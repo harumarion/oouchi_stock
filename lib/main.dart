@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
 import 'add_inventory_page.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart'; // ← 自動生成された設定ファイル
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(MyApp());
 }
 
