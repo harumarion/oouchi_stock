@@ -15,23 +15,59 @@ For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
 
-## Firebase configuration
+## Firebase の設定
 
-This project uses Firebase. The configuration files `lib/firebase_options.dart` and `android/app/google-services.json` contain API keys and other secrets, so they are excluded from version control.
+[FlutterFire CLI](https://firebase.flutter.dev/docs/cli) を使って Firebase プロジェクトを構成します。初回セットアップや設定を変更したい場合は次のコマンドを実行します。
 
-1. Copy the provided templates and add your own values:
-   ```bash
-   cp lib/firebase_options.example.dart lib/firebase_options.dart
-   cp android/app/google-services.json.example android/app/google-services.json
-   ```
-2. Fill in the placeholders in each file with the values from your Firebase project or generate them using `flutterfire configure`.
-3. You can keep these secrets outside of source control by using environment variables and packages such as [`flutter_dotenv`](https://pub.dev/packages/flutter_dotenv).
-4. Create an `.env` file for local development:
-   ```bash
-   cp .env.example .env
-   ```
-   Define your Firebase API keys and other settings in this file. `flutter_dotenv` or
-   `--dart-define-from-file=.env` can load the values at runtime.
+```bash
+dart pub global activate flutterfire_cli
+flutterfire configure
+```
 
-The created `lib/firebase_options.dart`, `android/app/google-services.json` and `.env`
-files are ignored via `.gitignore` and must be prepared locally before running the app.
+この手順により `lib/firebase_options.dart` や `android/app/google-services.json` などの設定ファイルが生成されます。生成されたファイルには API キーやプロジェクト ID が含まれており、アプリはこれらを参照して Firebase に接続します。CI などでファイルを置き換える場合は以下の環境変数を利用できます。
+
+- `FIREBASE_OPTIONS` : `firebase_options.dart` へのパス
+- `GOOGLE_APPLICATION_CREDENTIALS` : サービスアカウント認証情報の JSON ファイル
+
+このリポジトリでは秘密情報を含む設定ファイルを公開しないため、
+`.gitignore` で `lib/firebase_options.dart`、`android/app/google-services.json`、`.env`
+を除外しています。初回セットアップ時は以下のテンプレートをコピーして必要な値を
+入力してください。
+
+```bash
+cp lib/firebase_options.example.dart lib/firebase_options.dart
+cp android/app/google-services.json.example android/app/google-services.json
+cp .env.example .env
+```
+
+`.env` に定義した値は [`flutter_dotenv`](https://pub.dev/packages/flutter_dotenv)
+や `--dart-define-from-file=.env` で読み込むことができます。
+
+## 実行手順
+
+次のコマンドを順に実行してアプリを起動します。
+
+```bash
+flutter pub get       # 依存パッケージを取得
+flutter run           # アプリを実行
+```
+
+Firebase の設定を変更した場合は `flutterfire configure` を再度実行してください。
+
+## テスト
+
+`test/` ディレクトリにウィジェットテストが含まれています。テストは以下のコマンドで実行できます。
+
+```bash
+flutter test
+```
+
+テスト前に Firebase の設定ファイルが生成されていることを確認してください。
+## 動作確認
+
+```
+flutter run
+```
+
+起動後、在庫カードの「+」「-」ボタンをタップすると Firestore の数量が更新されます。
+更新内容は Firestore のストリームを通じて自動で反映されるため、画面遷移は不要です。エラーが発生した場合は SnackBar で通知されます。

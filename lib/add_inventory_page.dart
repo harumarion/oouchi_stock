@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
+
+// 在庫を追加する画面のウィジェット
 
 class AddInventoryPage extends StatefulWidget {
   const AddInventoryPage({super.key});
@@ -9,13 +12,20 @@ class AddInventoryPage extends StatefulWidget {
 }
 
 class _AddInventoryPageState extends State<AddInventoryPage> {
+  // フォームの状態を管理するキー
   final _formKey = GlobalKey<FormState>();
+  // 商品名
   String _itemName = '';
+  // カテゴリ
   String _category = '日用品';
+  // 数量
   int _quantity = 1;
+  // 単位
   String _unit = '個';
+  // 任意のメモ
   String _note = '';
 
+  // 入力内容を Firestore に保存する
   Future<void> _saveItem() async {
     await FirebaseFirestore.instance.collection('inventory').add({
       'itemName': _itemName,
@@ -27,11 +37,14 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
     });
   }
 
+  // カテゴリの選択肢
   final List<String> _categories = ['冷蔵庫', '冷凍庫', '日用品'];
+  // 単位の選択肢
   final List<String> _units = ['個', '本', '袋', 'ロール'];
 
   @override
   Widget build(BuildContext context) {
+    // 画面のレイアウトを構築
     return Scaffold(
       appBar: AppBar(title: const Text('在庫を追加')),
       body: Padding(
@@ -40,6 +53,7 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
           key: _formKey,
           child: ListView(
             children: [
+              // 商品名入力
               TextFormField(
                 decoration: const InputDecoration(labelText: '商品名'),
                 onChanged: (value) => _itemName = value,
@@ -47,6 +61,7 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
                     value == null || value.isEmpty ? '商品名は必須です' : null,
               ),
               const SizedBox(height: 12),
+              // カテゴリ選択
               DropdownButtonFormField<String>(
                 decoration: const InputDecoration(labelText: 'カテゴリ'),
                 value: _category,
@@ -62,17 +77,22 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
                   IconButton(
                     icon: const Icon(Icons.remove),
                     onPressed: () => setState(() {
+                      // 数量を減らす
                       if (_quantity > 1) _quantity--;
                     }),
                   ),
                   Text('$_quantity'),
                   IconButton(
                     icon: const Icon(Icons.add),
-                    onPressed: () => setState(() => _quantity++),
+                    onPressed: () => setState(() {
+                      // 数量を増やす
+                      _quantity++;
+                    }),
                   ),
                 ],
               ),
               const SizedBox(height: 12),
+              // 単位選択
               DropdownButtonFormField<String>(
                 decoration: const InputDecoration(labelText: '単位'),
                 value: _unit,
@@ -82,18 +102,45 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
                 onChanged: (value) => setState(() => _unit = value!),
               ),
               const SizedBox(height: 12),
+              // メモの入力（任意）
               TextFormField(
                 decoration: const InputDecoration(labelText: 'メモ（任意）'),
                 onChanged: (value) => _note = value,
               ),
               const SizedBox(height: 24),
+              // 入力内容を保存するボタン
               ElevatedButton.icon(
                 icon: const Icon(Icons.save),
                 label: const Text('保存'),
                 onPressed: () async {
+                  // フォームの入力が正しいか確認
                   if (_formKey.currentState!.validate()) {
-                    await _saveItem();
-                    if (mounted) Navigator.pop(context);
+                    try {
+                      await _saveItem();
+                      if (!mounted) return;
+                      final snackBar = ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('保存完了')),
+                      );
+                      await snackBar.closed;
+                      if (!mounted) return;
+                      Navigator.pop(context);
+                    } on FirebaseException catch (e) {
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              '保存に失敗しました: ${e.message ?? e.code}',
+                            ),
+                          ),
+                        );
+                      }
+                    } catch (_) {
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('保存に失敗しました')),
+                        );
+                      }
+                    }
                   }
                 },
               ),
