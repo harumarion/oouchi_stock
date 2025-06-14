@@ -59,10 +59,11 @@ class HomePage extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             children: docs.map((doc) {
               final data = doc.data();
-              final quantity = '${data['quantity']}${data['unit'] ?? ''}';
               return InventoryCard(
+                docRef: doc.reference,
                 itemName: data['itemName'] ?? '',
-                quantity: quantity,
+                quantity: data['quantity'] ?? 0,
+                unit: data['unit'] ?? '',
               );
             }).toList(),
           );
@@ -84,16 +85,40 @@ class HomePage extends StatelessWidget {
 
 // 1件分の在庫情報を表示するカードウィジェット
 class InventoryCard extends StatelessWidget {
+  final DocumentReference<Map<String, dynamic>> docRef;
   // 商品名
   final String itemName;
   // 在庫数と単位をまとめた文字列
-  final String quantity;
+  final int quantity;
+  final String unit;
 
   const InventoryCard({
     super.key,
+    required this.docRef,
     required this.itemName,
     required this.quantity,
+    required this.unit,
   });
+
+  Future<void> onUsed(BuildContext context) async {
+    try {
+      await docRef.update({'quantity': FieldValue.increment(-1)});
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('更新に失敗しました')),
+      );
+    }
+  }
+
+  Future<void> onBought(BuildContext context) async {
+    try {
+      await docRef.update({'quantity': FieldValue.increment(1)});
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('更新に失敗しました')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -110,8 +135,8 @@ class InventoryCard extends StatelessWidget {
                 // 商品名
                 Text(itemName, style: const TextStyle(fontSize: 18)),
                 const SizedBox(height: 4),
-                // 数量表示
-                Text(quantity, style: const TextStyle(color: Colors.grey)),
+                Text('$quantity$unit',
+                    style: const TextStyle(color: Colors.grey)),
               ],
             ),
             Row(
@@ -119,16 +144,12 @@ class InventoryCard extends StatelessWidget {
                 // 在庫を1減らすボタン
                 IconButton(
                   icon: const Icon(Icons.remove_circle_outline),
-                  onPressed: () {
-                    // TODO: 「使った」操作
-                  },
+                  onPressed: () => onUsed(context),
                 ),
                 // 在庫を1増やすボタン
                 IconButton(
                   icon: const Icon(Icons.add_circle_outline),
-                  onPressed: () {
-                    // TODO: 「買った」操作
-                  },
+                  onPressed: () => onBought(context),
                 ),
               ],
             ),
