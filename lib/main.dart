@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'add_inventory_page.dart';
+import 'inventory_detail_page.dart';
+import 'stocktake_page.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'firebase_options.dart'; // ← 自動生成された設定ファイル
@@ -39,6 +41,27 @@ class HomePage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('おうちストック'),
         centerTitle: true,
+        actions: [
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              if (value == 'add') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (c) => const AddInventoryPage()),
+                );
+              } else if (value == 'stock') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (c) => const StocktakePage()),
+                );
+              }
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(value: 'add', child: Text('在庫を追加')),
+              const PopupMenuItem(value: 'stock', child: Text('棚卸入力')),
+            ],
+          )
+        ],
       ),
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
         // Firestore の inventory コレクションを監視する
@@ -59,11 +82,25 @@ class HomePage extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             children: docs.map((doc) {
               final data = doc.data();
-              return InventoryCard(
-                docRef: doc.reference,
-                itemName: data['itemName'] ?? '',
-                quantity: data['quantity'] ?? 0,
-                unit: data['unit'] ?? '',
+              return GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => InventoryDetailPage(
+                        docRef: doc.reference,
+                        itemName: data['itemName'] ?? '',
+                        unit: data['unit'] ?? '',
+                      ),
+                    ),
+                  );
+                },
+                child: InventoryCard(
+                  docRef: doc.reference,
+                  itemName: data['itemName'] ?? '',
+                  quantity: (data['quantity'] ?? 0).toDouble(),
+                  unit: data['unit'] ?? '',
+                ),
               );
             }).toList(),
           );
@@ -88,8 +125,8 @@ class InventoryCard extends StatelessWidget {
   final DocumentReference<Map<String, dynamic>> docRef;
   // 商品名
   final String itemName;
-  // 在庫数と単位をまとめた文字列
-  final int quantity;
+  // 在庫数（小数点第一位まで表示）
+  final double quantity;
   final String unit;
 
   const InventoryCard({
@@ -100,9 +137,50 @@ class InventoryCard extends StatelessWidget {
     required this.unit,
   });
 
-  Future<void> onUsed(BuildContext context) async {
+  Future<double?> _inputAmountDialog(
+    BuildContext context,
+    String title,
+  ) async {
+    final controller = TextEditingController(text: '1.0');
+    return showDialog<double>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(title),
+          content: TextField(
+            controller: controller,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('キャンセル'),
+            ),
+            TextButton(
+              onPressed: () {
+                final v = double.tryParse(controller.text);
+                Navigator.pop(context, v);
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _updateQuantity(
+    BuildContext context,
+    double amount,
+    String type,
+  ) async {
     try {
-      await docRef.update({'quantity': FieldValue.increment(-1)});
+      await docRef.update({'quantity': FieldValue.increment(amount)});
+      await docRef.collection('history').add({
+        'type': type,
+        'quantity': amount.abs(),
+        'timestamp': Timestamp.now(),
+      });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('更新に失敗しました')),
@@ -110,14 +188,16 @@ class InventoryCard extends StatelessWidget {
     }
   }
 
+  Future<void> onUsed(BuildContext context) async {
+    final v = await _inputAmountDialog(context, '使った量');
+    if (v == null) return;
+    await _updateQuantity(context, -v, 'used');
+  }
+
   Future<void> onBought(BuildContext context) async {
-    try {
-      await docRef.update({'quantity': FieldValue.increment(1)});
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('更新に失敗しました')),
-      );
-    }
+    final v = await _inputAmountDialog(context, '買った量');
+    if (v == null) return;
+    await _updateQuantity(context, v, 'bought');
   }
 
   @override
@@ -135,7 +215,7 @@ class InventoryCard extends StatelessWidget {
                 // 商品名
                 Text(itemName, style: const TextStyle(fontSize: 18)),
                 const SizedBox(height: 4),
-                Text('$quantity$unit',
+                Text('${quantity.toStringAsFixed(1)}$unit',
                     style: const TextStyle(color: Colors.grey)),
               ],
             ),
