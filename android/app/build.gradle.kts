@@ -11,7 +11,8 @@ plugins {
 android {
     namespace = "com.example.oouchi_stock"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    // Override Flutter's default NDK version to satisfy Firebase libraries
+    ndkVersion = "27.0.12077973"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
