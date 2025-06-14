@@ -41,13 +41,14 @@ class HomePage extends StatelessWidget {
             .collection('inventory')
             .orderBy('createdAt', descending: true)
             .snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return const Center(child: Text('読み込みエラー'));
-          }
-          if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
-          }
+          builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              final errorMessage = snapshot.error?.toString() ?? '不明なエラー';
+              return Center(child: Text('読み込みエラー: $errorMessage'));
+            }
+            if (!snapshot.hasData) {
+              return const Center(child: CircularProgressIndicator());
+            }
           final docs = snapshot.data!.docs;
           return ListView(
             padding: const EdgeInsets.all(16),
