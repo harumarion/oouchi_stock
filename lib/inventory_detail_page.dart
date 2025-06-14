@@ -6,8 +6,12 @@ class HistoryEntry {
   final String type;
   final double quantity;
   final Timestamp timestamp;
+  final double before;
+  final double after;
+  final double diff;
 
-  HistoryEntry(this.type, this.quantity, this.timestamp);
+  HistoryEntry(this.type, this.quantity, this.timestamp,
+      {this.before = 0, this.after = 0, this.diff = 0});
 }
 
 // 購入予測アルゴリズムの Strategy インターフェイス
@@ -49,6 +53,9 @@ class InventoryDetailPage extends StatelessWidget {
                   d['type'] ?? '',
                   (d['quantity'] ?? 0).toDouble(),
                   d['timestamp'] as Timestamp,
+                  before: (d['before'] ?? 0).toDouble(),
+                  after: (d['after'] ?? 0).toDouble(),
+                  diff: (d['diff'] ?? 0).toDouble(),
                 ))
             .toList());
   }
@@ -72,10 +79,7 @@ class InventoryDetailPage extends StatelessWidget {
               Text('次回購入予測: ${_formatDate(predicted)}'),
               const SizedBox(height: 16),
               const Text('履歴', style: TextStyle(fontSize: 18)),
-              ...list.map((e) => ListTile(
-                    title: Text('${e.quantity.toStringAsFixed(1)}$unit'),
-                    subtitle: Text(_formatDate(e.timestamp.toDate())),
-                  )),
+              ...list.map(_buildHistoryTile),
             ],
           );
         },
@@ -86,10 +90,12 @@ class InventoryDetailPage extends StatelessWidget {
   double _currentQuantity(List<HistoryEntry> history) {
     if (history.isEmpty) return 0;
     double total = 0;
-    for (final h in history) {
-      if (h.type == 'add' || h.type == 'bought') {
+    for (final h in history.reversed) {
+      if (h.type == 'stocktake') {
+        total = h.after;
+      } else if (h.type == 'add' || h.type == 'bought') {
         total += h.quantity;
-      } else if (h.type == 'used' || h.type == 'stocktake') {
+      } else if (h.type == 'used') {
         total -= h.quantity;
       }
     }
@@ -98,5 +104,29 @@ class InventoryDetailPage extends StatelessWidget {
 
   String _formatDate(DateTime date) {
     return '${date.year}/${date.month}/${date.day}';
+  }
+
+  /// 履歴表示用のタイルを作成する。
+  Widget _buildHistoryTile(HistoryEntry e) {
+    String title;
+    Color color = Colors.black;
+    if (e.type == 'stocktake') {
+      final sign = e.diff >= 0 ? '+' : '-';
+      title =
+          '棚卸 ${e.before.toStringAsFixed(1)} -> ${e.after.toStringAsFixed(1)} ($sign${e.diff.abs().toStringAsFixed(1)}$unit)';
+      color = e.diff >= 0 ? Colors.green : Colors.red;
+    } else if (e.type == 'add' || e.type == 'bought') {
+      title = '+${e.quantity.toStringAsFixed(1)}$unit';
+      color = Colors.green;
+    } else if (e.type == 'used') {
+      title = '-${e.quantity.toStringAsFixed(1)}$unit';
+      color = Colors.red;
+    } else {
+      title = '${e.quantity.toStringAsFixed(1)}$unit';
+    }
+    return ListTile(
+      title: Text(title, style: TextStyle(color: color)),
+      subtitle: Text(_formatDate(e.timestamp.toDate())),
+    );
   }
 }

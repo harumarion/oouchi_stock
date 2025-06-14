@@ -18,6 +18,8 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
   String _itemName = '';
   // カテゴリ
   String _category = '日用品';
+  // 品種
+  String _itemType = '柔軟剤';
   // 数量（小数点第一位まで扱う）
   double _quantity = 1.0;
   // 単位
@@ -30,6 +32,7 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
     final doc = await FirebaseFirestore.instance.collection('inventory').add({
       'itemName': _itemName,
       'category': _category,
+      'itemType': _itemType,
       'quantity': _quantity,
       'unit': _unit,
       'note': _note,
@@ -44,6 +47,28 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
 
   // カテゴリの選択肢
   final List<String> _categories = ['冷蔵庫', '冷凍庫', '日用品'];
+  // カテゴリごとの品種一覧
+  final Map<String, List<String>> _typesMap = {
+    '冷蔵庫': ['その他'],
+    '冷凍庫': ['その他'],
+    '日用品': [
+      '柔軟剤',
+      '洗濯洗剤',
+      '食洗器洗剤',
+      '衣料用漂白剤',
+      'シャンプー',
+      'コンディショナー',
+      'オシャレ洗剤',
+      'トイレ洗剤',
+      '台所洗剤',
+      '台所洗剤スプレー',
+      '台所漂白',
+      '台所漂白スプレー',
+      'トイレ洗剤ふき',
+      '台所清掃スプレー',
+      'ハンドソープ',
+    ],
+  };
   // 単位の選択肢
   final List<String> _units = ['個', '本', '袋', 'ロール'];
 
@@ -73,7 +98,26 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
                 items: _categories
                     .map((c) => DropdownMenuItem(value: c, child: Text(c)))
                     .toList(),
-                onChanged: (value) => setState(() => _category = value!),
+                onChanged: (value) {
+                  if (value == null) return;
+                  setState(() {
+                    _category = value;
+                    final types = _typesMap[value];
+                    if (types != null && types.isNotEmpty) {
+                      _itemType = types.first;
+                    }
+                  });
+                },
+              ),
+              const SizedBox(height: 12),
+              // 品種選択
+              DropdownButtonFormField<String>(
+                decoration: const InputDecoration(labelText: '品種'),
+                value: _itemType,
+                items: (_typesMap[_category] ?? ['その他'])
+                    .map((t) => DropdownMenuItem(value: t, child: Text(t)))
+                    .toList(),
+                onChanged: (value) => setState(() => _itemType = value ?? ''),
               ),
               const SizedBox(height: 12),
               Row(

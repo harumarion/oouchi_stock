@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'add_inventory_page.dart';
-import 'inventory_detail_page.dart';
+import 'add_category_page.dart';
+import 'inventory_detail_page.dart' show InventoryDetailPage, HistoryEntry, DummyPredictionStrategy;
 import 'stocktake_page.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -35,87 +36,112 @@ class MyApp extends StatelessWidget {
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
+  static const List<String> categories = ['冷蔵庫', '冷凍庫', '日用品'];
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('おうちストック'),
-        centerTitle: true,
-        actions: [
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              if (value == 'add') {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (c) => const AddInventoryPage()),
-                );
-              } else if (value == 'stock') {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (c) => const StocktakePage()),
-                );
-              }
-            },
-            itemBuilder: (context) => [
-              const PopupMenuItem(value: 'add', child: Text('在庫を追加')),
-              const PopupMenuItem(value: 'stock', child: Text('棚卸入力')),
-            ],
-          )
-        ],
-      ),
-      body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-        // Firestore の inventory コレクションを監視する
-        stream: FirebaseFirestore.instance
-            .collection('inventory')
-            .orderBy('createdAt', descending: true)
-            .snapshots(),
-          builder: (context, snapshot) {
-            if (snapshot.hasError) {
-              final errorMessage = snapshot.error?.toString() ?? '不明なエラー';
-              return Center(child: Text('読み込みエラー: $errorMessage'));
-            }
-            if (!snapshot.hasData) {
-              return const Center(child: CircularProgressIndicator());
-            }
-          final docs = snapshot.data!.docs;
-          return ListView(
-            padding: const EdgeInsets.all(16),
-            children: docs.map((doc) {
-              final data = doc.data();
-              return GestureDetector(
-                onTap: () {
+    return DefaultTabController(
+      length: categories.length,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('おうちストック'),
+          centerTitle: true,
+          bottom: TabBar(tabs: [for (final c in categories) Tab(text: c)]),
+          actions: [
+            PopupMenuButton<String>(
+              onSelected: (value) {
+                if (value == 'add') {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                      builder: (_) => InventoryDetailPage(
-                        docRef: doc.reference,
-                        itemName: data['itemName'] ?? '',
-                        unit: data['unit'] ?? '',
-                      ),
-                    ),
+                    MaterialPageRoute(builder: (c) => const AddInventoryPage()),
                   );
-                },
-                child: InventoryCard(
-                  docRef: doc.reference,
-                  itemName: data['itemName'] ?? '',
-                  quantity: (data['quantity'] ?? 0).toDouble(),
-                  unit: data['unit'] ?? '',
-                ),
-              );
-            }).toList(),
-          );
-        },
+                } else if (value == 'stock') {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (c) => const StocktakePage()),
+                  );
+                } else if (value == 'category') {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (c) => const AddCategoryPage()),
+                  );
+                }
+              },
+              itemBuilder: (context) => [
+                const PopupMenuItem(value: 'add', child: Text('在庫を追加')),
+                const PopupMenuItem(value: 'stock', child: Text('棚卸入力')),
+                const PopupMenuItem(value: 'category', child: Text('カテゴリ追加')),
+              ],
+            )
+          ],
+        ),
+        body: TabBarView(
+          children: [for (final c in categories) InventoryList(category: c)],
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (c) => const AddInventoryPage()),
+            );
+          },
+          child: const Icon(Icons.add),
+        ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // 在庫追加画面へ遷移
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const AddInventoryPage()),
-          );
-        },
-        child: const Icon(Icons.add), // 追加ボタン
-      ),
+    );
+  }
+}
+
+/// 指定カテゴリの在庫を一覧表示するウィジェット。
+class InventoryList extends StatelessWidget {
+  final String category;
+  const InventoryList({super.key, required this.category});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+      stream: FirebaseFirestore.instance
+          .collection('inventory')
+          .where('category', isEqualTo: category)
+          .orderBy('createdAt', descending: true)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          final err = snapshot.error?.toString() ?? '不明なエラー';
+          return Center(child: Text('読み込みエラー: $err'));
+        }
+        if (!snapshot.hasData) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        final docs = snapshot.data!.docs;
+        return ListView(
+          padding: const EdgeInsets.all(16),
+          children: docs.map((doc) {
+            final data = doc.data();
+            return GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => InventoryDetailPage(
+                      docRef: doc.reference,
+                      itemName: data['itemName'] ?? '',
+                      unit: data['unit'] ?? '',
+                    ),
+                  ),
+                );
+              },
+              child: InventoryCard(
+                docRef: doc.reference,
+                itemName: data['itemName'] ?? '',
+                itemType: data['itemType'] ?? '',
+                quantity: (data['quantity'] ?? 0).toDouble(),
+                unit: data['unit'] ?? '',
+              ),
+            );
+          }).toList(),
+        );
+      },
     );
   }
 }
@@ -125,6 +151,7 @@ class InventoryCard extends StatelessWidget {
   final DocumentReference<Map<String, dynamic>> docRef;
   // 商品名
   final String itemName;
+  final String itemType;
   // 在庫数（小数点第一位まで表示）
   final double quantity;
   final String unit;
@@ -133,9 +160,51 @@ class InventoryCard extends StatelessWidget {
     super.key,
     required this.docRef,
     required this.itemName,
+    required this.itemType,
     required this.quantity,
     required this.unit,
   });
+
+  /// 履歴を読み込み購入予測日を計算する。
+  Future<DateTime> _loadPrediction() async {
+    final history = await docRef
+        .collection('history')
+        .orderBy('timestamp', descending: true)
+        .get();
+    final list = history.docs
+        .map((d) => HistoryEntry(
+              d['type'] ?? '',
+              (d['quantity'] ?? 0).toDouble(),
+              d['timestamp'] as Timestamp,
+              before: (d['before'] ?? 0).toDouble(),
+              after: (d['after'] ?? 0).toDouble(),
+              diff: (d['diff'] ?? 0).toDouble(),
+            ))
+        .toList();
+    final strategy = const DummyPredictionStrategy();
+    final predicted = strategy.predict(
+        DateTime.now(), list, _currentQuantity(list));
+    return predicted;
+  }
+
+  double _currentQuantity(List<HistoryEntry> history) {
+    if (history.isEmpty) return 0;
+    double total = 0;
+    for (final h in history.reversed) {
+      if (h.type == 'stocktake') {
+        total = h.after;
+      } else if (h.type == 'add' || h.type == 'bought') {
+        total += h.quantity;
+      } else if (h.type == 'used') {
+        total -= h.quantity;
+      }
+    }
+    return total;
+  }
+
+  String _formatDate(DateTime d) {
+    return '${d.year}/${d.month}/${d.day}';
+  }
 
   Future<double?> _inputAmountDialog(
     BuildContext context,
@@ -202,40 +271,48 @@ class InventoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    return FutureBuilder<DateTime>(
+      future: _loadPrediction(),
+      builder: (context, snapshot) {
+        final predicted = snapshot.data;
+        final dateText =
+            predicted != null ? _formatDate(predicted) : '計算中...';
+        return Card(
+          margin: const EdgeInsets.only(bottom: 12),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // 商品名
-                Text(itemName, style: const TextStyle(fontSize: 18)),
-                const SizedBox(height: 4),
-                Text('${quantity.toStringAsFixed(1)}$unit',
-                    style: const TextStyle(color: Colors.grey)),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('$itemType / $itemName',
+                        style: const TextStyle(fontSize: 18)),
+                    const SizedBox(height: 4),
+                    Text('${quantity.toStringAsFixed(1)}$unit',
+                        style: const TextStyle(color: Colors.grey)),
+                    Text('予測: $dateText',
+                        style: const TextStyle(color: Colors.grey)),
+                  ],
+                ),
+                Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.remove_circle_outline),
+                      onPressed: () => onUsed(context),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.add_circle_outline),
+                      onPressed: () => onBought(context),
+                    ),
+                  ],
+                ),
               ],
             ),
-            Row(
-              children: [
-                // 在庫を1減らすボタン
-                IconButton(
-                  icon: const Icon(Icons.remove_circle_outline),
-                  onPressed: () => onUsed(context),
-                ),
-                // 在庫を1増やすボタン
-                IconButton(
-                  icon: const Icon(Icons.add_circle_outline),
-                  onPressed: () => onBought(context),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

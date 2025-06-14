@@ -6,9 +6,11 @@ class _StockItem {
   final DocumentReference<Map<String, dynamic>> ref;
   final String name;
   final TextEditingController controller;
+  final double original;
 
   _StockItem(this.ref, this.name, double quantity)
-      : controller = TextEditingController(text: quantity.toStringAsFixed(1));
+      : original = quantity,
+        controller = TextEditingController(text: quantity.toStringAsFixed(1));
 }
 
 // 棚卸画面
@@ -46,10 +48,14 @@ class _StocktakePageState extends State<StocktakePage> {
   Future<void> _save() async {
     for (final item in _items) {
       final value = double.tryParse(item.controller.text) ?? 0;
+      final before = item.original;
+      final diff = value - before;
       await item.ref.update({'quantity': value});
       await item.ref.collection('history').add({
         'type': 'stocktake',
-        'quantity': value,
+        'before': before,
+        'after': value,
+        'diff': diff,
         'timestamp': Timestamp.now(),
       });
     }
