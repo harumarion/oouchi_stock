@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AddInventoryPage extends StatefulWidget {
   const AddInventoryPage({super.key});
@@ -14,6 +15,17 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
   int _quantity = 1;
   String _unit = '個';
   String _note = '';
+
+  Future<void> _saveItem() async {
+    await FirebaseFirestore.instance.collection('inventory').add({
+      'itemName': _itemName,
+      'category': _category,
+      'quantity': _quantity,
+      'unit': _unit,
+      'note': _note,
+      'createdAt': Timestamp.now(),
+    });
+  }
 
   final List<String> _categories = ['冷蔵庫', '冷凍庫', '日用品'];
   final List<String> _units = ['個', '本', '袋', 'ロール'];
@@ -78,10 +90,10 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
               ElevatedButton.icon(
                 icon: const Icon(Icons.save),
                 label: const Text('保存'),
-                onPressed: () {
+                onPressed: () async {
                   if (_formKey.currentState!.validate()) {
-                    // TODO: 登録処理（FireStoreや状態管理と連携）
-                    Navigator.pop(context);
+                    await _saveItem();
+                    if (mounted) Navigator.pop(context);
                   }
                 },
               ),
