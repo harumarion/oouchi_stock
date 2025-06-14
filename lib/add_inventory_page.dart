@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 // 在庫を追加する画面のウィジェット
 
@@ -114,8 +115,32 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
                 onPressed: () async {
                   // フォームの入力が正しいか確認
                   if (_formKey.currentState!.validate()) {
-                    await _saveItem();
-                    if (mounted) Navigator.pop(context);
+                    try {
+                      await _saveItem();
+                      if (!mounted) return;
+                      final snackBar = ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('保存完了')),
+                      );
+                      await snackBar.closed;
+                      if (!mounted) return;
+                      Navigator.pop(context);
+                    } on FirebaseException catch (e) {
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              '保存に失敗しました: ${e.message ?? e.code}',
+                            ),
+                          ),
+                        );
+                      }
+                    } catch (_) {
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('保存に失敗しました')),
+                        );
+                      }
+                    }
                   }
                 },
               ),
