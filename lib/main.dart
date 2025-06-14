@@ -14,11 +14,12 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   ); // Firebase の初期設定
-  runApp(MyApp()); // アプリのスタート
+  runApp(const MyApp()); // アプリのスタート
 }
 
 // アプリのルートウィジェット
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
