@@ -12,6 +12,7 @@ import 'package:oouchi_stock/main.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_core_platform_interface/firebase_core_platform_interface.dart';
 import 'package:oouchi_stock/firebase_options.dart';
+import 'firebase_test_utils.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
