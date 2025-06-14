@@ -18,8 +18,8 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
   String _itemName = '';
   // カテゴリ
   String _category = '日用品';
-  // 数量
-  int _quantity = 1;
+  // 数量（小数点第一位まで扱う）
+  double _quantity = 1.0;
   // 単位
   String _unit = '個';
   // 任意のメモ
@@ -27,13 +27,18 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
 
   // 入力内容を Firestore に保存する
   Future<void> _saveItem() async {
-    await FirebaseFirestore.instance.collection('inventory').add({
+    final doc = await FirebaseFirestore.instance.collection('inventory').add({
       'itemName': _itemName,
       'category': _category,
       'quantity': _quantity,
       'unit': _unit,
       'note': _note,
       'createdAt': Timestamp.now(),
+    });
+    await doc.collection('history').add({
+      'type': 'add',
+      'quantity': _quantity,
+      'timestamp': Timestamp.now(),
     });
   }
 
@@ -77,16 +82,18 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
                   IconButton(
                     icon: const Icon(Icons.remove),
                     onPressed: () => setState(() {
-                      // 数量を減らす
-                      if (_quantity > 1) _quantity--;
+                      // 数量を0.1単位で減らす
+                      if (_quantity > 0.1) _quantity -= 0.1;
+                      _quantity = double.parse(_quantity.toStringAsFixed(1));
                     }),
                   ),
-                  Text('$_quantity'),
+                  Text(_quantity.toStringAsFixed(1)),
                   IconButton(
                     icon: const Icon(Icons.add),
                     onPressed: () => setState(() {
-                      // 数量を増やす
-                      _quantity++;
+                      // 数量を0.1単位で増やす
+                      _quantity += 0.1;
+                      _quantity = double.parse(_quantity.toStringAsFixed(1));
                     }),
                   ),
                 ],
