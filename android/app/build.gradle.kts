@@ -46,3 +46,8 @@ android {
 flutter {
     source = "../.."
 }
+
+dependencies {
+    // Ensure ProviderInstaller is available at runtime
+    implementation("com.google.android.gms:play-services-base:18.4.0")
+}
