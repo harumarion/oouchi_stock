@@ -45,6 +45,17 @@ Firestore コンソールから手動で作成しても構いません。
 場合は、インデックスがまだデプロイされていない可能性があります。上記コマンドを
 実行するか、表示される URL からインデックスを作成してください。
 
+このエラーは、例えば `inventory` コレクションをカテゴリで絞り込み、`createdAt`
+の降順で並び替えるクエリを実行した際に発生します。ログに次のようなメッセージが
+出力される場合はインデックス不足が原因です。
+
+```
+W/Firestore: Listen for Query(target=Query(inventory where category==<value> order by -createdAt, -__name__)) failed: Status{code=FAILED_PRECONDITION, description=The query requires an index.}
+```
+`firestore.indexes.json` にはこのクエリに対応したインデックス定義を含めているため、
+`firebase deploy --only firestore:indexes` を実行してデプロイすることで解消でき
+ます。
+
 ## 実行手順
 
 次のコマンドを順に実行してアプリを起動します。
