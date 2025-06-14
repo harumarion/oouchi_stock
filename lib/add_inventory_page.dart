@@ -23,7 +23,7 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
       'quantity': _quantity,
       'unit': _unit,
       'note': _note,
-      'createdAt': Timestamp.now(),
+      'createdAt': FieldValue.serverTimestamp(),
     });
   }
 
