@@ -29,6 +29,18 @@ flutterfire configure
 - `FIREBASE_OPTIONS` : `firebase_options.dart` へのパス
 - `GOOGLE_APPLICATION_CREDENTIALS` : サービスアカウント認証情報の JSON ファイル
 
+## Firestore のインデックス
+
+一部のクエリでは複合インデックスが必要となります。リポジトリには
+`firestore.indexes.json` を含めているので、初回セットアップ時に次のコマンドで
+デプロイしてください。
+
+```bash
+firebase deploy --only firestore:indexes
+```
+
+Firestore コンソールから手動で作成しても構いません。
+
 ## 実行手順
 
 次のコマンドを順に実行してアプリを起動します。
