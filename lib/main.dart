@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'add_inventory_page.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'firebase_options.dart'; // ← 自動生成された設定ファイル
 
 void main() async {
@@ -35,12 +36,31 @@ class HomePage extends StatelessWidget {
         title: const Text('おうちストック'),
         centerTitle: true,
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          InventoryCard(itemName: 'トイレットペーパー', quantity: '残り2ロール'),
-          InventoryCard(itemName: '牛乳', quantity: 'あと3日分'),
-        ],
+      body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+        stream: FirebaseFirestore.instance
+            .collection('inventory')
+            .orderBy('createdAt', descending: true)
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return const Center(child: Text('読み込みエラー'));
+          }
+          if (!snapshot.hasData) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          final docs = snapshot.data!.docs;
+          return ListView(
+            padding: const EdgeInsets.all(16),
+            children: docs.map((doc) {
+              final data = doc.data();
+              final quantity = '${data['quantity']}${data['unit'] ?? ''}';
+              return InventoryCard(
+                itemName: data['itemName'] ?? '',
+                quantity: quantity,
+              );
+            }).toList(),
+          );
+        },
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
