@@ -41,6 +41,10 @@ firebase deploy --only firestore:indexes
 
 Firestore コンソールから手動で作成しても構いません。
 
+実行時に `FAILED_PRECONDITION: The query requires an index` のエラーが表示された
+場合は、インデックスがまだデプロイされていない可能性があります。上記コマンドを
+実行するか、表示される URL からインデックスを作成してください。
+
 ## 実行手順
 
 次のコマンドを順に実行してアプリを起動します。
