@@ -13,7 +13,7 @@ class InventoryDetailPage extends StatelessWidget {
   final PurchasePredictionStrategy strategy;
   final InventoryRepositoryImpl repository = InventoryRepositoryImpl();
 
-  const InventoryDetailPage({
+  InventoryDetailPage({
     super.key,
     required this.inventoryId,
     required this.itemName,

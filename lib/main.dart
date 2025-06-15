@@ -148,7 +148,7 @@ class InventoryCard extends StatelessWidget {
   final UpdateQuantity _update = UpdateQuantity(InventoryRepositoryImpl());
   final InventoryRepositoryImpl _repository = InventoryRepositoryImpl();
 
-  const InventoryCard({
+  InventoryCard({
     super.key,
     required this.inventory,
   });
