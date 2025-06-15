@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'add_inventory_page.dart';
 import 'add_category_page.dart';
-import 'inventory_detail_page.dart' show InventoryDetailPage, HistoryEntry, DummyPredictionStrategy;
+import 'inventory_detail_page.dart';
 import 'stocktake_page.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'firebase_options.dart'; // ← 自動生成された設定ファイル
+import 'data/repositories/inventory_repository_impl.dart';
+import 'domain/entities/inventory.dart';
+import 'domain/entities/history_entry.dart';
+import 'domain/services/purchase_prediction_strategy.dart';
+import 'domain/usecases/watch_inventories.dart';
+import 'domain/usecases/update_quantity.dart';
 
 // アプリのエントリーポイント。Firebase を初期化してから起動する。
 
@@ -100,12 +105,9 @@ class InventoryList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-      stream: FirebaseFirestore.instance
-          .collection('inventory')
-          .where('category', isEqualTo: category)
-          .orderBy('createdAt', descending: true)
-          .snapshots(),
+    final usecase = WatchInventories(InventoryRepositoryImpl());
+    return StreamBuilder<List<Inventory>>(
+      stream: usecase(category),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           final err = snapshot.error?.toString() ?? '不明なエラー';
@@ -114,31 +116,24 @@ class InventoryList extends StatelessWidget {
         if (!snapshot.hasData) {
           return const Center(child: CircularProgressIndicator());
         }
-        final docs = snapshot.data!.docs;
+        final list = snapshot.data!;
         return ListView(
           padding: const EdgeInsets.all(16),
-          children: docs.map((doc) {
-            final data = doc.data();
+          children: list.map((inv) {
             return GestureDetector(
               onTap: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (_) => InventoryDetailPage(
-                      docRef: doc.reference,
-                      itemName: data['itemName'] ?? '',
-                      unit: data['unit'] ?? '',
+                      inventoryId: inv.id,
+                      itemName: inv.itemName,
+                      unit: inv.unit,
                     ),
                   ),
                 );
               },
-              child: InventoryCard(
-                docRef: doc.reference,
-                itemName: data['itemName'] ?? '',
-                itemType: data['itemType'] ?? '',
-                quantity: (data['quantity'] ?? 0).toDouble(),
-                unit: data['unit'] ?? '',
-              ),
+              child: InventoryCard(inventory: inv),
             );
           }).toList(),
         );
@@ -149,39 +144,18 @@ class InventoryList extends StatelessWidget {
 
 // 1件分の在庫情報を表示するカードウィジェット
 class InventoryCard extends StatelessWidget {
-  final DocumentReference<Map<String, dynamic>> docRef;
-  // 商品名
-  final String itemName;
-  final String itemType;
-  // 在庫数（小数点第一位まで表示）
-  final double quantity;
-  final String unit;
+  final Inventory inventory;
+  final UpdateQuantity _update = UpdateQuantity(InventoryRepositoryImpl());
+  final InventoryRepositoryImpl _repository = InventoryRepositoryImpl();
 
   const InventoryCard({
     super.key,
-    required this.docRef,
-    required this.itemName,
-    required this.itemType,
-    required this.quantity,
-    required this.unit,
+    required this.inventory,
   });
 
   /// 履歴を読み込み購入予測日を計算する。
   Future<DateTime> _loadPrediction() async {
-    final history = await docRef
-        .collection('history')
-        .orderBy('timestamp', descending: true)
-        .get();
-    final list = history.docs
-        .map((d) => HistoryEntry(
-              d['type'] ?? '',
-              (d['quantity'] ?? 0).toDouble(),
-              d['timestamp'] as Timestamp,
-              before: (d['before'] ?? 0).toDouble(),
-              after: (d['after'] ?? 0).toDouble(),
-              diff: (d['diff'] ?? 0).toDouble(),
-            ))
-        .toList();
+    final list = await _repository.watchHistory(inventory.id).first;
     final strategy = const DummyPredictionStrategy();
     final predicted = strategy.predict(
         DateTime.now(), list, _currentQuantity(list));
@@ -245,12 +219,7 @@ class InventoryCard extends StatelessWidget {
     String type,
   ) async {
     try {
-      await docRef.update({'quantity': FieldValue.increment(amount)});
-      await docRef.collection('history').add({
-        'type': type,
-        'quantity': amount.abs(),
-        'timestamp': Timestamp.now(),
-      });
+      await _update(inventory.id, amount, type);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('更新に失敗しました')),
@@ -288,10 +257,10 @@ class InventoryCard extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('$itemType / $itemName',
+                    Text('${inventory.itemType} / ${inventory.itemName}',
                         style: const TextStyle(fontSize: 18)),
                     const SizedBox(height: 4),
-                    Text('${quantity.toStringAsFixed(1)}$unit',
+                    Text('${inventory.quantity.toStringAsFixed(1)}${inventory.unit}',
                         style: const TextStyle(color: Colors.grey)),
                     Text('予測: $dateText',
                         style: const TextStyle(color: Colors.grey)),

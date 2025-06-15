@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'domain/entities/inventory.dart';
+import 'domain/usecases/add_inventory.dart';
+import 'data/repositories/inventory_repository_impl.dart';
 
 // 在庫を追加する画面のウィジェット
 
@@ -27,22 +29,22 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
   // 任意のメモ
   String _note = '';
 
+  final AddInventory _usecase =
+      AddInventory(InventoryRepositoryImpl());
+
   // 入力内容を Firestore に保存する
   Future<void> _saveItem() async {
-    final doc = await FirebaseFirestore.instance.collection('inventory').add({
-      'itemName': _itemName,
-      'category': _category,
-      'itemType': _itemType,
-      'quantity': _quantity,
-      'unit': _unit,
-      'note': _note,
-      'createdAt': Timestamp.now(),
-    });
-    await doc.collection('history').add({
-      'type': 'add',
-      'quantity': _quantity,
-      'timestamp': Timestamp.now(),
-    });
+    final item = Inventory(
+      id: '',
+      itemName: _itemName,
+      category: _category,
+      itemType: _itemType,
+      quantity: _quantity,
+      unit: _unit,
+      note: _note,
+      createdAt: DateTime.now(),
+    );
+    await _usecase(item);
   }
 
   // カテゴリの選択肢
