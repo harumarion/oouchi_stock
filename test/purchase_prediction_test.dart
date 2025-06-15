@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:oouchi_stock/inventory_detail_page.dart';
+import 'package:oouchi_stock/domain/services/purchase_prediction_strategy.dart';
 
 void main() {
   // ダミー予測戦略の戻り値を確認するテスト

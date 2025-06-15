@@ -1,63 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'data/repositories/inventory_repository_impl.dart';
+import 'domain/entities/history_entry.dart';
+import 'domain/services/purchase_prediction_strategy.dart';
 
-// 履歴データを保持するクラス
-class HistoryEntry {
-  final String type;
-  final double quantity;
-  final Timestamp timestamp;
-  final double before;
-  final double after;
-  final double diff;
-
-  HistoryEntry(this.type, this.quantity, this.timestamp,
-      {this.before = 0, this.after = 0, this.diff = 0});
-}
-
-// 購入予測アルゴリズムの Strategy インターフェイス
-abstract class PurchasePredictionStrategy {
-  DateTime predict(DateTime now, List<HistoryEntry> history, double quantity);
-}
-
-// 現状は仮の実装。常に一週間後を返す
-class DummyPredictionStrategy implements PurchasePredictionStrategy {
-  const DummyPredictionStrategy();
-  @override
-  DateTime predict(DateTime now, List<HistoryEntry> history, double quantity) {
-    return now.add(const Duration(days: 7));
-  }
-}
 
 // 商品詳細画面。履歴と予測日を表示する
 class InventoryDetailPage extends StatelessWidget {
-  final DocumentReference<Map<String, dynamic>> docRef;
+  final String inventoryId;
   final String itemName;
   final String unit;
   final PurchasePredictionStrategy strategy;
+  final InventoryRepositoryImpl repository = InventoryRepositoryImpl();
 
   const InventoryDetailPage({
     super.key,
-    required this.docRef,
+    required this.inventoryId,
     required this.itemName,
     required this.unit,
     this.strategy = const DummyPredictionStrategy(),
   });
 
   Stream<List<HistoryEntry>> historyStream() {
-    return docRef
-        .collection('history')
-        .orderBy('timestamp', descending: true)
-        .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((d) => HistoryEntry(
-                  d['type'] ?? '',
-                  (d['quantity'] ?? 0).toDouble(),
-                  d['timestamp'] as Timestamp,
-                  before: (d['before'] ?? 0).toDouble(),
-                  after: (d['after'] ?? 0).toDouble(),
-                  diff: (d['diff'] ?? 0).toDouble(),
-                ))
-            .toList());
+    return repository.watchHistory(inventoryId);
   }
 
   @override
@@ -126,7 +91,7 @@ class InventoryDetailPage extends StatelessWidget {
     }
     return ListTile(
       title: Text(title, style: TextStyle(color: color)),
-      subtitle: Text(_formatDate(e.timestamp.toDate())),
+      subtitle: Text(_formatDate(e.timestamp)),
     );
   }
 }

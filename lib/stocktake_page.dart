@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'data/repositories/inventory_repository_impl.dart';
+import 'domain/usecases/fetch_all_inventory.dart';
+import 'domain/usecases/stocktake.dart';
 
 // 棚卸入力用のデータ保持クラス
 class _StockItem {
-  final DocumentReference<Map<String, dynamic>> ref;
+  final String id;
   final String name;
   final TextEditingController controller;
   final double original;
 
-  _StockItem(this.ref, this.name, double quantity)
+  _StockItem(this.id, this.name, double quantity)
       : original = quantity,
         controller = TextEditingController(text: quantity.toStringAsFixed(1));
 }
@@ -23,25 +25,24 @@ class StocktakePage extends StatefulWidget {
 
 class _StocktakePageState extends State<StocktakePage> {
   final List<_StockItem> _items = [];
+  final repository = InventoryRepositoryImpl();
+  late final FetchAllInventory _fetch;
+  late final Stocktake _stocktake;
 
   @override
   void initState() {
     super.initState();
+    _fetch = FetchAllInventory(repository);
+    _stocktake = Stocktake(repository);
     _load();
   }
 
   Future<void> _load() async {
-    final snapshot = await FirebaseFirestore.instance
-        .collection('inventory')
-        .orderBy('createdAt')
-        .get();
+    final list = await _fetch();
     setState(() {
-      _items.clear();
-      for (final doc in snapshot.docs) {
-        final q = (doc['quantity'] ?? 0).toDouble();
-        final name = doc['itemName'] ?? doc.id;
-        _items.add(_StockItem(doc.reference, name, q));
-      }
+      _items
+        ..clear()
+        ..addAll(list.map((inv) => _StockItem(inv.id, inv.itemName, inv.quantity)));
     });
   }
 
@@ -50,14 +51,7 @@ class _StocktakePageState extends State<StocktakePage> {
       final value = double.tryParse(item.controller.text) ?? 0;
       final before = item.original;
       final diff = value - before;
-      await item.ref.update({'quantity': value});
-      await item.ref.collection('history').add({
-        'type': 'stocktake',
-        'before': before,
-        'after': value,
-        'diff': diff,
-        'timestamp': Timestamp.now(),
-      });
+      await _stocktake(item.id, before, value, diff);
     }
   }
 
