@@ -64,12 +64,12 @@ class _CategorySettingsPageState extends State<CategorySettingsPage> {
       }
       if (mounted) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('削除しました')));
+            .showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).deleted)));
       }
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('削除に失敗しました')));
+            .showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).deleteFailed)));
       }
     }
   }
@@ -77,7 +77,7 @@ class _CategorySettingsPageState extends State<CategorySettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('カテゴリ設定')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context).categorySettingsTitle)),
       body: ListView(
         children: [
           for (final c in _list)
@@ -92,12 +92,12 @@ class _CategorySettingsPageState extends State<CategorySettingsPage> {
                       children: [
                         ListTile(
                           leading: const Icon(Icons.edit),
-                          title: const Text('編集'),
+                          title: Text(AppLocalizations.of(context).categoryEditTitle),
                           onTap: () => Navigator.pop(context, 'edit'),
                         ),
                         ListTile(
                           leading: const Icon(Icons.delete),
-                          title: const Text('削除'),
+                          title: Text(AppLocalizations.of(context).delete),
                           onTap: () => Navigator.pop(context, 'delete'),
                         ),
                       ],

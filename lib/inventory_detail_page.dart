@@ -80,13 +80,13 @@ class InventoryDetailPage extends StatelessWidget {
               return ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
-                  Text('カテゴリ: ${inv.category}'),
-                  Text('品種: ${inv.itemType}'),
-                  Text('在庫: ${inv.quantity.toStringAsFixed(1)}${inv.unit}'),
+                  Text('${AppLocalizations.of(context).category}: ${inv.category}'),
+                  Text('${AppLocalizations.of(context).itemType}: ${inv.itemType}'),
+                  Text('${AppLocalizations.of(context).quantity}: ${inv.quantity.toStringAsFixed(1)}${inv.unit}'),
                   const SizedBox(height: 8),
-                  Text('次回購入予測: ${_formatDate(predicted)}'),
+                  Text('${AppLocalizations.of(context).predictLabel} ${_formatDate(predicted)}'),
                   const SizedBox(height: 16),
-                  const Text('履歴', style: TextStyle(fontSize: 18)),
+                  Text(AppLocalizations.of(context).history, style: const TextStyle(fontSize: 18)),
                   SizedBox(
                     height: MediaQuery.of(context).size.height / 3,
                     child: ListView(

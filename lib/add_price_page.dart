@@ -71,7 +71,7 @@ class _AddPricePageState extends State<AddPricePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('値段管理追加')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context).priceAddTitle)),
       body: _inventories.isEmpty
           ? const Center(child: CircularProgressIndicator())
           : Padding(
@@ -81,7 +81,7 @@ class _AddPricePageState extends State<AddPricePage> {
                 child: ListView(
                   children: [
                     DropdownButtonFormField<Inventory>(
-                      decoration: const InputDecoration(labelText: '商品'),
+                      decoration: InputDecoration(labelText: AppLocalizations.of(context).itemName),
                       value: _inventory,
                       items: _inventories
                           .map((e) => DropdownMenuItem(
@@ -93,7 +93,7 @@ class _AddPricePageState extends State<AddPricePage> {
                     ),
                     const SizedBox(height: 12),
                     ListTile(
-                      title: Text('確認日: ${_checkedAt.year}/${_checkedAt.month}/${_checkedAt.day}'),
+                      title: Text(AppLocalizations.of(context).checkedDate('${_checkedAt.year}/${_checkedAt.month}/${_checkedAt.day}')),
                       trailing: const Icon(Icons.calendar_today),
                       onTap: () async {
                         final picked = await showDatePicker(
@@ -107,32 +107,32 @@ class _AddPricePageState extends State<AddPricePage> {
                     ),
                     const SizedBox(height: 12),
                     TextFormField(
-                      decoration: const InputDecoration(labelText: '数'),
+                      decoration: InputDecoration(labelText: AppLocalizations.of(context).count),
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
                       initialValue: '1',
                       onChanged: (v) => setState(() => _count = double.tryParse(v) ?? 1),
                     ),
                     const SizedBox(height: 12),
                     TextFormField(
-                      decoration: const InputDecoration(labelText: '容量'),
+                      decoration: InputDecoration(labelText: AppLocalizations.of(context).volume),
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
                       initialValue: '1',
                       onChanged: (v) => setState(() => _volume = double.tryParse(v) ?? 1),
                     ),
                     const SizedBox(height: 12),
                     TextFormField(
-                      decoration: const InputDecoration(labelText: '値段'),
+                      decoration: InputDecoration(labelText: AppLocalizations.of(context).price),
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
                       onChanged: (v) => setState(() => _price = double.tryParse(v) ?? 0),
                     ),
                     const SizedBox(height: 12),
                     TextFormField(
-                      decoration: const InputDecoration(labelText: '購入元'),
+                      decoration: InputDecoration(labelText: AppLocalizations.of(context).shop),
                       onChanged: (v) => _shop = v,
                     ),
                     const SizedBox(height: 12),
-                    Text('合計容量: ${_totalVolume.toStringAsFixed(2)}'),
-                    Text('単価: ${_unitPrice.toStringAsFixed(2)}'),
+                    Text(AppLocalizations.of(context).totalVolume(_totalVolume.toStringAsFixed(2))),
+                    Text(AppLocalizations.of(context).unitPrice(_unitPrice.toStringAsFixed(2))),
                     const SizedBox(height: 24),
                     ElevatedButton(
                       onPressed: () async {
@@ -141,18 +141,18 @@ class _AddPricePageState extends State<AddPricePage> {
                             await _save();
                             if (!mounted) return;
                             await ScaffoldMessenger.of(context)
-                                .showSnackBar(const SnackBar(content: Text('保存しました')))
+                                .showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).saved)))
                                 .closed;
                             if (mounted) Navigator.pop(context);
                           } catch (_) {
                             if (mounted) {
                               ScaffoldMessenger.of(context)
-                                  .showSnackBar(const SnackBar(content: Text('保存に失敗しました')));
+                                  .showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).saveFailed)));
                             }
                           }
                         }
                       },
-                      child: const Text('保存'),
+                      child: Text(AppLocalizations.of(context).save),
                     ),
                   ],
                 ),

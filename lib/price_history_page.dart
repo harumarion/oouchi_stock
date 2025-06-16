@@ -20,8 +20,8 @@ class PriceHistoryPage extends StatelessWidget {
         stream: watch(category, itemType),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            final err = snapshot.error?.toString() ?? '不明なエラー';
-            return Center(child: Text('読み込みエラー: $err'));
+            final err = snapshot.error?.toString() ?? 'unknown';
+            return Center(child: Text(AppLocalizations.of(context).loadError(err)));
           }
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
@@ -33,14 +33,22 @@ class PriceHistoryPage extends StatelessWidget {
                 ListTile(
                   title: Text(p.itemName),
                   subtitle: Text(
-                      '${_formatDate(p.checkedAt)} 数:${p.count} ${p.unit} 容量:${p.volume} 合計:${p.totalVolume} 値段:${p.price} 購入元:${p.shop} 単価:${p.unitPrice.toStringAsFixed(2)}'),
+                      '${_formatDate(p.checkedAt)} '
+                      '${AppLocalizations.of(context).priceSummary(
+                          count: p.count.toString(),
+                          unitStr: p.unit,
+                          volume: p.volume.toString(),
+                          total: p.totalVolume.toString(),
+                          price: p.price.toString(),
+                          shop: p.shop,
+                          unitPrice: p.unitPrice.toStringAsFixed(2))}'),
                   onLongPress: () async {
                     final res = await showModalBottomSheet<String>(
                       context: context,
                       builder: (_) => SafeArea(
                         child: ListTile(
                           leading: const Icon(Icons.delete),
-                          title: const Text('削除'),
+                          title: Text(AppLocalizations.of(context).delete),
                           onTap: () => Navigator.pop(context, 'delete'),
                         ),
                       ),

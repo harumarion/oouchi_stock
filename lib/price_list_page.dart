@@ -52,7 +52,7 @@ class _PriceListPageState extends State<PriceListPage> {
   Widget build(BuildContext context) {
     if (!_loaded) {
       return Scaffold(
-        appBar: AppBar(title: const Text('値段管理')),
+        appBar: AppBar(title: Text(AppLocalizations.of(context).priceManagementTitle)),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
@@ -60,7 +60,7 @@ class _PriceListPageState extends State<PriceListPage> {
       length: _categories.length,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('値段管理'),
+          title: Text(AppLocalizations.of(context).priceManagementTitle),
           bottom: TabBar(
             isScrollable: true,
             tabs: [for (final c in _categories) Tab(text: c.name)],
@@ -96,8 +96,8 @@ class PriceCategoryList extends StatelessWidget {
       stream: watch(category),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          final err = snapshot.error?.toString() ?? '不明なエラー';
-          return Center(child: Text('読み込みエラー: $err'));
+          final err = snapshot.error?.toString() ?? 'unknown';
+          return Center(child: Text(AppLocalizations.of(context).loadError(err)));
         }
         if (!snapshot.hasData) {
           return const Center(child: CircularProgressIndicator());
@@ -118,7 +118,15 @@ class PriceCategoryList extends StatelessWidget {
               ListTile(
                 title: Text(p.itemName),
                 subtitle: Text(
-                    '数:${p.count} ${p.unit} 容量:${p.volume} 合計:${p.totalVolume} 値段:${p.price} 購入元:${p.shop} 単価:${p.unitPrice.toStringAsFixed(2)}'),
+                    AppLocalizations.of(context).priceSummary(
+                      count: p.count.toString(),
+                      unitStr: p.unit,
+                      volume: p.volume.toString(),
+                      total: p.totalVolume.toString(),
+                      price: p.price.toString(),
+                      shop: p.shop,
+                      unitPrice: p.unitPrice.toStringAsFixed(2),
+                    )),
                 onTap: () {
                   Navigator.push(
                     context,
