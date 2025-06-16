@@ -122,13 +122,13 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
   Widget build(BuildContext context) {
     if (_categories.isEmpty) {
       return Scaffold(
-        appBar: AppBar(title: const Text('商品を追加')),
+        appBar: AppBar(title: Text(AppLocalizations.of(context).inventoryAddTitle)),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
     // 画面のレイアウトを構築
     return Scaffold(
-      appBar: AppBar(title: const Text('商品を追加')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context).inventoryAddTitle)),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -137,15 +137,15 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
             children: [
               // 商品名入力
               TextFormField(
-                decoration: const InputDecoration(labelText: '商品名'),
+                decoration: InputDecoration(labelText: AppLocalizations.of(context).itemName),
                 onChanged: (value) => _itemName = value,
                 validator: (value) =>
-                    value == null || value.isEmpty ? '商品名は必須です' : null,
+                    value == null || value.isEmpty ? AppLocalizations.of(context).itemNameRequired : null,
               ),
               const SizedBox(height: 12),
               // カテゴリ選択
               DropdownButtonFormField<Category>(
-                decoration: const InputDecoration(labelText: 'カテゴリ'),
+                decoration: InputDecoration(labelText: AppLocalizations.of(context).category),
                 value: _category,
                 items: _categories
                     .map((c) => DropdownMenuItem(value: c, child: Text(c.name)))
@@ -164,7 +164,7 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
               const SizedBox(height: 12),
               // 品種選択
               DropdownButtonFormField<String>(
-                decoration: const InputDecoration(labelText: '品種'),
+                decoration: InputDecoration(labelText: AppLocalizations.of(context).itemType),
                 value: _itemType,
                 items: (_typesMap[_category?.name] ?? ['その他'])
                     .map((t) => DropdownMenuItem(value: t, child: Text(t)))
@@ -174,7 +174,7 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
               const SizedBox(height: 12),
               Row(
                 children: [
-                  const Text('数量:'),
+                  Text('${AppLocalizations.of(context).quantity}:'),
                   IconButton(
                     icon: const Icon(Icons.remove),
                     onPressed: () => setState(() {
@@ -197,7 +197,7 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
               const SizedBox(height: 12),
               // 単位選択
               DropdownButtonFormField<String>(
-                decoration: const InputDecoration(labelText: '単位'),
+                decoration: InputDecoration(labelText: AppLocalizations.of(context).unit),
                 value: _unit,
                 items: _units
                     .map((u) => DropdownMenuItem(value: u, child: Text(u)))
@@ -207,14 +207,14 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
               const SizedBox(height: 12),
               // メモの入力（任意）
               TextFormField(
-                decoration: const InputDecoration(labelText: 'メモ（任意）'),
+                decoration: InputDecoration(labelText: AppLocalizations.of(context).memoOptional),
                 onChanged: (value) => _note = value,
               ),
               const SizedBox(height: 24),
               // 入力内容を保存するボタン
               ElevatedButton.icon(
                 icon: const Icon(Icons.save),
-                label: const Text('保存'),
+                label: Text(AppLocalizations.of(context).save),
                 onPressed: () async {
                   // フォームの入力が正しいか確認
                   if (_formKey.currentState!.validate()) {
@@ -222,7 +222,7 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
                       await _saveItem();
                       if (!mounted) return;
                       final snackBar = ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('保存完了')),
+                        SnackBar(content: Text(AppLocalizations.of(context).saved)),
                       );
                       await snackBar.closed;
                       if (!mounted) return;
@@ -232,15 +232,14 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
-                              '保存に失敗しました: ${e.message ?? e.code}',
-                            ),
+                                '${AppLocalizations.of(context).saveFailed}: ${e.message ?? e.code}'),
                           ),
                         );
                       }
                     } catch (_) {
                       if (mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('保存に失敗しました')),
+                          SnackBar(content: Text(AppLocalizations.of(context).saveFailed)),
                         );
                       }
                     }

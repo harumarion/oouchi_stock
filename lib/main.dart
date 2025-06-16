@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'l10n/app_localizations.dart';
 import 'add_inventory_page.dart';
 import 'add_category_page.dart';
 import 'settings_page.dart';
@@ -36,7 +38,14 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'おうちストック',
+      onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: AppLocalizations.supportedLocales,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
         useMaterial3: true,
@@ -104,13 +113,13 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     if (!_categoriesLoaded) {
       return Scaffold(
-        appBar: AppBar(title: const Text('おうちストック')),
+        appBar: AppBar(title: Text(AppLocalizations.of(context).appTitle)),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
     if (_categories.isEmpty) {
       return Scaffold(
-        appBar: AppBar(title: const Text('おうちストック')),
+        appBar: AppBar(title: Text(AppLocalizations.of(context).appTitle)),
         body: Center(
           child: ElevatedButton(
             onPressed: () {
@@ -119,7 +128,7 @@ class _HomePageState extends State<HomePage> {
                 MaterialPageRoute(builder: (_) => const AddCategoryPage()),
               );
             },
-            child: const Text('カテゴリを追加'),
+            child: Text(AppLocalizations.of(context).addCategory),
           ),
         ),
       );
@@ -128,7 +137,7 @@ class _HomePageState extends State<HomePage> {
       length: _categories.length,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('おうちストック'),
+          title: Text(AppLocalizations.of(context).appTitle),
           centerTitle: true,
           bottom: TabBar(
             isScrollable: true,
@@ -168,15 +177,18 @@ class _HomePageState extends State<HomePage> {
                 }
               },
               itemBuilder: (context) => [
-                const PopupMenuItem(
+                PopupMenuItem(
                     value: 'add',
-                    child: Text('商品を追加', style: TextStyle(fontSize: 18))),
-                const PopupMenuItem(
+                    child: Text(AppLocalizations.of(context).addItem,
+                        style: const TextStyle(fontSize: 18))),
+                PopupMenuItem(
                     value: 'price',
-                    child: Text('値段管理', style: TextStyle(fontSize: 18))),
-                const PopupMenuItem(
+                    child: Text(AppLocalizations.of(context).priceManagement,
+                        style: const TextStyle(fontSize: 18))),
+                PopupMenuItem(
                     value: 'settings',
-                    child: Text('設定', style: TextStyle(fontSize: 18))),
+                    child: Text(AppLocalizations.of(context).settings,
+                        style: const TextStyle(fontSize: 18))),
               ],
             )
           ],
@@ -208,8 +220,10 @@ class InventoryList extends StatelessWidget {
       stream: watchUsecase(category),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          final err = snapshot.error?.toString() ?? '不明なエラー';
-          return Center(child: Text('読み込みエラー: $err'));
+          final err = snapshot.error?.toString() ?? 'unknown';
+          return Center(
+            child: Text(AppLocalizations.of(context).loadError(err)),
+          );
         }
         if (!snapshot.hasData) {
           return const Center(child: CircularProgressIndicator());
@@ -239,12 +253,12 @@ class InventoryList extends StatelessWidget {
                       children: [
                         ListTile(
                           leading: const Icon(Icons.edit),
-                          title: const Text('編集'),
+                          title: Text(AppLocalizations.of(context).categoryEditTitle),
                           onTap: () => Navigator.pop(context, 'edit'),
                         ),
                         ListTile(
                           leading: const Icon(Icons.delete),
-                          title: const Text('削除'),
+                          title: Text(AppLocalizations.of(context).delete),
                           onTap: () => Navigator.pop(context, 'delete'),
                         ),
                       ],
@@ -257,7 +271,8 @@ class InventoryList extends StatelessWidget {
                   } catch (e) {
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('削除に失敗しました')),
+                        SnackBar(
+                            content: Text(AppLocalizations.of(context).deleteFailed)),
                       );
                     }
                   }
@@ -351,14 +366,14 @@ class InventoryCard extends StatelessWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('キャンセル'),
+              child: Text(AppLocalizations.of(context).cancel),
             ),
             TextButton(
               onPressed: () {
                 final v = double.tryParse(controller.text);
                 Navigator.pop(context, v);
               },
-              child: const Text('OK'),
+              child: Text(AppLocalizations.of(context).ok),
             ),
           ],
         );
@@ -375,21 +390,27 @@ class InventoryCard extends StatelessWidget {
       await _update(inventory.id, amount, type);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('更新に失敗しました')),
+        SnackBar(content: Text(AppLocalizations.of(context).updateFailed)),
       );
     }
   }
 
   /// 使った量ボタンの処理
   Future<void> onUsed(BuildContext context) async {
-    final v = await _inputAmountDialog(context, '使った量');
+    final v = await _inputAmountDialog(
+      context,
+      AppLocalizations.of(context).usedAmount,
+    );
     if (v == null) return;
     await _updateQuantity(context, -v, 'used');
   }
 
   /// 買った量ボタンの処理
   Future<void> onBought(BuildContext context) async {
-    final v = await _inputAmountDialog(context, '買った量');
+    final v = await _inputAmountDialog(
+      context,
+      AppLocalizations.of(context).boughtAmount,
+    );
     if (v == null) return;
     await _updateQuantity(context, v, 'bought');
   }
@@ -398,7 +419,7 @@ class InventoryCard extends StatelessWidget {
   Future<void> onStock(BuildContext context) async {
     final v = await _inputAmountDialog(
       context,
-      '現在の在庫',
+      AppLocalizations.of(context).stockAmount,
       initialValue: inventory.quantity,
     );
     if (v == null) return;
@@ -406,7 +427,7 @@ class InventoryCard extends StatelessWidget {
       await _stocktake(inventory.id, inventory.quantity, v, v - inventory.quantity);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('更新に失敗しました')),
+        SnackBar(content: Text(AppLocalizations.of(context).updateFailed)),
       );
     }
   }
@@ -417,8 +438,9 @@ class InventoryCard extends StatelessWidget {
       future: _loadPrediction(),
       builder: (context, snapshot) {
         final predicted = snapshot.data;
-        final dateText =
-            predicted != null ? _formatDate(predicted) : '計算中...';
+        final dateText = predicted != null
+            ? _formatDate(predicted)
+            : AppLocalizations.of(context).calculating;
         return Card(
           margin: const EdgeInsets.only(bottom: 12),
           child: Padding(
@@ -437,7 +459,7 @@ class InventoryCard extends StatelessWidget {
                       style: const TextStyle(color: Colors.black87),
                     ),
                     Text(
-                      '予測: $dateText',
+                      '${AppLocalizations.of(context).predictLabel} $dateText',
                       style: const TextStyle(color: Colors.black87),
                     ),
                   ],

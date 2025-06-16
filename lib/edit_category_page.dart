@@ -34,13 +34,13 @@ class _EditCategoryPageState extends State<EditCategoryPage> {
       }
       if (!mounted) return;
       await ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('保存しました')))
+          .showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).saved)))
           .closed;
       if (mounted) Navigator.pop(context, _name);
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('保存に失敗しました')));
+            .showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).saveFailed)));
       }
     }
   }
@@ -48,7 +48,7 @@ class _EditCategoryPageState extends State<EditCategoryPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('カテゴリ編集')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context).categoryEditTitle)),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -57,9 +57,9 @@ class _EditCategoryPageState extends State<EditCategoryPage> {
             children: [
               TextFormField(
                 initialValue: _name,
-                decoration: const InputDecoration(labelText: 'カテゴリ名'),
+                decoration: InputDecoration(labelText: AppLocalizations.of(context).categoryName),
                 onChanged: (v) => _name = v,
-                validator: (v) => v == null || v.isEmpty ? '必須項目です' : null,
+                validator: (v) => v == null || v.isEmpty ? AppLocalizations.of(context).required : null,
               ),
               const SizedBox(height: 24),
               ElevatedButton(
@@ -68,7 +68,7 @@ class _EditCategoryPageState extends State<EditCategoryPage> {
                     _save();
                   }
                 },
-                child: const Text('保存'),
+                child: Text(AppLocalizations.of(context).save),
               ),
             ],
           ),
