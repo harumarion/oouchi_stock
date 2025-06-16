@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'presenters/add_inventory_presenter.dart';
 
 // 在庫を追加する画面のウィジェット
 
@@ -11,7 +10,8 @@ class AddInventoryPage extends StatefulWidget {
   State<AddInventoryPage> createState() => _AddInventoryPageState();
 }
 
-class _AddInventoryPageState extends State<AddInventoryPage> {
+class _AddInventoryPageState extends State<AddInventoryPage>
+    implements AddInventoryView {
   // フォームの状態を管理するキー
   final _formKey = GlobalKey<FormState>();
   // 商品名
@@ -27,22 +27,12 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
   // 任意のメモ
   String _note = '';
 
-  // 入力内容を Firestore に保存する
-  Future<void> _saveItem() async {
-    final doc = await FirebaseFirestore.instance.collection('inventory').add({
-      'itemName': _itemName,
-      'category': _category,
-      'itemType': _itemType,
-      'quantity': _quantity,
-      'unit': _unit,
-      'note': _note,
-      'createdAt': Timestamp.now(),
-    });
-    await doc.collection('history').add({
-      'type': 'add',
-      'quantity': _quantity,
-      'timestamp': Timestamp.now(),
-    });
+  late final AddInventoryPresenter _presenter;
+
+  @override
+  void initState() {
+    super.initState();
+    _presenter = AddInventoryPresenter(this);
   }
 
   // カテゴリの選択肢
@@ -164,34 +154,15 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
                 icon: const Icon(Icons.save),
                 label: const Text('保存'),
                 onPressed: () async {
-                  // フォームの入力が正しいか確認
                   if (_formKey.currentState!.validate()) {
-                    try {
-                      await _saveItem();
-                      if (!mounted) return;
-                      final snackBar = ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('保存完了')),
-                      );
-                      await snackBar.closed;
-                      if (!mounted) return;
-                      Navigator.pop(context);
-                    } on FirebaseException catch (e) {
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              '保存に失敗しました: ${e.message ?? e.code}',
-                            ),
-                          ),
-                        );
-                      }
-                    } catch (_) {
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('保存に失敗しました')),
-                        );
-                      }
-                    }
+                    await _presenter.saveItem(
+                      itemName: _itemName,
+                      category: _category,
+                      itemType: _itemType,
+                      quantity: _quantity,
+                      unit: _unit,
+                      note: _note,
+                    );
                   }
                 },
               ),
@@ -200,5 +171,21 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
         ),
       ),
     );
+  }
+
+  @override
+  void showSaveSuccess() async {
+    if (!mounted) return;
+    final snackBar =
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('保存完了')));
+    await snackBar.closed;
+    if (mounted) Navigator.pop(context);
+  }
+
+  @override
+  void showSaveError(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text('保存に失敗しました: $message')));
   }
 }
