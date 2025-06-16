@@ -87,6 +87,7 @@ class _HomePageState extends State<HomePage> {
               createdAt: (data['createdAt'] as Timestamp).toDate(),
             );
           }).toList();
+          _categoriesLoaded = true;
         });
       });
     }
