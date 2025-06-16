@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'data/repositories/inventory_repository_impl.dart';
 import 'domain/entities/history_entry.dart';
 import 'domain/entities/inventory.dart';
+import 'domain/entities/category.dart';
 import 'domain/services/purchase_prediction_strategy.dart';
 import 'edit_inventory_page.dart';
 
@@ -9,12 +10,14 @@ import 'edit_inventory_page.dart';
 // 商品詳細画面。履歴と予測日を表示する
 class InventoryDetailPage extends StatelessWidget {
   final String inventoryId;
+  final List<Category> categories;
   final PurchasePredictionStrategy strategy;
   final InventoryRepositoryImpl repository = InventoryRepositoryImpl();
 
   InventoryDetailPage({
     super.key,
     required this.inventoryId,
+    required this.categories,
     this.strategy = const DummyPredictionStrategy(),
   });
 
@@ -48,7 +51,14 @@ class InventoryDetailPage extends StatelessWidget {
                     builder: (_) => EditInventoryPage(
                       id: inventoryId,
                       itemName: inv.itemName,
-                      category: inv.category,
+                      category: categories.firstWhere(
+                        (e) => e.name == inv.category,
+                        orElse: () => Category(
+                          id: 0,
+                          name: inv.category,
+                          createdAt: DateTime.now(),
+                        ),
+                      ),
                       itemType: inv.itemType,
                       unit: inv.unit,
                       note: inv.note,
