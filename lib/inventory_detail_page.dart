@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'data/repositories/inventory_repository_impl.dart';
 import 'domain/entities/history_entry.dart';
 import 'domain/services/purchase_prediction_strategy.dart';
+import 'edit_inventory_page.dart';
 
 
 // 商品詳細画面。履歴と予測日を表示する
@@ -10,6 +11,9 @@ class InventoryDetailPage extends StatelessWidget {
   final String inventoryId;
   final String itemName;
   final String unit;
+  final String category;
+  final String itemType;
+  final double quantity;
   final PurchasePredictionStrategy strategy;
   final InventoryRepositoryImpl repository = InventoryRepositoryImpl();
 
@@ -18,6 +22,9 @@ class InventoryDetailPage extends StatelessWidget {
     required this.inventoryId,
     required this.itemName,
     required this.unit,
+    required this.category,
+    required this.itemType,
+    required this.quantity,
     this.strategy = const DummyPredictionStrategy(),
   });
 
@@ -28,7 +35,26 @@ class InventoryDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(itemName)),
+      appBar: AppBar(title: Text(itemName), actions: [
+        IconButton(
+          icon: const Icon(Icons.edit),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => EditInventoryPage(
+                  id: inventoryId,
+                  itemName: itemName,
+                  category: category,
+                  itemType: itemType,
+                  unit: unit,
+                  note: '',
+                ),
+              ),
+            );
+          },
+        )
+      ]),
       body: StreamBuilder<List<HistoryEntry>>(
         stream: historyStream(),
         builder: (context, snapshot) {
@@ -41,10 +67,19 @@ class InventoryDetailPage extends StatelessWidget {
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
+              Text('カテゴリ: $category'),
+              Text('品種: $itemType'),
+              Text('在庫: ${quantity.toStringAsFixed(1)}$unit'),
+              const SizedBox(height: 8),
               Text('次回購入予測: ${_formatDate(predicted)}'),
               const SizedBox(height: 16),
               const Text('履歴', style: TextStyle(fontSize: 18)),
-              ...list.map(_buildHistoryTile),
+              SizedBox(
+                height: MediaQuery.of(context).size.height / 3,
+                child: ListView(
+                  children: list.map(_buildHistoryTile).toList(),
+                ),
+              ),
             ],
           );
         },

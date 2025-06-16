@@ -4,7 +4,7 @@ import 'domain/entities/inventory.dart';
 import 'domain/usecases/add_inventory.dart';
 import 'data/repositories/inventory_repository_impl.dart';
 
-// 在庫を追加する画面のウィジェット
+// 商品を追加する画面のウィジェット
 
 class AddInventoryPage extends StatefulWidget {
   const AddInventoryPage({super.key});
@@ -78,7 +78,7 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
   Widget build(BuildContext context) {
     // 画面のレイアウトを構築
     return Scaffold(
-      appBar: AppBar(title: const Text('在庫を追加')),
+      appBar: AppBar(title: const Text('商品を追加')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Form(

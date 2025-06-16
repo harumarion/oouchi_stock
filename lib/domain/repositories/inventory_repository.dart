@@ -10,6 +10,8 @@ abstract class InventoryRepository {
 
   Future<void> updateQuantity(String id, double amount, String type);
 
+  Future<void> updateInventory(Inventory inventory);
+
   Stream<List<HistoryEntry>> watchHistory(String inventoryId);
 
   Future<void> stocktake(

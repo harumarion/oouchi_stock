@@ -83,6 +83,17 @@ class InventoryRepositoryImpl implements InventoryRepository {
   }
 
   @override
+  Future<void> updateInventory(Inventory inventory) async {
+    await _firestore.collection('inventory').doc(inventory.id).update({
+      'itemName': inventory.itemName,
+      'category': inventory.category,
+      'itemType': inventory.itemType,
+      'unit': inventory.unit,
+      'note': inventory.note,
+    });
+  }
+
+  @override
   Stream<List<HistoryEntry>> watchHistory(String inventoryId) {
     return _firestore
         .collection('inventory')

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'add_inventory_page.dart';
 import 'add_category_page.dart';
+import 'settings_page.dart';
 import 'inventory_detail_page.dart';
 import 'stocktake_page.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -39,20 +40,29 @@ class MyApp extends StatelessWidget {
 }
 
 // 在庫一覧を表示する画面
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
-  static const List<String> categories = ['冷蔵庫', '冷凍庫', '日用品'];
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  List<String> _categories = ['冷蔵庫', '冷凍庫', '日用品'];
+
+  void _updateCategories(List<String> list) {
+    setState(() => _categories = List.from(list));
+  }
 
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: categories.length,
+      length: _categories.length,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('おうちストック'),
           centerTitle: true,
-          bottom: TabBar(tabs: [for (final c in categories) Tab(text: c)]),
+          bottom: TabBar(tabs: [for (final c in _categories) Tab(text: c)]),
           actions: [
             PopupMenuButton<String>(
               onSelected: (value) {
@@ -71,18 +81,36 @@ class HomePage extends StatelessWidget {
                     context,
                     MaterialPageRoute(builder: (c) => const AddCategoryPage()),
                   );
+                } else if (value == 'settings') {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (c) => SettingsPage(
+                              categories: _categories,
+                              onReorder: _updateCategories,
+                            )),
+                  );
                 }
               },
               itemBuilder: (context) => [
-                const PopupMenuItem(value: 'add', child: Text('在庫を追加')),
-                const PopupMenuItem(value: 'stock', child: Text('棚卸入力')),
-                const PopupMenuItem(value: 'category', child: Text('カテゴリ追加')),
+                const PopupMenuItem(
+                    value: 'add',
+                    child: Text('商品を追加', style: TextStyle(fontSize: 18))),
+                const PopupMenuItem(
+                    value: 'stock',
+                    child: Text('棚卸入力', style: TextStyle(fontSize: 18))),
+                const PopupMenuItem(
+                    value: 'category',
+                    child: Text('カテゴリ追加', style: TextStyle(fontSize: 18))),
+                const PopupMenuItem(
+                    value: 'settings',
+                    child: Text('設定', style: TextStyle(fontSize: 18))),
               ],
             )
           ],
         ),
         body: TabBarView(
-          children: [for (final c in categories) InventoryList(category: c)],
+          children: [for (final c in _categories) InventoryList(category: c)],
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
@@ -129,6 +157,9 @@ class InventoryList extends StatelessWidget {
                       inventoryId: inv.id,
                       itemName: inv.itemName,
                       unit: inv.unit,
+                      category: inv.category,
+                      itemType: inv.itemType,
+                      quantity: inv.quantity,
                     ),
                   ),
                 );
@@ -260,10 +291,14 @@ class InventoryCard extends StatelessWidget {
                     Text('${inventory.itemType} / ${inventory.itemName}',
                         style: const TextStyle(fontSize: 18)),
                     const SizedBox(height: 4),
-                    Text('${inventory.quantity.toStringAsFixed(1)}${inventory.unit}',
-                        style: const TextStyle(color: Colors.grey)),
-                    Text('予測: $dateText',
-                        style: const TextStyle(color: Colors.grey)),
+                    Text(
+                      '${inventory.quantity.toStringAsFixed(1)}${inventory.unit}',
+                      style: const TextStyle(color: Colors.black87),
+                    ),
+                    Text(
+                      '予測: $dateText',
+                      style: const TextStyle(color: Colors.black87),
+                    ),
                   ],
                 ),
                 Row(
