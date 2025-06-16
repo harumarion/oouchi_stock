@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'data/repositories/inventory_repository_impl.dart';
 import 'domain/entities/history_entry.dart';
+import 'domain/entities/inventory.dart';
 import 'domain/services/purchase_prediction_strategy.dart';
 import 'edit_inventory_page.dart';
 
@@ -9,24 +9,18 @@ import 'edit_inventory_page.dart';
 // 商品詳細画面。履歴と予測日を表示する
 class InventoryDetailPage extends StatelessWidget {
   final String inventoryId;
-  final String itemName;
-  final String unit;
-  final String category;
-  final String itemType;
-  final double quantity;
   final PurchasePredictionStrategy strategy;
   final InventoryRepositoryImpl repository = InventoryRepositoryImpl();
 
   InventoryDetailPage({
     super.key,
     required this.inventoryId,
-    required this.itemName,
-    required this.unit,
-    required this.category,
-    required this.itemType,
-    required this.quantity,
     this.strategy = const DummyPredictionStrategy(),
   });
+
+  Stream<Inventory?> inventoryStream() {
+    return repository.watchInventory(inventoryId);
+  }
 
   Stream<List<HistoryEntry>> historyStream() {
     return repository.watchHistory(inventoryId);
@@ -34,56 +28,68 @@ class InventoryDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(itemName), actions: [
-        IconButton(
-          icon: const Icon(Icons.edit),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => EditInventoryPage(
-                  id: inventoryId,
-                  itemName: itemName,
-                  category: category,
-                  itemType: itemType,
-                  unit: unit,
-                  note: '',
-                ),
-              ),
-            );
-          },
-        )
-      ]),
-      body: StreamBuilder<List<HistoryEntry>>(
-        stream: historyStream(),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          final list = snapshot.data!;
-          final predicted =
-              strategy.predict(DateTime.now(), list, _currentQuantity(list));
-          return ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              Text('カテゴリ: $category'),
-              Text('品種: $itemType'),
-              Text('在庫: ${quantity.toStringAsFixed(1)}$unit'),
-              const SizedBox(height: 8),
-              Text('次回購入予測: ${_formatDate(predicted)}'),
-              const SizedBox(height: 16),
-              const Text('履歴', style: TextStyle(fontSize: 18)),
-              SizedBox(
-                height: MediaQuery.of(context).size.height / 3,
-                child: ListView(
-                  children: list.map(_buildHistoryTile).toList(),
-                ),
-              ),
-            ],
+    return StreamBuilder<Inventory?>(
+      stream: inventoryStream(),
+      builder: (context, invSnapshot) {
+        if (!invSnapshot.hasData) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
           );
-        },
-      ),
+        }
+        final inv = invSnapshot.data!;
+        return Scaffold(
+          appBar: AppBar(title: Text(inv.itemName), actions: [
+            IconButton(
+              icon: const Icon(Icons.edit),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => EditInventoryPage(
+                      id: inventoryId,
+                      itemName: inv.itemName,
+                      category: inv.category,
+                      itemType: inv.itemType,
+                      unit: inv.unit,
+                      note: inv.note,
+                    ),
+                  ),
+                );
+              },
+            )
+          ]),
+          body: StreamBuilder<List<HistoryEntry>>(
+            stream: historyStream(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              final list = snapshot.data!;
+              final predicted =
+                  strategy.predict(DateTime.now(), list, _currentQuantity(list));
+              return ListView(
+                padding: const EdgeInsets.all(16),
+                children: [
+                  Text('カテゴリ: ${inv.category}'),
+                  Text('品種: ${inv.itemType}'),
+                  Text('在庫: ${inv.quantity.toStringAsFixed(1)}${inv.unit}'),
+                  const SizedBox(height: 8),
+                  Text('次回購入予測: ${_formatDate(predicted)}'),
+                  const SizedBox(height: 16),
+                  const Text('履歴', style: TextStyle(fontSize: 18)),
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height / 3,
+                    child: ListView(
+                      children:
+                          list.map((e) => _buildHistoryTile(e, inv.unit)).toList(),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        );
+      },
     );
   }
 
@@ -107,7 +113,7 @@ class InventoryDetailPage extends StatelessWidget {
   }
 
   /// 履歴表示用のタイルを作成する。
-  Widget _buildHistoryTile(HistoryEntry e) {
+  Widget _buildHistoryTile(HistoryEntry e, String unit) {
     String title;
     Color color = Colors.black;
     if (e.type == 'stocktake') {

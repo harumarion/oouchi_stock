@@ -12,6 +12,9 @@ abstract class InventoryRepository {
 
   Future<void> updateInventory(Inventory inventory);
 
+  /// 指定IDの在庫情報をストリームで取得する
+  Stream<Inventory?> watchInventory(String inventoryId);
+
   Stream<List<HistoryEntry>> watchHistory(String inventoryId);
 
   Future<void> stocktake(
