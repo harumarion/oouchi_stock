@@ -11,6 +11,7 @@ import 'firebase_options.dart'; // ← 自動生成された設定ファイル
 import 'data/repositories/inventory_repository_impl.dart';
 import 'domain/entities/inventory.dart';
 import 'domain/entities/history_entry.dart';
+import 'domain/entities/category.dart';
 import 'domain/services/purchase_prediction_strategy.dart';
 import 'domain/usecases/watch_inventories.dart';
 import 'domain/usecases/update_quantity.dart';
@@ -28,7 +29,7 @@ void main() async {
 
 // アプリのルートウィジェット
 class MyApp extends StatelessWidget {
-  final List<String>? initialCategories;
+  final List<Category>? initialCategories;
   const MyApp({super.key, this.initialCategories});
   @override
   Widget build(BuildContext context) {
@@ -45,7 +46,7 @@ class MyApp extends StatelessWidget {
 
 // 在庫一覧を表示する画面
 class HomePage extends StatefulWidget {
-  final List<String>? categories;
+  final List<Category>? categories;
   const HomePage({super.key, this.categories});
 
   @override
@@ -53,10 +54,10 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  List<String> _categories = [];
+  List<Category> _categories = [];
   StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _catSub;
 
-  void _updateCategories(List<String> list) {
+  void _updateCategories(List<Category> list) {
     setState(() => _categories = List.from(list));
   }
 
@@ -72,8 +73,14 @@ class _HomePageState extends State<HomePage> {
           .snapshots()
           .listen((snapshot) {
         setState(() {
-          _categories =
-              snapshot.docs.map((d) => d.data()['name'] as String).toList();
+          _categories = snapshot.docs.map((d) {
+            final data = d.data();
+            return Category(
+              id: data['id'] ?? 0,
+              name: data['name'] ?? '',
+              createdAt: (data['createdAt'] as Timestamp).toDate(),
+            );
+          }).toList();
         });
       });
     }
@@ -105,7 +112,7 @@ class _HomePageState extends State<HomePage> {
               for (final c in _categories)
                 SizedBox(
                   width: MediaQuery.of(context).size.width / 3,
-                  child: Tab(text: c),
+                  child: Tab(text: c.name),
                 )
             ],
           ),
@@ -115,7 +122,8 @@ class _HomePageState extends State<HomePage> {
                 if (value == 'add') {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (c) => const AddInventoryPage()),
+                    MaterialPageRoute(
+                        builder: (c) => AddInventoryPage(categories: _categories)),
                   );
                 } else if (value == 'stock') {
                   Navigator.push(
@@ -148,7 +156,10 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
         body: TabBarView(
-          children: [for (final c in _categories) InventoryList(category: c)],
+          children: [
+            for (final c in _categories)
+              InventoryList(category: c.name, categories: _categories)
+          ],
         ),
         // 在庫一覧から商品を追加する機能はメニューからのみ利用するため
         // ここで表示していた追加用の FAB は削除する。
@@ -160,7 +171,8 @@ class _HomePageState extends State<HomePage> {
 /// 指定カテゴリの在庫を一覧表示するウィジェット。
 class InventoryList extends StatelessWidget {
   final String category;
-  const InventoryList({super.key, required this.category});
+  final List<Category> categories;
+  const InventoryList({super.key, required this.category, required this.categories});
 
   @override
   Widget build(BuildContext context) {
@@ -229,7 +241,13 @@ class InventoryList extends StatelessWidget {
                       builder: (_) => EditInventoryPage(
                         id: inv.id,
                         itemName: inv.itemName,
-                        category: inv.category,
+                        category: categories.firstWhere(
+                          (e) => e.name == inv.category,
+                          orElse: () => Category(
+                              id: 0,
+                              name: inv.category,
+                              createdAt: DateTime.now()),
+                        ),
                         itemType: inv.itemType,
                         unit: inv.unit,
                         note: inv.note,

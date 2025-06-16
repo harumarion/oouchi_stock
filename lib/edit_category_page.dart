@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import 'domain/entities/category.dart';
+
 /// カテゴリ名を編集する画面。
 class EditCategoryPage extends StatefulWidget {
-  final String initialName;
-  const EditCategoryPage({super.key, required this.initialName});
+  final Category category;
+  const EditCategoryPage({super.key, required this.category});
 
   @override
   State<EditCategoryPage> createState() => _EditCategoryPageState();
@@ -17,14 +19,14 @@ class _EditCategoryPageState extends State<EditCategoryPage> {
   @override
   void initState() {
     super.initState();
-    _name = widget.initialName;
+    _name = widget.category.name;
   }
 
   Future<void> _save() async {
     try {
       final snapshot = await FirebaseFirestore.instance
           .collection('categories')
-          .where('name', isEqualTo: widget.initialName)
+          .where('id', isEqualTo: widget.category.id)
           .get();
       for (final doc in snapshot.docs) {
         await doc.reference.update({'name': _name});

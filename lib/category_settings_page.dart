@@ -3,11 +3,12 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'add_category_page.dart';
 import 'edit_category_page.dart';
+import 'domain/entities/category.dart';
 
 /// カテゴリを一覧表示し追加・削除・編集を行う画面。
 class CategorySettingsPage extends StatefulWidget {
-  final List<String> initial;
-  final ValueChanged<List<String>> onChanged;
+  final List<Category> initial;
+  final ValueChanged<List<Category>> onChanged;
   const CategorySettingsPage({
     super.key,
     required this.initial,
@@ -20,7 +21,7 @@ class CategorySettingsPage extends StatefulWidget {
 
 class _CategorySettingsPageState extends State<CategorySettingsPage> {
   late final StreamSubscription<QuerySnapshot<Map<String, dynamic>>> _sub;
-  List<String> _list = [];
+  List<Category> _list = [];
 
   @override
   void initState() {
@@ -32,8 +33,14 @@ class _CategorySettingsPageState extends State<CategorySettingsPage> {
         .snapshots()
         .listen((snapshot) {
       setState(() {
-        _list =
-            snapshot.docs.map((d) => d.data()['name'] as String).toList();
+        _list = snapshot.docs.map((d) {
+          final data = d.data();
+          return Category(
+            id: data['id'] ?? 0,
+            name: data['name'] ?? '',
+            createdAt: (data['createdAt'] as Timestamp).toDate(),
+          );
+        }).toList();
       });
       widget.onChanged(List.from(_list));
     });
@@ -45,11 +52,11 @@ class _CategorySettingsPageState extends State<CategorySettingsPage> {
     super.dispose();
   }
 
-  Future<void> _deleteCategory(String name) async {
+  Future<void> _deleteCategory(Category category) async {
     try {
       final snapshot = await FirebaseFirestore.instance
           .collection('categories')
-          .where('name', isEqualTo: name)
+          .where('id', isEqualTo: category.id)
           .get();
       for (final doc in snapshot.docs) {
         await doc.reference.delete();
@@ -74,7 +81,7 @@ class _CategorySettingsPageState extends State<CategorySettingsPage> {
         children: [
           for (final c in _list)
             ListTile(
-              title: Text(c),
+              title: Text(c.name),
               onLongPress: () async {
                 final result = await showModalBottomSheet<String>(
                   context: context,
@@ -102,7 +109,7 @@ class _CategorySettingsPageState extends State<CategorySettingsPage> {
                   await Navigator.push<String>(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => EditCategoryPage(initialName: c),
+                      builder: (_) => EditCategoryPage(category: c),
                     ),
                   );
                 }
@@ -112,13 +119,10 @@ class _CategorySettingsPageState extends State<CategorySettingsPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          final newCategory = await Navigator.push<String>(
+          await Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const AddCategoryPage()),
           );
-          if (newCategory != null) {
-            // 追加後は Stream が自動で更新される
-          }
         },
         child: const Icon(Icons.add),
       ),

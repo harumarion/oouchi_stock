@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -17,14 +18,15 @@ class _AddCategoryPageState extends State<AddCategoryPage> {
   /// カテゴリを保存する処理。失敗時は SnackBar で通知する。
   Future<void> _save() async {
     try {
+      final id = Random().nextInt(0xffffffff);
       await FirebaseFirestore.instance
           .collection('categories')
-          .add({'name': _name, 'createdAt': Timestamp.now()});
+          .add({'id': id, 'name': _name, 'createdAt': Timestamp.now()});
       if (!mounted) return;
       await ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text('保存しました')))
           .closed;
-      if (mounted) Navigator.pop(context, _name);
+      if (mounted) Navigator.pop(context);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context)
