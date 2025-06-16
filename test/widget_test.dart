@@ -13,6 +13,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_core_platform_interface/firebase_core_platform_interface.dart';
 import 'package:oouchi_stock/firebase_options.dart';
 import 'firebase_test_utils.dart';
+import 'package:oouchi_stock/add_category_page.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -27,5 +28,13 @@ void main() {
   testWidgets('アプリが起動する', (WidgetTester tester) async {
     await tester.pumpWidget(const MyApp());
     expect(find.text('おうちストック'), findsOneWidget);
+  });
+
+  testWidgets('カテゴリ名未入力で保存するとバリデーションエラーが表示される',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(home: AddCategoryPage()));
+    await tester.tap(find.text('保存'));
+    await tester.pump();
+    expect(find.text('必須項目です'), findsOneWidget);
   });
 }
