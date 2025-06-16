@@ -4,6 +4,7 @@ import 'add_inventory_page.dart';
 import 'settings_page.dart';
 import 'inventory_detail_page.dart';
 import 'stocktake_page.dart';
+import 'edit_inventory_page.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'firebase_options.dart'; // ← 自動生成された設定ファイル
