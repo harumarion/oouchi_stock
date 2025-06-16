@@ -5,6 +5,7 @@ import 'add_category_page.dart';
 import 'settings_page.dart';
 import 'inventory_detail_page.dart';
 import 'edit_inventory_page.dart';
+import 'price_list_page.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'firebase_options.dart'; // ← 自動生成された設定ファイル
@@ -150,6 +151,11 @@ class _HomePageState extends State<HomePage> {
                           AddInventoryPage(categories: _categories),
                     ),
                   );
+                } else if (value == 'price') {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const PriceListPage()),
+                  );
                 } else if (value == 'settings') {
                   Navigator.push(
                     context,
@@ -165,6 +171,9 @@ class _HomePageState extends State<HomePage> {
                 const PopupMenuItem(
                     value: 'add',
                     child: Text('商品を追加', style: TextStyle(fontSize: 18))),
+                const PopupMenuItem(
+                    value: 'price',
+                    child: Text('値段管理', style: TextStyle(fontSize: 18))),
                 const PopupMenuItem(
                     value: 'settings',
                     child: Text('設定', style: TextStyle(fontSize: 18))),
