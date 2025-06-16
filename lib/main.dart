@@ -77,10 +77,13 @@ class _HomePageState extends State<HomePage> {
                     MaterialPageRoute(builder: (c) => const StocktakePage()),
                   );
                 } else if (value == 'category') {
-                  Navigator.push(
+                  final newCategory = await Navigator.push<String>(
                     context,
                     MaterialPageRoute(builder: (c) => const AddCategoryPage()),
                   );
+                  if (newCategory != null) {
+                    _updateCategories([..._categories, newCategory]);
+                  }
                 } else if (value == 'settings') {
                   Navigator.push(
                     context,

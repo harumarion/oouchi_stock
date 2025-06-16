@@ -24,7 +24,7 @@ class _AddCategoryPageState extends State<AddCategoryPage> {
       await ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text('保存しました')))
           .closed;
-      if (mounted) Navigator.pop(context);
+      if (mounted) Navigator.pop(context, _name);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context)
