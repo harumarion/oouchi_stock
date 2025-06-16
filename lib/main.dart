@@ -283,7 +283,7 @@ class InventoryList extends StatelessWidget {
   }
 }
 
-// 1件分の在庫情報を表示するカードウィジェット
+// ホーム画面で在庫を表示するカードウィジェット
 class InventoryCard extends StatelessWidget {
   final Inventory inventory;
   final UpdateQuantity _update = UpdateQuantity(InventoryRepositoryImpl());
@@ -371,18 +371,21 @@ class InventoryCard extends StatelessWidget {
     }
   }
 
+  /// 使った量ボタンの処理
   Future<void> onUsed(BuildContext context) async {
     final v = await _inputAmountDialog(context, '使った量');
     if (v == null) return;
     await _updateQuantity(context, -v, 'used');
   }
 
+  /// 買った量ボタンの処理
   Future<void> onBought(BuildContext context) async {
     final v = await _inputAmountDialog(context, '買った量');
     if (v == null) return;
     await _updateQuantity(context, v, 'bought');
   }
 
+  /// 在庫ボタンの処理
   Future<void> onStock(BuildContext context) async {
     final v = await _inputAmountDialog(
       context,
@@ -437,11 +440,11 @@ class InventoryCard extends StatelessWidget {
                       onPressed: () => onStock(context),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.remove_circle_outline),
+                      icon: const Text('✂️', style: TextStyle(fontSize: 20)),
                       onPressed: () => onUsed(context),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.add_circle_outline),
+                      icon: const Text('📦', style: TextStyle(fontSize: 20)),
                       onPressed: () => onBought(context),
                     ),
                   ],
