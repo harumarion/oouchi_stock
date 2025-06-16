@@ -4,7 +4,6 @@ import 'add_inventory_page.dart';
 import 'add_category_page.dart';
 import 'settings_page.dart';
 import 'inventory_detail_page.dart';
-import 'stocktake_page.dart';
 import 'edit_inventory_page.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -17,6 +16,7 @@ import 'domain/services/purchase_prediction_strategy.dart';
 import 'domain/usecases/watch_inventories.dart';
 import 'domain/usecases/update_quantity.dart';
 import 'domain/usecases/delete_inventory.dart';
+import 'domain/usecases/stocktake.dart';
 
 // アプリのエントリーポイント。Firebase を初期化してから起動する。
 
@@ -149,11 +149,6 @@ class _HomePageState extends State<HomePage> {
                           AddInventoryPage(categories: _categories),
                     ),
                   );
-                } else if (value == 'stock') {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (c) => const StocktakePage()),
-                  );
                 } else if (value == 'settings') {
                   Navigator.push(
                     context,
@@ -169,9 +164,6 @@ class _HomePageState extends State<HomePage> {
                 const PopupMenuItem(
                     value: 'add',
                     child: Text('商品を追加', style: TextStyle(fontSize: 18))),
-                const PopupMenuItem(
-                    value: 'stock',
-                    child: Text('棚卸入力', style: TextStyle(fontSize: 18))),
                 const PopupMenuItem(
                     value: 'settings',
                     child: Text('設定', style: TextStyle(fontSize: 18))),
@@ -294,6 +286,7 @@ class InventoryCard extends StatelessWidget {
   final Inventory inventory;
   final UpdateQuantity _update = UpdateQuantity(InventoryRepositoryImpl());
   final InventoryRepositoryImpl _repository = InventoryRepositoryImpl();
+  final Stocktake _stocktake = Stocktake(InventoryRepositoryImpl());
 
   InventoryCard({
     super.key,
@@ -331,8 +324,10 @@ class InventoryCard extends StatelessWidget {
   Future<double?> _inputAmountDialog(
     BuildContext context,
     String title,
+    {double initialValue = 1.0}
   ) async {
-    final controller = TextEditingController(text: '1.0');
+    final controller =
+        TextEditingController(text: initialValue.toStringAsFixed(1));
     return showDialog<double>(
       context: context,
       builder: (context) {
@@ -386,6 +381,22 @@ class InventoryCard extends StatelessWidget {
     await _updateQuantity(context, v, 'bought');
   }
 
+  Future<void> onStock(BuildContext context) async {
+    final v = await _inputAmountDialog(
+      context,
+      '現在の在庫',
+      initialValue: inventory.quantity,
+    );
+    if (v == null) return;
+    try {
+      await _stocktake(inventory.id, inventory.quantity, v, v - inventory.quantity);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('更新に失敗しました')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<DateTime>(
@@ -419,6 +430,10 @@ class InventoryCard extends StatelessWidget {
                 ),
                 Row(
                   children: [
+                    IconButton(
+                      icon: const Text('🛒', style: TextStyle(fontSize: 20)),
+                      onPressed: () => onStock(context),
+                    ),
                     IconButton(
                       icon: const Icon(Icons.remove_circle_outline),
                       onPressed: () => onUsed(context),
