@@ -122,7 +122,7 @@ class _HomePageState extends State<HomePage> {
                     MaterialPageRoute(
                         builder: (c) => SettingsPage(
                               categories: _categories,
-                              onReorder: _updateCategories,
+                              onChanged: _updateCategories,
                             )),
                   );
                 }
