@@ -18,18 +18,24 @@ class SettingsPage extends StatelessWidget {
         children: [
           ListTile(
             title: const Text('カテゴリ追加'),
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const AddCategoryPage()),
-            ),
+            onTap: () async {
+              final newCategory = await Navigator.push<String>(
+                context,
+                MaterialPageRoute(builder: (_) => const AddCategoryPage()),
+              );
+              if (newCategory != null) {
+                final updated = List<String>.from(categories)..add(newCategory);
+                onReorder(updated);
+              }
+            },
           ),
           ListTile(
-            title: const Text('タグ並び替え'),
+            title: const Text('カテゴリ並び替え'),
             onTap: () async {
               final result = await Navigator.push<List<String>>(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => TagOrderPage(initial: categories),
+                  builder: (_) => CategoryOrderPage(initial: categories),
                 ),
               );
               if (result != null) onReorder(result);
@@ -41,15 +47,15 @@ class SettingsPage extends StatelessWidget {
   }
 }
 
-class TagOrderPage extends StatefulWidget {
+class CategoryOrderPage extends StatefulWidget {
   final List<String> initial;
-  const TagOrderPage({super.key, required this.initial});
+  const CategoryOrderPage({super.key, required this.initial});
 
   @override
-  State<TagOrderPage> createState() => _TagOrderPageState();
+  State<CategoryOrderPage> createState() => _CategoryOrderPageState();
 }
 
-class _TagOrderPageState extends State<TagOrderPage> {
+class _CategoryOrderPageState extends State<CategoryOrderPage> {
   late List<String> _list;
 
   @override
@@ -61,7 +67,7 @@ class _TagOrderPageState extends State<TagOrderPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('タグ並び替え')),
+      appBar: AppBar(title: const Text('カテゴリ並び替え')),
       body: ReorderableListView(
         onReorder: (oldIndex, newIndex) {
           setState(() {
