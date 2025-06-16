@@ -22,6 +22,7 @@ class _EditCategoryPageState extends State<EditCategoryPage> {
     _name = widget.category.name;
   }
 
+  /// 保存ボタンの処理
   Future<void> _save() async {
     try {
       final snapshot = await FirebaseFirestore.instance

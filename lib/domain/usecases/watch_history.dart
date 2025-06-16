@@ -1,6 +1,8 @@
 import '../entities/history_entry.dart';
 import '../repositories/inventory_repository.dart';
 
+/// 履歴を監視するユースケース
+
 class WatchHistory {
   final InventoryRepository repository;
   WatchHistory(this.repository);

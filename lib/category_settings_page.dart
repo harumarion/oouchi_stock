@@ -52,6 +52,7 @@ class _CategorySettingsPageState extends State<CategorySettingsPage> {
     super.dispose();
   }
 
+  /// 削除ボタンの処理
   Future<void> _deleteCategory(Category category) async {
     try {
       final snapshot = await FirebaseFirestore.instance

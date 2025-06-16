@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'category_settings_page.dart';
 import 'domain/entities/category.dart';
 
+/// 設定画面。カテゴリ設定ページへの遷移を提供する
 class SettingsPage extends StatelessWidget {
   final List<Category> categories;
   final ValueChanged<List<Category>> onChanged;

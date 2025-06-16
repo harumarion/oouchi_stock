@@ -36,7 +36,7 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
   final AddInventory _usecase =
       AddInventory(InventoryRepositoryImpl());
 
-  // 入力内容を Firestore に保存する
+  /// 保存ボタンの処理。入力内容を Firestore に保存する
   Future<void> _saveItem() async {
     final item = Inventory(
       id: '',

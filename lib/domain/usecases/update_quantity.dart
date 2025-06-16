@@ -1,5 +1,7 @@
 import '../repositories/inventory_repository.dart';
 
+/// 数量を変更するユースケース
+
 class UpdateQuantity {
   final InventoryRepository repository;
   UpdateQuantity(this.repository);

@@ -436,7 +436,7 @@ class InventoryCard extends StatelessWidget {
                 Row(
                   children: [
                     IconButton(
-                      icon: const Text('🛒', style: TextStyle(fontSize: 20)),
+                      icon: const Text('📦', style: TextStyle(fontSize: 20)),
                       onPressed: () => onStock(context),
                     ),
                     IconButton(
@@ -444,7 +444,7 @@ class InventoryCard extends StatelessWidget {
                       onPressed: () => onUsed(context),
                     ),
                     IconButton(
-                      icon: const Text('📦', style: TextStyle(fontSize: 20)),
+                      icon: const Text('🛒', style: TextStyle(fontSize: 20)),
                       onPressed: () => onBought(context),
                     ),
                   ],

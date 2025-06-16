@@ -1,5 +1,7 @@
 import '../repositories/inventory_repository.dart';
 
+/// 棚卸しを行うユースケース
+
 class Stocktake {
   final InventoryRepository repository;
   Stocktake(this.repository);

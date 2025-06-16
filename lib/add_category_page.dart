@@ -15,7 +15,7 @@ class _AddCategoryPageState extends State<AddCategoryPage> {
   final _formKey = GlobalKey<FormState>();
   String _name = '';
 
-  /// カテゴリを保存する処理。失敗時は SnackBar で通知する。
+  /// 保存ボタンの処理。入力されたカテゴリ名を保存する
   Future<void> _save() async {
     try {
       final id = Random().nextInt(0xffffffff);
