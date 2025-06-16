@@ -150,4 +150,9 @@ class InventoryRepositoryImpl implements InventoryRepository {
       'timestamp': Timestamp.now(),
     });
   }
+
+  @override
+  Future<void> deleteInventory(String id) async {
+    await _firestore.collection('inventory').doc(id).delete();
+  }
 }
