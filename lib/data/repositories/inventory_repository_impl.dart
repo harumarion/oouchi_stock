@@ -94,6 +94,28 @@ class InventoryRepositoryImpl implements InventoryRepository {
   }
 
   @override
+  Stream<Inventory?> watchInventory(String inventoryId) {
+    return _firestore
+        .collection('inventory')
+        .doc(inventoryId)
+        .snapshots()
+        .map((doc) {
+      final data = doc.data();
+      if (data == null) return null;
+      return Inventory(
+        id: doc.id,
+        itemName: data['itemName'] ?? '',
+        category: data['category'] ?? '',
+        itemType: data['itemType'] ?? '',
+        quantity: (data['quantity'] ?? 0).toDouble(),
+        unit: data['unit'] ?? '',
+        note: data['note'] ?? '',
+        createdAt: (data['createdAt'] as Timestamp).toDate(),
+      );
+    });
+  }
+
+  @override
   Stream<List<HistoryEntry>> watchHistory(String inventoryId) {
     return _firestore
         .collection('inventory')

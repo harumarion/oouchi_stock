@@ -155,11 +155,6 @@ class InventoryList extends StatelessWidget {
                   MaterialPageRoute(
                     builder: (_) => InventoryDetailPage(
                       inventoryId: inv.id,
-                      itemName: inv.itemName,
-                      unit: inv.unit,
-                      category: inv.category,
-                      itemType: inv.itemType,
-                      quantity: inv.quantity,
                     ),
                   ),
                 );
