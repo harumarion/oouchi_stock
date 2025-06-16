@@ -5,6 +5,7 @@ import 'domain/entities/inventory.dart';
 import 'domain/entities/category.dart';
 import 'domain/usecases/update_inventory.dart';
 import 'data/repositories/inventory_repository_impl.dart';
+import 'default_item_types.dart';
 
 /// 商品を編集する画面のウィジェット
 class EditInventoryPage extends StatefulWidget {
@@ -42,11 +43,8 @@ class _EditInventoryPageState extends State<EditInventoryPage> {
   List<Category> _categories = [];
   late final StreamSubscription<QuerySnapshot<Map<String, dynamic>>>
       _catSub;
-  final Map<String, List<String>> _typesMap = {
-    '冷蔵庫': ['その他'],
-    '冷凍庫': ['その他'],
-    '日用品': ['柔軟剤', '洗濯洗剤', '食洗器洗剤', '衣料用漂白剤']
-  };
+  Map<String, List<String>> _typesMap = {};
+  late final StreamSubscription<QuerySnapshot<Map<String, dynamic>>> _typeSub;
   final List<String> _units = ['個', '本', '袋', 'ロール'];
 
   @override
@@ -78,6 +76,29 @@ class _EditInventoryPageState extends State<EditInventoryPage> {
         }
       });
     });
+    _typeSub = FirebaseFirestore.instance
+        .collection('itemTypes')
+        .orderBy('createdAt')
+        .snapshots()
+        .listen((snapshot) async {
+      if (snapshot.docs.isEmpty) {
+        await insertDefaultItemTypes();
+        return;
+      }
+      setState(() {
+        _typesMap = {};
+        for (final doc in snapshot.docs) {
+          final data = doc.data();
+          final cat = data['category'] ?? '';
+          final name = data['name'] ?? '';
+          _typesMap.putIfAbsent(cat, () => []).add(name);
+        }
+        final types = _typesMap[_category.name];
+        if (types != null && types.isNotEmpty) {
+          _itemType = types.contains(_itemType) ? _itemType : types.first;
+        }
+      });
+    });
   }
 
   /// 保存ボタンの処理
@@ -98,6 +119,7 @@ class _EditInventoryPageState extends State<EditInventoryPage> {
   @override
   void dispose() {
     _catSub.cancel();
+    _typeSub.cancel();
     super.dispose();
   }
 

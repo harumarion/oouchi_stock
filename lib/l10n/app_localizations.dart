@@ -34,6 +34,10 @@ class AppLocalizations {
   String get categoryEditTitle => _get('categoryEditTitle');
   String get categoryName => _get('categoryName');
   String get categorySettingsTitle => _get('categorySettingsTitle');
+  String get itemTypeAddTitle => _get('itemTypeAddTitle');
+  String get itemTypeEditTitle => _get('itemTypeEditTitle');
+  String get itemTypeSettingsTitle => _get('itemTypeSettingsTitle');
+  String get itemTypeSettings => _get('itemTypeSettings');
   String get save => _get('save');
   String get saved => _get('saved');
   String get saveFailed => _get('saveFailed');
