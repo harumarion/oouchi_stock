@@ -117,15 +117,8 @@ class _HomePageState extends State<HomePage> {
         body: TabBarView(
           children: [for (final c in _categories) InventoryList(category: c)],
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (c) => const AddInventoryPage()),
-            );
-          },
-          child: const Icon(Icons.add),
-        ),
+        // 在庫一覧から商品を追加する機能はメニューからのみ利用するため
+        // ここで表示していた追加用の FAB は削除する。
       ),
     );
   }
