@@ -55,11 +55,11 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  List<String> _categories = [];
+  List<Category> _categories = [];
   bool _categoriesLoaded = false;
   StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _catSub;
 
-  void _updateCategories(List<String> list) {
+  void _updateCategories(List<Category> list) {
     setState(() {
       _categories = List.from(list);
       _categoriesLoaded = true;
@@ -223,6 +223,7 @@ class InventoryList extends StatelessWidget {
                   MaterialPageRoute(
                     builder: (_) => InventoryDetailPage(
                       inventoryId: inv.id,
+                      categories: categories,
                     ),
                   ),
                 );
