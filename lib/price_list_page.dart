@@ -39,6 +39,12 @@ class _PriceListPageState extends State<PriceListPage> {
         }).toList();
         _loaded = true;
       });
+    }, onError: (_) {
+      if (mounted) {
+        setState(() {
+          _loaded = true;
+        });
+      }
     });
   }
 
@@ -89,6 +95,10 @@ class PriceCategoryList extends StatelessWidget {
     return StreamBuilder<List<PriceInfo>>(
       stream: watch(category),
       builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          final err = snapshot.error?.toString() ?? '不明なエラー';
+          return Center(child: Text('読み込みエラー: $err'));
+        }
         if (!snapshot.hasData) {
           return const Center(child: CircularProgressIndicator());
         }
