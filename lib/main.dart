@@ -123,7 +123,9 @@ class _HomePageState extends State<HomePage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (c) => AddInventoryPage(categories: _categories)),
+                      builder: (_) =>
+                          AddInventoryPage(categories: _categories),
+                    ),
                   );
                 } else if (value == 'stock') {
                   Navigator.push(
