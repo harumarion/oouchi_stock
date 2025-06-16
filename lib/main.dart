@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'add_inventory_page.dart';
-import 'add_category_page.dart';
 import 'settings_page.dart';
 import 'inventory_detail_page.dart';
 import 'stocktake_page.dart';
@@ -107,15 +106,6 @@ class _HomePageState extends State<HomePage> {
                     context,
                     MaterialPageRoute(builder: (c) => const StocktakePage()),
                   );
-                } else if (value == 'category') {
-                  Navigator.push<String>(
-                    context,
-                    MaterialPageRoute(builder: (c) => const AddCategoryPage()),
-                  ).then((newCategory) {
-                    if (newCategory != null) {
-                      _updateCategories([..._categories, newCategory]);
-                    }
-                  });
                 } else if (value == 'settings') {
                   Navigator.push(
                     context,
@@ -134,9 +124,6 @@ class _HomePageState extends State<HomePage> {
                 const PopupMenuItem(
                     value: 'stock',
                     child: Text('棚卸入力', style: TextStyle(fontSize: 18))),
-                const PopupMenuItem(
-                    value: 'category',
-                    child: Text('カテゴリ追加', style: TextStyle(fontSize: 18))),
                 const PopupMenuItem(
                     value: 'settings',
                     child: Text('設定', style: TextStyle(fontSize: 18))),
