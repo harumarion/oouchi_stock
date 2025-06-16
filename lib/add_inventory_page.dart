@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'domain/entities/inventory.dart';
 import 'domain/usecases/add_inventory.dart';
 import 'data/repositories/inventory_repository_impl.dart';
@@ -48,7 +50,9 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
   }
 
   // カテゴリの選択肢
-  final List<String> _categories = ['冷蔵庫', '冷凍庫', '日用品'];
+  List<String> _categories = [];
+  late final StreamSubscription<QuerySnapshot<Map<String, dynamic>>>
+      _catSub;
   // カテゴリごとの品種一覧
   final Map<String, List<String>> _typesMap = {
     '冷蔵庫': ['その他'],
@@ -75,7 +79,37 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
   final List<String> _units = ['個', '本', '袋', 'ロール'];
 
   @override
+  void initState() {
+    super.initState();
+    _catSub = FirebaseFirestore.instance
+        .collection('categories')
+        .orderBy('createdAt')
+        .snapshots()
+        .listen((snapshot) {
+      setState(() {
+        _categories =
+            snapshot.docs.map((d) => d.data()['name'] as String).toList();
+        if (_categories.isNotEmpty && !_categories.contains(_category)) {
+          _category = _categories.first;
+        }
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _catSub.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (_categories.isEmpty) {
+      return const Scaffold(
+        appBar: AppBar(title: Text('商品を追加')),
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
     // 画面のレイアウトを構築
     return Scaffold(
       appBar: AppBar(title: const Text('商品を追加')),

@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'domain/entities/inventory.dart';
 import 'domain/usecases/update_inventory.dart';
 import 'data/repositories/inventory_repository_impl.dart';
@@ -35,7 +37,9 @@ class _EditInventoryPageState extends State<EditInventoryPage> {
   final UpdateInventory _usecase =
       UpdateInventory(InventoryRepositoryImpl());
 
-  final List<String> _categories = ['冷蔵庫', '冷凍庫', '日用品'];
+  List<String> _categories = [];
+  late final StreamSubscription<QuerySnapshot<Map<String, dynamic>>>
+      _catSub;
   final Map<String, List<String>> _typesMap = {
     '冷蔵庫': ['その他'],
     '冷凍庫': ['その他'],
@@ -51,6 +55,19 @@ class _EditInventoryPageState extends State<EditInventoryPage> {
     _itemType = widget.itemType;
     _unit = widget.unit;
     _note = widget.note;
+    _catSub = FirebaseFirestore.instance
+        .collection('categories')
+        .orderBy('createdAt')
+        .snapshots()
+        .listen((snapshot) {
+      setState(() {
+        _categories =
+            snapshot.docs.map((d) => d.data()['name'] as String).toList();
+        if (_categories.isNotEmpty && !_categories.contains(_category)) {
+          _category = _categories.first;
+        }
+      });
+    });
   }
 
   Future<void> _saveItem() async {
@@ -68,7 +85,19 @@ class _EditInventoryPageState extends State<EditInventoryPage> {
   }
 
   @override
+  void dispose() {
+    _catSub.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (_categories.isEmpty) {
+      return const Scaffold(
+        appBar: AppBar(title: Text('商品編集')),
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
     return Scaffold(
       appBar: AppBar(title: const Text('商品編集')),
       body: Padding(
