@@ -6,6 +6,7 @@ import 'domain/entities/category.dart';
 import 'domain/usecases/update_inventory.dart';
 import 'data/repositories/inventory_repository_impl.dart';
 
+/// 商品を編集する画面のウィジェット
 class EditInventoryPage extends StatefulWidget {
   final String id;
   final String itemName;
@@ -79,6 +80,7 @@ class _EditInventoryPageState extends State<EditInventoryPage> {
     });
   }
 
+  /// 保存ボタンの処理
   Future<void> _saveItem() async {
     final item = Inventory(
       id: widget.id,
