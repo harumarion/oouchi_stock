@@ -196,6 +196,11 @@ class InventoryList extends StatelessWidget {
                       shrinkWrap: true,
                       children: [
                         ListTile(
+                          leading: const Icon(Icons.edit),
+                          title: const Text('編集'),
+                          onTap: () => Navigator.pop(context, 'edit'),
+                        ),
+                        ListTile(
                           leading: const Icon(Icons.delete),
                           title: const Text('削除'),
                           onTap: () => Navigator.pop(context, 'delete'),
@@ -214,6 +219,20 @@ class InventoryList extends StatelessWidget {
                       );
                     }
                   }
+                } else if (result == 'edit') {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => EditInventoryPage(
+                        id: inv.id,
+                        itemName: inv.itemName,
+                        category: inv.category,
+                        itemType: inv.itemType,
+                        unit: inv.unit,
+                        note: inv.note,
+                      ),
+                    ),
+                  );
                 }
               },
               child: InventoryCard(inventory: inv),
