@@ -19,4 +19,7 @@ abstract class InventoryRepository {
 
   Future<void> stocktake(
       String id, double before, double after, double diff);
+
+  /// 在庫を削除する
+  Future<void> deleteInventory(String id);
 }

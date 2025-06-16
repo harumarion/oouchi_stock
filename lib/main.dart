@@ -12,6 +12,7 @@ import 'domain/entities/history_entry.dart';
 import 'domain/services/purchase_prediction_strategy.dart';
 import 'domain/usecases/watch_inventories.dart';
 import 'domain/usecases/update_quantity.dart';
+import 'domain/usecases/delete_inventory.dart';
 
 // アプリのエントリーポイント。Firebase を初期化してから起動する。
 
@@ -136,9 +137,10 @@ class InventoryList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final usecase = WatchInventories(InventoryRepositoryImpl());
+    final watchUsecase = WatchInventories(InventoryRepositoryImpl());
+    final deleteUsecase = DeleteInventory(InventoryRepositoryImpl());
     return StreamBuilder<List<Inventory>>(
-      stream: usecase(category),
+      stream: watchUsecase(category),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           final err = snapshot.error?.toString() ?? '不明なエラー';
@@ -161,6 +163,34 @@ class InventoryList extends StatelessWidget {
                     ),
                   ),
                 );
+              },
+              onLongPress: () async {
+                final result = await showModalBottomSheet<String>(
+                  context: context,
+                  builder: (context) => SafeArea(
+                    child: ListView(
+                      shrinkWrap: true,
+                      children: [
+                        ListTile(
+                          leading: const Icon(Icons.delete),
+                          title: const Text('削除'),
+                          onTap: () => Navigator.pop(context, 'delete'),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+                if (result == 'delete') {
+                  try {
+                    await deleteUsecase(inv.id);
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('削除に失敗しました')),
+                      );
+                    }
+                  }
+                }
               },
               child: InventoryCard(inventory: inv),
             );
