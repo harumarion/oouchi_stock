@@ -82,9 +82,9 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     if (_categories.isEmpty) {
-      return const Scaffold(
-        appBar: AppBar(title: Text('おうちストック')),
-        body: Center(child: CircularProgressIndicator()),
+      return Scaffold(
+        appBar: AppBar(title: const Text('おうちストック')),
+        body: const Center(child: CircularProgressIndicator()),
       );
     }
     return DefaultTabController(
