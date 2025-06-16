@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'add_category_page.dart';
+import 'edit_category_page.dart';
 
-/// カテゴリを一覧表示し並び替えや追加・削除を行う画面。
+/// カテゴリを一覧表示し追加・削除・編集を行う画面。
 class CategorySettingsPage extends StatefulWidget {
   final List<String> initial;
   final ValueChanged<List<String>> onChanged;
@@ -17,12 +19,30 @@ class CategorySettingsPage extends StatefulWidget {
 }
 
 class _CategorySettingsPageState extends State<CategorySettingsPage> {
-  late List<String> _list;
+  late final StreamSubscription<QuerySnapshot<Map<String, dynamic>>> _sub;
+  List<String> _list = [];
 
   @override
   void initState() {
     super.initState();
     _list = List.from(widget.initial);
+    _sub = FirebaseFirestore.instance
+        .collection('categories')
+        .orderBy('createdAt')
+        .snapshots()
+        .listen((snapshot) {
+      setState(() {
+        _list =
+            snapshot.docs.map((d) => d.data()['name'] as String).toList();
+      });
+      widget.onChanged(List.from(_list));
+    });
+  }
+
+  @override
+  void dispose() {
+    _sub.cancel();
+    super.dispose();
   }
 
   Future<void> _deleteCategory(String name) async {
@@ -35,8 +55,6 @@ class _CategorySettingsPageState extends State<CategorySettingsPage> {
         await doc.reference.delete();
       }
       if (mounted) {
-        setState(() => _list.remove(name));
-        widget.onChanged(List.from(_list));
         ScaffoldMessenger.of(context)
             .showSnackBar(const SnackBar(content: Text('削除しました')));
       }
@@ -52,44 +70,43 @@ class _CategorySettingsPageState extends State<CategorySettingsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('カテゴリ設定')),
-      body: ReorderableListView(
-        onReorder: (oldIndex, newIndex) {
-          setState(() {
-            if (newIndex > oldIndex) newIndex -= 1;
-            final item = _list.removeAt(oldIndex);
-            _list.insert(newIndex, item);
-          });
-          widget.onChanged(List.from(_list));
-        },
+      body: ListView(
         children: [
           for (final c in _list)
             ListTile(
-              key: ValueKey(c),
               title: Text(c),
-              trailing: IconButton(
-                icon: const Icon(Icons.delete),
-                onPressed: () async {
-                  final ok = await showDialog<bool>(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      content: Text('「$c」を削除しますか？'),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context, false),
-                          child: const Text('キャンセル'),
+              onLongPress: () async {
+                final result = await showModalBottomSheet<String>(
+                  context: context,
+                  builder: (_) => SafeArea(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        ListTile(
+                          leading: const Icon(Icons.edit),
+                          title: const Text('編集'),
+                          onTap: () => Navigator.pop(context, 'edit'),
                         ),
-                        TextButton(
-                          onPressed: () => Navigator.pop(context, true),
-                          child: const Text('削除'),
+                        ListTile(
+                          leading: const Icon(Icons.delete),
+                          title: const Text('削除'),
+                          onTap: () => Navigator.pop(context, 'delete'),
                         ),
                       ],
                     ),
+                  ),
+                );
+                if (result == 'delete') {
+                  _deleteCategory(c);
+                } else if (result == 'edit') {
+                  await Navigator.push<String>(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => EditCategoryPage(initialName: c),
+                    ),
                   );
-                  if (ok == true) {
-                    _deleteCategory(c);
-                  }
-                },
-              ),
+                }
+              },
             ),
         ],
       ),
@@ -100,8 +117,7 @@ class _CategorySettingsPageState extends State<CategorySettingsPage> {
             MaterialPageRoute(builder: (_) => const AddCategoryPage()),
           );
           if (newCategory != null) {
-            setState(() => _list.add(newCategory));
-            widget.onChanged(List.from(_list));
+            // 追加後は Stream が自動で更新される
           }
         },
         child: const Icon(Icons.add),
