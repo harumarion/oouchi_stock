@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'add_inventory_page.dart';
+import 'add_category_page.dart';
 import 'settings_page.dart';
 import 'inventory_detail_page.dart';
 import 'stocktake_page.dart';
@@ -54,11 +55,15 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  List<Category> _categories = [];
+  List<String> _categories = [];
+  bool _categoriesLoaded = false;
   StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _catSub;
 
-  void _updateCategories(List<Category> list) {
-    setState(() => _categories = List.from(list));
+  void _updateCategories(List<String> list) {
+    setState(() {
+      _categories = List.from(list);
+      _categoriesLoaded = true;
+    });
   }
 
   @override
@@ -66,6 +71,7 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     if (widget.categories != null) {
       _categories = List.from(widget.categories!);
+      _categoriesLoaded = true;
     } else {
       _catSub = FirebaseFirestore.instance
           .collection('categories')
@@ -94,10 +100,26 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    if (_categories.isEmpty) {
+    if (!_categoriesLoaded) {
       return Scaffold(
         appBar: AppBar(title: const Text('おうちストック')),
         body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+    if (_categories.isEmpty) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('おうちストック')),
+        body: Center(
+          child: ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const AddCategoryPage()),
+              );
+            },
+            child: const Text('カテゴリを追加'),
+          ),
+        ),
       );
     }
     return DefaultTabController(
