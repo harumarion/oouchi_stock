@@ -9,24 +9,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:oouchi_stock/main.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_core_platform_interface/firebase_core_platform_interface.dart';
-import 'package:oouchi_stock/firebase_options.dart';
 import 'firebase_test_utils.dart';
 import 'package:oouchi_stock/add_category_page.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  setupFirebaseCoreMocks();
-
-  setUpAll(() async {
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
-  });
 
   testWidgets('アプリが起動する', (WidgetTester tester) async {
-    await tester.pumpWidget(const MyApp());
+    await tester.pumpWidget(
+        const MyApp(initialCategories: ['日用品']));
     expect(find.text('おうちストック'), findsOneWidget);
   });
 

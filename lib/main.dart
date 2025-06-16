@@ -28,7 +28,8 @@ void main() async {
 
 // アプリのルートウィジェット
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final List<String>? initialCategories;
+  const MyApp({super.key, this.initialCategories});
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -37,14 +38,15 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
         useMaterial3: true,
       ),
-      home: const HomePage(),
+      home: HomePage(categories: initialCategories),
     );
   }
 }
 
 // 在庫一覧を表示する画面
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final List<String>? categories;
+  const HomePage({super.key, this.categories});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -52,7 +54,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   List<String> _categories = [];
-  late final StreamSubscription<QuerySnapshot<Map<String, dynamic>>> _catSub;
+  StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _catSub;
 
   void _updateCategories(List<String> list) {
     setState(() => _categories = List.from(list));
@@ -61,21 +63,25 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    _catSub = FirebaseFirestore.instance
-        .collection('categories')
-        .orderBy('createdAt')
-        .snapshots()
-        .listen((snapshot) {
-      setState(() {
-        _categories =
-            snapshot.docs.map((d) => d.data()['name'] as String).toList();
+    if (widget.categories != null) {
+      _categories = List.from(widget.categories!);
+    } else {
+      _catSub = FirebaseFirestore.instance
+          .collection('categories')
+          .orderBy('createdAt')
+          .snapshots()
+          .listen((snapshot) {
+        setState(() {
+          _categories =
+              snapshot.docs.map((d) => d.data()['name'] as String).toList();
+        });
       });
-    });
+    }
   }
 
   @override
   void dispose() {
-    _catSub.cancel();
+    _catSub?.cancel();
     super.dispose();
   }
 
