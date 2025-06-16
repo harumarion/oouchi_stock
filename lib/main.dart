@@ -93,7 +93,16 @@ class _HomePageState extends State<HomePage> {
         appBar: AppBar(
           title: const Text('おうちストック'),
           centerTitle: true,
-          bottom: TabBar(tabs: [for (final c in _categories) Tab(text: c)]),
+          bottom: TabBar(
+            isScrollable: true,
+            tabs: [
+              for (final c in _categories)
+                SizedBox(
+                  width: MediaQuery.of(context).size.width / 3,
+                  child: Tab(text: c),
+                )
+            ],
+          ),
           actions: [
             PopupMenuButton<String>(
               onSelected: (value) {
