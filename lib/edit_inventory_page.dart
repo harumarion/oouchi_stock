@@ -2,13 +2,14 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'domain/entities/inventory.dart';
+import 'domain/entities/category.dart';
 import 'domain/usecases/update_inventory.dart';
 import 'data/repositories/inventory_repository_impl.dart';
 
 class EditInventoryPage extends StatefulWidget {
   final String id;
   final String itemName;
-  final String category;
+  final Category category;
   final String itemType;
   final String unit;
   final String note;
@@ -29,7 +30,7 @@ class EditInventoryPage extends StatefulWidget {
 class _EditInventoryPageState extends State<EditInventoryPage> {
   final _formKey = GlobalKey<FormState>();
   late String _itemName;
-  late String _category;
+  late Category _category;
   late String _itemType;
   late String _unit;
   late String _note;
@@ -37,7 +38,7 @@ class _EditInventoryPageState extends State<EditInventoryPage> {
   final UpdateInventory _usecase =
       UpdateInventory(InventoryRepositoryImpl());
 
-  List<String> _categories = [];
+  List<Category> _categories = [];
   late final StreamSubscription<QuerySnapshot<Map<String, dynamic>>>
       _catSub;
   final Map<String, List<String>> _typesMap = {
@@ -61,9 +62,17 @@ class _EditInventoryPageState extends State<EditInventoryPage> {
         .snapshots()
         .listen((snapshot) {
       setState(() {
-        _categories =
-            snapshot.docs.map((d) => d.data()['name'] as String).toList();
-        if (_categories.isNotEmpty && !_categories.contains(_category)) {
+        _categories = snapshot.docs.map((d) {
+          final data = d.data();
+          return Category(
+            id: data['id'] ?? 0,
+            name: data['name'] ?? '',
+            createdAt: (data['createdAt'] as Timestamp).toDate(),
+          );
+        }).toList();
+        if (_categories.isNotEmpty &&
+            _categories.every(
+                (c) => c.id != _category.id && c.name != _category.name)) {
           _category = _categories.first;
         }
       });
@@ -74,7 +83,7 @@ class _EditInventoryPageState extends State<EditInventoryPage> {
     final item = Inventory(
       id: widget.id,
       itemName: _itemName,
-      category: _category,
+      category: _category.name,
       itemType: _itemType,
       quantity: 0,
       unit: _unit,
@@ -114,17 +123,17 @@ class _EditInventoryPageState extends State<EditInventoryPage> {
                     v == null || v.isEmpty ? '商品名は必須です' : null,
               ),
               const SizedBox(height: 12),
-              DropdownButtonFormField<String>(
+              DropdownButtonFormField<Category>(
                 decoration: const InputDecoration(labelText: 'カテゴリ'),
                 value: _category,
                 items: _categories
-                    .map((c) => DropdownMenuItem(value: c, child: Text(c)))
+                    .map((c) => DropdownMenuItem(value: c, child: Text(c.name)))
                     .toList(),
                 onChanged: (v) {
                   if (v == null) return;
                   setState(() {
                     _category = v;
-                    final types = _typesMap[v];
+                    final types = _typesMap[v.name];
                     if (types != null && types.isNotEmpty) {
                       _itemType = types.first;
                     }
@@ -135,7 +144,7 @@ class _EditInventoryPageState extends State<EditInventoryPage> {
               DropdownButtonFormField<String>(
                 decoration: const InputDecoration(labelText: '品種'),
                 value: _itemType,
-                items: (_typesMap[_category] ?? ['その他'])
+                items: (_typesMap[_category.name] ?? ['その他'])
                     .map((t) => DropdownMenuItem(value: t, child: Text(t)))
                     .toList(),
                 onChanged: (v) => setState(() => _itemType = v ?? ''),

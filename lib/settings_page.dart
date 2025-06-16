@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'category_settings_page.dart';
+import 'domain/entities/category.dart';
 
 class SettingsPage extends StatelessWidget {
-  final List<String> categories;
-  final ValueChanged<List<String>> onChanged;
+  final List<Category> categories;
+  final ValueChanged<List<Category>> onChanged;
   const SettingsPage({
     super.key,
     required this.categories,

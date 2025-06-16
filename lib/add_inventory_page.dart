@@ -3,13 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'domain/entities/inventory.dart';
+import 'domain/entities/category.dart';
 import 'domain/usecases/add_inventory.dart';
 import 'data/repositories/inventory_repository_impl.dart';
 
 // 商品を追加する画面のウィジェット
 
 class AddInventoryPage extends StatefulWidget {
-  final List<String>? categories;
+  final List<Category>? categories;
   const AddInventoryPage({super.key, this.categories});
 
   @override
@@ -22,7 +23,7 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
   // 商品名
   String _itemName = '';
   // カテゴリ
-  String _category = '日用品';
+  Category? _category;
   // 品種
   String _itemType = '柔軟剤';
   // 数量（小数点第一位まで扱う）
@@ -40,7 +41,7 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
     final item = Inventory(
       id: '',
       itemName: _itemName,
-      category: _category,
+      category: _category?.name ?? '',
       itemType: _itemType,
       quantity: _quantity,
       unit: _unit,
@@ -51,7 +52,7 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
   }
 
   // カテゴリの選択肢
-  List<String> _categories = [];
+  List<Category> _categories = [];
   StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _catSub;
   // カテゴリごとの品種一覧
   final Map<String, List<String>> _typesMap = {
@@ -83,6 +84,9 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
     super.initState();
     if (widget.categories != null) {
       _categories = List.from(widget.categories!);
+      if (_categories.isNotEmpty) {
+        _category = _categories.first;
+      }
     } else {
       _catSub = FirebaseFirestore.instance
           .collection('categories')
@@ -90,9 +94,17 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
           .snapshots()
           .listen((snapshot) {
         setState(() {
-          _categories =
-              snapshot.docs.map((d) => d.data()['name'] as String).toList();
-          if (_categories.isNotEmpty && !_categories.contains(_category)) {
+          _categories = snapshot.docs.map((d) {
+            final data = d.data();
+            return Category(
+              id: data['id'] ?? 0,
+              name: data['name'] ?? '',
+              createdAt: (data['createdAt'] as Timestamp).toDate(),
+            );
+          }).toList();
+          if (_categories.isNotEmpty &&
+              _categories.every(
+                  (c) => c.id != _category?.id && c.name != _category?.name)) {
             _category = _categories.first;
           }
         });
@@ -132,17 +144,17 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
               ),
               const SizedBox(height: 12),
               // カテゴリ選択
-              DropdownButtonFormField<String>(
+              DropdownButtonFormField<Category>(
                 decoration: const InputDecoration(labelText: 'カテゴリ'),
                 value: _category,
                 items: _categories
-                    .map((c) => DropdownMenuItem(value: c, child: Text(c)))
+                    .map((c) => DropdownMenuItem(value: c, child: Text(c.name)))
                     .toList(),
                 onChanged: (value) {
                   if (value == null) return;
                   setState(() {
                     _category = value;
-                    final types = _typesMap[value];
+                    final types = _typesMap[value.name];
                     if (types != null && types.isNotEmpty) {
                       _itemType = types.first;
                     }
@@ -154,9 +166,9 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
               DropdownButtonFormField<String>(
                 decoration: const InputDecoration(labelText: '品種'),
                 value: _itemType,
-                items: (_typesMap[_category] ?? ['その他'])
+                items: (_typesMap[_category?.name] ?? ['その他'])
                     .map((t) => DropdownMenuItem(value: t, child: Text(t)))
-                    .toList(),
+                .toList(),
                 onChanged: (value) => setState(() => _itemType = value ?? ''),
               ),
               const SizedBox(height: 12),
