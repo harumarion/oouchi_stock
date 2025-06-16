@@ -32,8 +32,8 @@ class InventoryDetailPage extends StatelessWidget {
       stream: inventoryStream(),
       builder: (context, invSnapshot) {
         if (!invSnapshot.hasData) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
+          return Scaffold(
+            body: const Center(child: CircularProgressIndicator()),
           );
         }
         final inv = invSnapshot.data!;

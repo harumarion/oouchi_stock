@@ -93,9 +93,9 @@ class _EditInventoryPageState extends State<EditInventoryPage> {
   @override
   Widget build(BuildContext context) {
     if (_categories.isEmpty) {
-      return const Scaffold(
-        appBar: AppBar(title: Text('商品編集')),
-        body: Center(child: CircularProgressIndicator()),
+      return Scaffold(
+        appBar: AppBar(title: const Text('商品編集')),
+        body: const Center(child: CircularProgressIndicator()),
       );
     }
     return Scaffold(

@@ -105,9 +105,9 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
   @override
   Widget build(BuildContext context) {
     if (_categories.isEmpty) {
-      return const Scaffold(
-        appBar: AppBar(title: Text('商品を追加')),
-        body: Center(child: CircularProgressIndicator()),
+      return Scaffold(
+        appBar: AppBar(title: const Text('商品を追加')),
+        body: const Center(child: CircularProgressIndicator()),
       );
     }
     // 画面のレイアウトを構築
