@@ -9,7 +9,8 @@ import 'data/repositories/inventory_repository_impl.dart';
 // 商品を追加する画面のウィジェット
 
 class AddInventoryPage extends StatefulWidget {
-  const AddInventoryPage({super.key});
+  final List<String>? categories;
+  const AddInventoryPage({super.key, this.categories});
 
   @override
   State<AddInventoryPage> createState() => _AddInventoryPageState();
@@ -51,8 +52,7 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
 
   // カテゴリの選択肢
   List<String> _categories = [];
-  late final StreamSubscription<QuerySnapshot<Map<String, dynamic>>>
-      _catSub;
+  StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _catSub;
   // カテゴリごとの品種一覧
   final Map<String, List<String>> _typesMap = {
     '冷蔵庫': ['その他'],
@@ -81,24 +81,28 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
   @override
   void initState() {
     super.initState();
-    _catSub = FirebaseFirestore.instance
-        .collection('categories')
-        .orderBy('createdAt')
-        .snapshots()
-        .listen((snapshot) {
-      setState(() {
-        _categories =
-            snapshot.docs.map((d) => d.data()['name'] as String).toList();
-        if (_categories.isNotEmpty && !_categories.contains(_category)) {
-          _category = _categories.first;
-        }
+    if (widget.categories != null) {
+      _categories = List.from(widget.categories!);
+    } else {
+      _catSub = FirebaseFirestore.instance
+          .collection('categories')
+          .orderBy('createdAt')
+          .snapshots()
+          .listen((snapshot) {
+        setState(() {
+          _categories =
+              snapshot.docs.map((d) => d.data()['name'] as String).toList();
+          if (_categories.isNotEmpty && !_categories.contains(_category)) {
+            _category = _categories.first;
+          }
+        });
       });
-    });
+    }
   }
 
   @override
   void dispose() {
-    _catSub.cancel();
+    _catSub?.cancel();
     super.dispose();
   }
 
