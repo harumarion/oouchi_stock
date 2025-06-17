@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'i18n/app_localizations.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'add_inventory_page.dart';
 import 'add_category_page.dart';
 import 'settings_page.dart';
@@ -31,8 +31,7 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   ); // Firebase の初期設定
   final locale = WidgetsBinding.instance.platformDispatcher.locale;
-  final loc = AppLocalizations(locale);
-  await loc.load();
+  final loc = await AppLocalizations.delegate.load(locale);
   final notification = NotificationService();
   await notification.init();
   await notification.scheduleWeekly(
@@ -50,7 +49,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
+      onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
       localizationsDelegates: const [
         AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
@@ -125,13 +124,13 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     if (!_categoriesLoaded) {
       return Scaffold(
-        appBar: AppBar(title: Text(AppLocalizations.of(context).appTitle)),
+        appBar: AppBar(title: Text(AppLocalizations.of(context)!.appTitle)),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
     if (_categories.isEmpty) {
       return Scaffold(
-        appBar: AppBar(title: Text(AppLocalizations.of(context).appTitle)),
+        appBar: AppBar(title: Text(AppLocalizations.of(context)!.appTitle)),
         body: Center(
           child: ElevatedButton(
             onPressed: () {
@@ -148,8 +147,8 @@ class _HomePageState extends State<HomePage> {
     return DefaultTabController(
       length: _categories.length,
       child: Scaffold(
-        appBar: AppBar(
-          title: Text(AppLocalizations.of(context).appTitle),
+          appBar: AppBar(
+            title: Text(AppLocalizations.of(context)!.appTitle),
           centerTitle: true,
           bottom: TabBar(
             isScrollable: true,
