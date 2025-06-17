@@ -11,6 +11,7 @@ import 'price_list_page.dart';
 import 'buy_list_page.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'firebase_options.dart'; // ← 自動生成された設定ファイル
 import 'data/repositories/inventory_repository_impl.dart';
 import 'domain/entities/inventory.dart';
@@ -43,9 +44,35 @@ void main() async {
 }
 
 // アプリのルートウィジェット
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   final List<Category>? initialCategories;
   const MyApp({super.key, this.initialCategories});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  Locale? _locale;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLocale();
+  }
+
+  Future<void> _loadLocale() async {
+    final prefs = await SharedPreferences.getInstance();
+    final code = prefs.getString('locale');
+    if (code != null) setState(() => _locale = Locale(code));
+  }
+
+  Future<void> _updateLocale(Locale locale) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('locale', locale.languageCode);
+    setState(() => _locale = locale);
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -57,11 +84,12 @@ class MyApp extends StatelessWidget {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: AppLocalizations.supportedLocales,
+      locale: _locale,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
         useMaterial3: true,
       ),
-      home: HomePage(categories: initialCategories),
+      home: HomePage(categories: widget.initialCategories),
     );
   }
 }
@@ -193,6 +221,8 @@ class _HomePageState extends State<HomePage> {
                         builder: (c) => SettingsPage(
                               categories: _categories,
                               onChanged: _updateCategories,
+                              onLocaleChanged: (l) =>
+                                  context.findAncestorStateOfType<_MyAppState>()?._updateLocale(l),
                             )),
                   );
                 }
