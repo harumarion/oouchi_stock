@@ -17,6 +17,9 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+        // flutter_local_notifications などの依存ライブラリが利用する
+        // Java 8+ API を有効化するため desugaring をオンにする
+        isCoreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions {
@@ -50,4 +53,6 @@ flutter {
 dependencies {
     // Ensure ProviderInstaller is available at runtime
     implementation("com.google.android.gms:play-services-base:18.4.0")
+    // Desugaring library required when using Java 8+ APIs on lower API levels
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
 }
