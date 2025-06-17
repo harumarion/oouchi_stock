@@ -112,34 +112,49 @@ class PriceCategoryList extends StatelessWidget {
         }
         final items = map.values.toList()
           ..sort((a, b) => a.itemType.compareTo(b.itemType));
-        return ListView(
-          children: [
-            for (final p in items)
-              ListTile(
-                title: Text(p.itemName),
-                subtitle: Text(
-                    AppLocalizations.of(context).priceSummary(
-                      count: p.count.toString(),
-                      unitStr: p.unit,
-                      volume: p.volume.toString(),
-                      total: p.totalVolume.toString(),
-                      price: p.price.toString(),
-                      shop: p.shop,
-                      unitPrice: p.unitPrice.toStringAsFixed(2),
-                    )),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => PriceHistoryPage(
-                        category: category,
-                        itemType: p.itemType,
-                      ),
-                    ),
-                  );
-                },
-              )
-          ],
+        return SingleChildScrollView(
+          scrollDirection: Axis.vertical,
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: DataTable(
+              columns: [
+                DataColumn(label: Text(AppLocalizations.of(context).itemName)),
+                DataColumn(label: Text(AppLocalizations.of(context).count)),
+                DataColumn(label: Text(AppLocalizations.of(context).unit)),
+                DataColumn(label: Text(AppLocalizations.of(context).volume)),
+                DataColumn(label: Text(AppLocalizations.of(context).totalVolumeLabel)),
+                DataColumn(label: Text(AppLocalizations.of(context).price)),
+                DataColumn(label: Text(AppLocalizations.of(context).shop)),
+                DataColumn(label: Text(AppLocalizations.of(context).unitPriceLabel)),
+              ],
+              rows: [
+                for (final p in items)
+                  DataRow(
+                    cells: [
+                      DataCell(Text(p.itemName)),
+                      DataCell(Text(p.count.toString())),
+                      DataCell(Text(p.unit)),
+                      DataCell(Text(p.volume.toString())),
+                      DataCell(Text(p.totalVolume.toString())),
+                      DataCell(Text(p.price.toString())),
+                      DataCell(Text(p.shop)),
+                      DataCell(Text(p.unitPrice.toStringAsFixed(2))),
+                    ],
+                    onSelectChanged: (_) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => PriceHistoryPage(
+                            category: category,
+                            itemType: p.itemType,
+                          ),
+                        ),
+                      );
+                    },
+                  )
+              ],
+            ),
+          ),
         );
       },
     );
