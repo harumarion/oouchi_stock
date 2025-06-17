@@ -36,13 +36,13 @@ class PriceHistoryPage extends StatelessWidget {
                   subtitle: Text(
                       '${_formatDate(p.checkedAt)} '
                       '${AppLocalizations.of(context)!.priceSummary(
-                          count: p.count.toString(),
-                          unitStr: p.unit,
-                          volume: p.volume.toString(),
-                          total: p.totalVolume.toString(),
-                          price: p.price.toString(),
-                          shop: p.shop,
-                          unitPrice: p.unitPrice.toStringAsFixed(2))}'),
+                          p.count.toString(),
+                          p.unit,
+                          p.volume.toString(),
+                          p.totalVolume.toString(),
+                          p.price.toString(),
+                          p.shop,
+                          p.unitPrice.toStringAsFixed(2))}'),
                   onLongPress: () async {
                     final res = await showModalBottomSheet<String>(
                       context: context,
