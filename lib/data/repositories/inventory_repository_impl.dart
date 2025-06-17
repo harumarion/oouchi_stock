@@ -155,4 +155,26 @@ class InventoryRepositoryImpl implements InventoryRepository {
   Future<void> deleteInventory(String id) async {
     await _firestore.collection('inventory').doc(id).delete();
   }
+
+  @override
+  Stream<List<Inventory>> watchNeedsBuy(double threshold) {
+    return _firestore
+        .collection('inventory')
+        .where('quantity', isLessThanOrEqualTo: threshold)
+        .orderBy('quantity')
+        .snapshots()
+        .map((snapshot) => snapshot.docs.map((doc) {
+              final data = doc.data();
+              return Inventory(
+                id: doc.id,
+                itemName: data['itemName'] ?? '',
+                category: data['category'] ?? '',
+                itemType: data['itemType'] ?? '',
+                quantity: (data['quantity'] ?? 0).toDouble(),
+                unit: data['unit'] ?? '',
+                note: data['note'] ?? '',
+                createdAt: (data['createdAt'] as Timestamp).toDate(),
+              );
+            }).toList());
+  }
 }

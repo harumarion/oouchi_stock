@@ -34,6 +34,10 @@ class AppLocalizations {
   String get categoryEditTitle => _get('categoryEditTitle');
   String get categoryName => _get('categoryName');
   String get categorySettingsTitle => _get('categorySettingsTitle');
+  String get itemTypeAddTitle => _get('itemTypeAddTitle');
+  String get itemTypeEditTitle => _get('itemTypeEditTitle');
+  String get itemTypeSettingsTitle => _get('itemTypeSettingsTitle');
+  String get itemTypeSettings => _get('itemTypeSettings');
   String get save => _get('save');
   String get saved => _get('saved');
   String get saveFailed => _get('saveFailed');
@@ -69,6 +73,8 @@ class AppLocalizations {
   String get shop => _get('shop');
   String totalVolume(String v) => (_strings['totalVolume'] ?? 'totalVolume {value}').replaceFirst('{value}', v);
   String unitPrice(String v) => (_strings['unitPrice'] ?? 'unitPrice {value}').replaceFirst('{value}', v);
+  String get totalVolumeLabel => _get('totalVolumeLabel');
+  String get unitPriceLabel => _get('unitPriceLabel');
   String checkedDate(String d) => (_strings['checkedDate'] ?? 'checked {date}').replaceFirst('{date}', d);
   String priceSummary({required String count, required String unitStr, required String volume, required String total, required String price, required String shop, required String unitPrice}) {
     var template = _strings['priceSummary'] ?? '';
@@ -82,6 +88,11 @@ class AppLocalizations {
         .replaceFirst('{unitPrice}', unitPrice);
   }
   String get categorySettings => _get('categorySettings');
+  String get buyList => _get('buyList');
+  String get buyListTitle => _get('buyListTitle');
+  String get noBuyItems => _get('noBuyItems');
+  String get buyListNotificationTitle => _get('buyListNotificationTitle');
+  String get buyListNotificationBody => _get('buyListNotificationBody');
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'domain/entities/inventory.dart';
 import 'domain/entities/category.dart';
+import 'default_item_types.dart';
 import 'domain/usecases/add_inventory.dart';
 import 'data/repositories/inventory_repository_impl.dart';
 
@@ -55,27 +56,8 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
   List<Category> _categories = [];
   StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _catSub;
   // カテゴリごとの品種一覧
-  final Map<String, List<String>> _typesMap = {
-    '冷蔵庫': ['その他'],
-    '冷凍庫': ['その他'],
-    '日用品': [
-      '柔軟剤',
-      '洗濯洗剤',
-      '食洗器洗剤',
-      '衣料用漂白剤',
-      'シャンプー',
-      'コンディショナー',
-      'オシャレ洗剤',
-      'トイレ洗剤',
-      '台所洗剤',
-      '台所洗剤スプレー',
-      '台所漂白',
-      '台所漂白スプレー',
-      'トイレ洗剤ふき',
-      '台所清掃スプレー',
-      'ハンドソープ',
-    ],
-  };
+  Map<String, List<String>> _typesMap = {};
+  StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _typeSub;
   // 単位の選択肢
   final List<String> _units = ['個', '本', '袋', 'ロール'];
 
@@ -110,11 +92,37 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
         });
       });
     }
+    _typeSub = FirebaseFirestore.instance
+        .collection('itemTypes')
+        .orderBy('createdAt')
+        .snapshots()
+        .listen((snapshot) async {
+      if (snapshot.docs.isEmpty) {
+        await insertDefaultItemTypes();
+        return;
+      }
+      setState(() {
+        _typesMap = {};
+        for (final doc in snapshot.docs) {
+          final data = doc.data();
+          final cat = data['category'] ?? '';
+          final name = data['name'] ?? '';
+          _typesMap.putIfAbsent(cat, () => []).add(name);
+        }
+        if (_category != null) {
+          final types = _typesMap[_category!.name];
+          if (types != null && types.isNotEmpty) {
+            _itemType = types.first;
+          }
+        }
+      });
+    });
   }
 
   @override
   void dispose() {
     _catSub?.cancel();
+    _typeSub?.cancel();
     super.dispose();
   }
 

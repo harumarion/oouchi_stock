@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'category_settings_page.dart';
+import 'item_type_settings_page.dart';
 import 'domain/entities/category.dart';
 
 /// 設定画面。カテゴリ設定ページへの遷移を提供する
@@ -28,6 +29,17 @@ class SettingsPage extends StatelessWidget {
                     initial: categories,
                     onChanged: onChanged,
                   ),
+                ),
+              );
+            },
+          ),
+          ListTile(
+            title: Text(AppLocalizations.of(context).itemTypeSettings),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ItemTypeSettingsPage(categories: categories),
                 ),
               );
             },

@@ -8,6 +8,10 @@
   "categoryEditTitle": "カテゴリ編集",
   "categoryName": "カテゴリ名",
   "categorySettingsTitle": "カテゴリ設定",
+  "itemTypeAddTitle": "品種追加",
+  "itemTypeEditTitle": "品種編集",
+  "itemTypeSettingsTitle": "品種設定",
+  "itemTypeSettings": "品種設定",
   "save": "保存",
   "saved": "保存しました",
   "saveFailed": "保存に失敗しました",
@@ -45,5 +49,12 @@
   "unitPrice": "単価: {value}",
   "checkedDate": "確認日: {date}",
   "categorySettings": "カテゴリ設定",
-  "priceSummary": "数:{count} {unit} 容量:{volume} 合計:{total} 値段:{price} 購入元:{shop} 単価:{unitPrice}"
+  "priceSummary": "数:{count} {unit} 容量:{volume} 合計:{total} 値段:{price} 購入元:{shop} 単価:{unitPrice}",
+  "totalVolumeLabel": "合計",
+  "unitPriceLabel": "単価",
+  "buyList": "買い物リスト",
+  "buyListTitle": "買うべきリスト",
+  "noBuyItems": "買うものはありません",
+  "buyListNotificationTitle": "買い物リマインダー",
+  "buyListNotificationBody": "買うべき在庫を確認してください"
 }
