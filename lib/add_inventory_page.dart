@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:oouchi_stock/l10n/app_localizations.dart';
+import 'package:oouchi_stock/i18n/app_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'domain/entities/inventory.dart';

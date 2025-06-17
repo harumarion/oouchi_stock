@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:oouchi_stock/l10n/app_localizations.dart';
+import 'package:oouchi_stock/i18n/app_localizations.dart';
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'add_category_page.dart';
