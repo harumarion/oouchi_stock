@@ -73,6 +73,8 @@ class AppLocalizations {
   String get shop => _get('shop');
   String totalVolume(String v) => (_strings['totalVolume'] ?? 'totalVolume {value}').replaceFirst('{value}', v);
   String unitPrice(String v) => (_strings['unitPrice'] ?? 'unitPrice {value}').replaceFirst('{value}', v);
+  String get totalVolumeLabel => _get('totalVolumeLabel');
+  String get unitPriceLabel => _get('unitPriceLabel');
   String checkedDate(String d) => (_strings['checkedDate'] ?? 'checked {date}').replaceFirst('{date}', d);
   String priceSummary({required String count, required String unitStr, required String volume, required String total, required String price, required String shop, required String unitPrice}) {
     var template = _strings['priceSummary'] ?? '';
