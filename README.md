@@ -2,7 +2,7 @@
 
 A new Flutter project.
 
-ユーザー向けの操作説明は[取扱説明書](docs/取扱説明書.md)をご覧ください。
+ユーザー向けの操作説明は[取扱説明書](docs/user_manual_ja.md)をご覧ください。
 
 ## Getting Started
 
