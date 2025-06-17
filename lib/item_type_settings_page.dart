@@ -7,7 +7,7 @@ import 'domain/entities/category.dart';
 import 'add_item_type_page.dart';
 import 'edit_item_type_page.dart';
 import 'default_item_types.dart';
-import 'i18n/app_localizations.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ItemTypeSettingsPage extends StatefulWidget {
   final List<Category> categories;
