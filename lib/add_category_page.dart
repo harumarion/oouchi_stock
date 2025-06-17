@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:oouchi_stock/l10n/app_localizations.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// カテゴリを追加する画面。
