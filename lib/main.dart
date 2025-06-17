@@ -8,6 +8,7 @@ import 'settings_page.dart';
 import 'inventory_detail_page.dart';
 import 'edit_inventory_page.dart';
 import 'price_list_page.dart';
+import 'buy_list_page.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'firebase_options.dart'; // ← 自動生成された設定ファイル
@@ -20,6 +21,7 @@ import 'domain/usecases/watch_inventories.dart';
 import 'domain/usecases/update_quantity.dart';
 import 'domain/usecases/delete_inventory.dart';
 import 'domain/usecases/stocktake.dart';
+import 'notification_service.dart';
 
 // アプリのエントリーポイント。Firebase を初期化してから起動する。
 
@@ -28,6 +30,16 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   ); // Firebase の初期設定
+  final locale = WidgetsBinding.instance.platformDispatcher.locale;
+  final loc = AppLocalizations(locale);
+  await loc.load();
+  final notification = NotificationService();
+  await notification.init();
+  await notification.scheduleWeekly(
+    id: 0,
+    title: loc.buyListNotificationTitle,
+    body: loc.buyListNotificationBody,
+  );
   runApp(const MyApp()); // アプリのスタート
 }
 
@@ -165,6 +177,11 @@ class _HomePageState extends State<HomePage> {
                     context,
                     MaterialPageRoute(builder: (_) => const PriceListPage()),
                   );
+                } else if (value == 'buylist') {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const BuyListPage()),
+                  );
                 } else if (value == 'settings') {
                   Navigator.push(
                     context,
@@ -184,6 +201,10 @@ class _HomePageState extends State<HomePage> {
                 PopupMenuItem(
                     value: 'price',
                     child: Text(AppLocalizations.of(context).priceManagement,
+                        style: const TextStyle(fontSize: 18))),
+                PopupMenuItem(
+                    value: 'buylist',
+                    child: Text(AppLocalizations.of(context).buyList,
                         style: const TextStyle(fontSize: 18))),
                 PopupMenuItem(
                     value: 'settings',
