@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:oouchi_stock/l10n/app_localizations.dart';
+import 'package:oouchi_stock/i18n/app_localizations.dart';
 
 import 'data/repositories/inventory_repository_impl.dart';
 import 'data/repositories/price_repository_impl.dart';

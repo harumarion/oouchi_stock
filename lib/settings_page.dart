@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:oouchi_stock/l10n/app_localizations.dart';
+import 'package:oouchi_stock/i18n/app_localizations.dart';
 import 'category_settings_page.dart';
 import 'item_type_settings_page.dart';
 import 'domain/entities/category.dart';
