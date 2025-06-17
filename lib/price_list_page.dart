@@ -120,6 +120,7 @@ class PriceCategoryList extends StatelessWidget {
               columns: [
                 DataColumn(label: Text(AppLocalizations.of(context).itemName)),
                 DataColumn(label: Text(AppLocalizations.of(context).count)),
+                DataColumn(label: Text(AppLocalizations.of(context).unit)),
                 DataColumn(label: Text(AppLocalizations.of(context).volume)),
                 DataColumn(label: Text(AppLocalizations.of(context).totalVolumeLabel)),
                 DataColumn(label: Text(AppLocalizations.of(context).price)),
@@ -132,6 +133,7 @@ class PriceCategoryList extends StatelessWidget {
                     cells: [
                       DataCell(Text(p.itemName)),
                       DataCell(Text(p.count.toString())),
+                      DataCell(Text(p.unit)),
                       DataCell(Text(p.volume.toString())),
                       DataCell(Text(p.totalVolume.toString())),
                       DataCell(Text(p.price.toString())),
