@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'domain/entities/item_type.dart';
 import 'domain/entities/category.dart';
-import 'l10n/app_localizations.dart';
+import 'i18n/app_localizations.dart';
 
 class EditItemTypePage extends StatefulWidget {
   final ItemType itemType;
