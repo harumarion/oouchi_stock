@@ -53,7 +53,7 @@ class _PriceListPageState extends State<PriceListPage> {
   Widget build(BuildContext context) {
     if (!_loaded) {
       return Scaffold(
-        appBar: AppBar(title: Text(AppLocalizations.of(context).priceManagementTitle)),
+        appBar: AppBar(title: Text(AppLocalizations.of(context)!.priceManagementTitle)),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
@@ -61,7 +61,7 @@ class _PriceListPageState extends State<PriceListPage> {
       length: _categories.length,
       child: Scaffold(
         appBar: AppBar(
-          title: Text(AppLocalizations.of(context).priceManagementTitle),
+          title: Text(AppLocalizations.of(context)!.priceManagementTitle),
           bottom: TabBar(
             isScrollable: true,
             tabs: [for (final c in _categories) Tab(text: c.name)],
@@ -98,7 +98,7 @@ class PriceCategoryList extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           final err = snapshot.error?.toString() ?? 'unknown';
-          return Center(child: Text(AppLocalizations.of(context).loadError(err)));
+          return Center(child: Text(AppLocalizations.of(context)!.loadError(err)));
         }
         if (!snapshot.hasData) {
           return const Center(child: CircularProgressIndicator());
@@ -119,14 +119,14 @@ class PriceCategoryList extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             child: DataTable(
               columns: [
-                DataColumn(label: Text(AppLocalizations.of(context).itemName)),
-                DataColumn(label: Text(AppLocalizations.of(context).count)),
-                DataColumn(label: Text(AppLocalizations.of(context).unit)),
-                DataColumn(label: Text(AppLocalizations.of(context).volume)),
-                DataColumn(label: Text(AppLocalizations.of(context).totalVolumeLabel)),
-                DataColumn(label: Text(AppLocalizations.of(context).price)),
-                DataColumn(label: Text(AppLocalizations.of(context).shop)),
-                DataColumn(label: Text(AppLocalizations.of(context).unitPriceLabel)),
+                DataColumn(label: Text(AppLocalizations.of(context)!.itemName)),
+                DataColumn(label: Text(AppLocalizations.of(context)!.count)),
+                DataColumn(label: Text(AppLocalizations.of(context)!.unit)),
+                DataColumn(label: Text(AppLocalizations.of(context)!.volume)),
+                DataColumn(label: Text(AppLocalizations.of(context)!.totalVolumeLabel)),
+                DataColumn(label: Text(AppLocalizations.of(context)!.price)),
+                DataColumn(label: Text(AppLocalizations.of(context)!.shop)),
+                DataColumn(label: Text(AppLocalizations.of(context)!.unitPriceLabel)),
               ],
               rows: [
                 for (final p in items)

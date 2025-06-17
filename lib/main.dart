@@ -139,7 +139,7 @@ class _HomePageState extends State<HomePage> {
                 MaterialPageRoute(builder: (_) => const AddCategoryPage()),
               );
             },
-            child: Text(AppLocalizations.of(context).addCategory),
+            child: Text(AppLocalizations.of(context)!.addCategory),
           ),
         ),
       );
@@ -195,19 +195,19 @@ class _HomePageState extends State<HomePage> {
               itemBuilder: (context) => [
                 PopupMenuItem(
                     value: 'add',
-                    child: Text(AppLocalizations.of(context).addItem,
+                    child: Text(AppLocalizations.of(context)!.addItem,
                         style: const TextStyle(fontSize: 18))),
                 PopupMenuItem(
                     value: 'price',
-                    child: Text(AppLocalizations.of(context).priceManagement,
+                    child: Text(AppLocalizations.of(context)!.priceManagement,
                         style: const TextStyle(fontSize: 18))),
                 PopupMenuItem(
                     value: 'buylist',
-                    child: Text(AppLocalizations.of(context).buyList,
+                    child: Text(AppLocalizations.of(context)!.buyList,
                         style: const TextStyle(fontSize: 18))),
                 PopupMenuItem(
                     value: 'settings',
-                    child: Text(AppLocalizations.of(context).settings,
+                    child: Text(AppLocalizations.of(context)!.settings,
                         style: const TextStyle(fontSize: 18))),
               ],
             )
@@ -242,7 +242,7 @@ class InventoryList extends StatelessWidget {
         if (snapshot.hasError) {
           final err = snapshot.error?.toString() ?? 'unknown';
           return Center(
-            child: Text(AppLocalizations.of(context).loadError(err)),
+            child: Text(AppLocalizations.of(context)!.loadError(err)),
           );
         }
         if (!snapshot.hasData) {
@@ -273,12 +273,12 @@ class InventoryList extends StatelessWidget {
                       children: [
                         ListTile(
                           leading: const Icon(Icons.edit),
-                          title: Text(AppLocalizations.of(context).categoryEditTitle),
+                          title: Text(AppLocalizations.of(context)!.categoryEditTitle),
                           onTap: () => Navigator.pop(context, 'edit'),
                         ),
                         ListTile(
                           leading: const Icon(Icons.delete),
-                          title: Text(AppLocalizations.of(context).delete),
+                          title: Text(AppLocalizations.of(context)!.delete),
                           onTap: () => Navigator.pop(context, 'delete'),
                         ),
                       ],
@@ -292,7 +292,7 @@ class InventoryList extends StatelessWidget {
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                            content: Text(AppLocalizations.of(context).deleteFailed)),
+                            content: Text(AppLocalizations.of(context)!.deleteFailed)),
                       );
                     }
                   }
@@ -386,14 +386,14 @@ class InventoryCard extends StatelessWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text(AppLocalizations.of(context).cancel),
+              child: Text(AppLocalizations.of(context)!.cancel),
             ),
             TextButton(
               onPressed: () {
                 final v = double.tryParse(controller.text);
                 Navigator.pop(context, v);
               },
-              child: Text(AppLocalizations.of(context).ok),
+              child: Text(AppLocalizations.of(context)!.ok),
             ),
           ],
         );
@@ -410,7 +410,7 @@ class InventoryCard extends StatelessWidget {
       await _update(inventory.id, amount, type);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context).updateFailed)),
+        SnackBar(content: Text(AppLocalizations.of(context)!.updateFailed)),
       );
     }
   }
@@ -419,7 +419,7 @@ class InventoryCard extends StatelessWidget {
   Future<void> onUsed(BuildContext context) async {
     final v = await _inputAmountDialog(
       context,
-      AppLocalizations.of(context).usedAmount,
+      AppLocalizations.of(context)!.usedAmount,
     );
     if (v == null) return;
     await _updateQuantity(context, -v, 'used');
@@ -429,7 +429,7 @@ class InventoryCard extends StatelessWidget {
   Future<void> onBought(BuildContext context) async {
     final v = await _inputAmountDialog(
       context,
-      AppLocalizations.of(context).boughtAmount,
+      AppLocalizations.of(context)!.boughtAmount,
     );
     if (v == null) return;
     await _updateQuantity(context, v, 'bought');
@@ -439,7 +439,7 @@ class InventoryCard extends StatelessWidget {
   Future<void> onStock(BuildContext context) async {
     final v = await _inputAmountDialog(
       context,
-      AppLocalizations.of(context).stockAmount,
+      AppLocalizations.of(context)!.stockAmount,
       initialValue: inventory.quantity,
     );
     if (v == null) return;
@@ -447,7 +447,7 @@ class InventoryCard extends StatelessWidget {
       await _stocktake(inventory.id, inventory.quantity, v, v - inventory.quantity);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context).updateFailed)),
+        SnackBar(content: Text(AppLocalizations.of(context)!.updateFailed)),
       );
     }
   }
@@ -460,7 +460,7 @@ class InventoryCard extends StatelessWidget {
         final predicted = snapshot.data;
         final dateText = predicted != null
             ? _formatDate(predicted)
-            : AppLocalizations.of(context).calculating;
+            : AppLocalizations.of(context)!.calculating;
         return Card(
           margin: const EdgeInsets.only(bottom: 12),
           child: Padding(
@@ -479,7 +479,7 @@ class InventoryCard extends StatelessWidget {
                       style: const TextStyle(color: Colors.black87),
                     ),
                     Text(
-                      '${AppLocalizations.of(context).predictLabel} $dateText',
+                      '${AppLocalizations.of(context)!.predictLabel} $dateText',
                       style: const TextStyle(color: Colors.black87),
                     ),
                   ],

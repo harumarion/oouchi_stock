@@ -14,21 +14,21 @@ class BuyListPage extends StatelessWidget {
     final watch = WatchLowInventory(InventoryRepositoryImpl());
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context).buyListTitle),
+        title: Text(AppLocalizations.of(context)!.buyListTitle),
       ),
       body: StreamBuilder<List<Inventory>>(
         stream: watch(threshold),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             final err = snapshot.error?.toString() ?? 'unknown';
-            return Center(child: Text(AppLocalizations.of(context).loadError(err)));
+            return Center(child: Text(AppLocalizations.of(context)!.loadError(err)));
           }
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
           }
           final list = snapshot.data!;
           if (list.isEmpty) {
-            return Center(child: Text(AppLocalizations.of(context).noBuyItems));
+            return Center(child: Text(AppLocalizations.of(context)!.noBuyItems));
           }
           return ListView(
             padding: const EdgeInsets.all(16),

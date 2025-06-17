@@ -45,13 +45,13 @@ class _EditItemTypePageState extends State<EditItemTypePage> {
       }
       if (!mounted) return;
       await ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).saved)))
+          .showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.saved)))
           .closed;
       if (mounted) Navigator.pop(context);
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).saveFailed)));
+            .showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.saveFailed)));
       }
     }
   }
@@ -59,7 +59,7 @@ class _EditItemTypePageState extends State<EditItemTypePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(AppLocalizations.of(context).itemTypeEditTitle)),
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.itemTypeEditTitle)),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -68,13 +68,13 @@ class _EditItemTypePageState extends State<EditItemTypePage> {
             children: [
               TextFormField(
                 initialValue: _name,
-                decoration: InputDecoration(labelText: AppLocalizations.of(context).itemType),
+                decoration: InputDecoration(labelText: AppLocalizations.of(context)!.itemType),
                 onChanged: (v) => _name = v,
-                validator: (v) => v == null || v.isEmpty ? AppLocalizations.of(context).required : null,
+                validator: (v) => v == null || v.isEmpty ? AppLocalizations.of(context)!.required : null,
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<Category>(
-                decoration: InputDecoration(labelText: AppLocalizations.of(context).category),
+                decoration: InputDecoration(labelText: AppLocalizations.of(context)!.category),
                 value: _category,
                 items: widget.categories
                     .map((c) => DropdownMenuItem(value: c, child: Text(c.name)))
@@ -88,7 +88,7 @@ class _EditItemTypePageState extends State<EditItemTypePage> {
                     _save();
                   }
                 },
-                child: Text(AppLocalizations.of(context).save),
+                child: Text(AppLocalizations.of(context)!.save),
               ),
             ],
           ),
