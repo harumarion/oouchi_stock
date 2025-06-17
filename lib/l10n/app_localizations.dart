@@ -88,6 +88,11 @@ class AppLocalizations {
         .replaceFirst('{unitPrice}', unitPrice);
   }
   String get categorySettings => _get('categorySettings');
+  String get buyList => _get('buyList');
+  String get buyListTitle => _get('buyListTitle');
+  String get noBuyItems => _get('noBuyItems');
+  String get buyListNotificationTitle => _get('buyListNotificationTitle');
+  String get buyListNotificationBody => _get('buyListNotificationBody');
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

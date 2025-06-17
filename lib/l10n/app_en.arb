@@ -51,5 +51,10 @@
   "categorySettings": "Category Settings",
   "priceSummary": "Count:{count} {unit} Volume:{volume} Total:{total} Price:{price} Shop:{shop} Unit price:{unitPrice}",
   "totalVolumeLabel": "Total",
-  "unitPriceLabel": "Unit price"
+  "unitPriceLabel": "Unit price",
+  "buyList": "Buy List",
+  "buyListTitle": "Items to Buy",
+  "noBuyItems": "No items to buy",
+  "buyListNotificationTitle": "Shopping Reminder",
+  "buyListNotificationBody": "Check items to buy"
 }

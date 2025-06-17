@@ -22,4 +22,7 @@ abstract class InventoryRepository {
 
   /// 在庫を削除する
   Future<void> deleteInventory(String id);
+
+  /// 残量が一定以下の在庫を監視する
+  Stream<List<Inventory>> watchNeedsBuy(double threshold);
 }

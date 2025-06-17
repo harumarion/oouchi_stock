@@ -51,5 +51,10 @@
   "categorySettings": "カテゴリ設定",
   "priceSummary": "数:{count} {unit} 容量:{volume} 合計:{total} 値段:{price} 購入元:{shop} 単価:{unitPrice}",
   "totalVolumeLabel": "合計",
-  "unitPriceLabel": "単価"
+  "unitPriceLabel": "単価",
+  "buyList": "買い物リスト",
+  "buyListTitle": "買うべきリスト",
+  "noBuyItems": "買うものはありません",
+  "buyListNotificationTitle": "買い物リマインダー",
+  "buyListNotificationBody": "買うべき在庫を確認してください"
 }
