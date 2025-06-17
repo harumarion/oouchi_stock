@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'domain/entities/category.dart';
-import 'l10n/app_localizations.dart';
+import 'i18n/app_localizations.dart';
 
 class AddItemTypePage extends StatefulWidget {
   final List<Category> categories;
