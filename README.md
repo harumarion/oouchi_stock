@@ -2,6 +2,8 @@
 
 A new Flutter project.
 
+ユーザー向けの操作説明は[取扱説明書](docs/user_manual_ja.md)をご覧ください。
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.
