@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'data/repositories/inventory_repository_impl.dart';
 import 'domain/entities/inventory.dart';
 import 'domain/usecases/watch_low_inventory.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:oouchi_stock/l10n/app_localizations.dart';
 
 class BuyListPage extends StatelessWidget {
   final double threshold;

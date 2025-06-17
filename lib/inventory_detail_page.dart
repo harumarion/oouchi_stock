@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:oouchi_stock/l10n/app_localizations.dart';
 import 'data/repositories/inventory_repository_impl.dart';
 import 'domain/entities/history_entry.dart';
 import 'domain/entities/inventory.dart';
