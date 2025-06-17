@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'category_settings_page.dart';
+import 'item_type_settings_page.dart';
 import 'domain/entities/category.dart';
 
+/// 設定画面。カテゴリ設定ページへの遷移を提供する
 class SettingsPage extends StatelessWidget {
   final List<Category> categories;
   final ValueChanged<List<Category>> onChanged;
@@ -14,11 +16,11 @@ class SettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('設定')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context).settings)),
       body: ListView(
         children: [
           ListTile(
-            title: const Text('カテゴリ設定'),
+            title: Text(AppLocalizations.of(context).categorySettings),
             onTap: () {
               Navigator.push(
                 context,
@@ -27,6 +29,17 @@ class SettingsPage extends StatelessWidget {
                     initial: categories,
                     onChanged: onChanged,
                   ),
+                ),
+              );
+            },
+          ),
+          ListTile(
+            title: Text(AppLocalizations.of(context).itemTypeSettings),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ItemTypeSettingsPage(categories: categories),
                 ),
               );
             },

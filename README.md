@@ -2,6 +2,8 @@
 
 A new Flutter project.
 
+ユーザー向けの操作説明は[取扱説明書](docs/取扱説明書.md)をご覧ください。
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.
@@ -55,6 +57,10 @@ W/Firestore: Listen for Query(target=Query(inventory where category==<value> ord
 `firestore.indexes.json` にはこのクエリに対応したインデックス定義を含めているため、
 `firebase deploy --only firestore:indexes` を実行してデプロイすることで解消でき
 ます。
+
+同様に、値段管理機能で利用する `priceInfos` コレクションをカテゴリや商品種別で
+絞り込むクエリでもインデックスが必要です。これらの定義も `firestore.indexes.json`
+に含めているので、設定後は同じコマンドでデプロイしてください。
 
 ## 実行手順
 

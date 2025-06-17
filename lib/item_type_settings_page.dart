@@ -1,48 +1,49 @@
-import 'package:flutter/material.dart';
 import 'dart:async';
+import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'add_category_page.dart';
-import 'edit_category_page.dart';
-import 'domain/entities/category.dart';
 
-/// カテゴリを一覧表示し追加・削除・編集を行う画面。
-class CategorySettingsPage extends StatefulWidget {
-  final List<Category> initial;
-  final ValueChanged<List<Category>> onChanged;
-  const CategorySettingsPage({
-    super.key,
-    required this.initial,
-    required this.onChanged,
-  });
+import 'domain/entities/item_type.dart';
+import 'domain/entities/category.dart';
+import 'add_item_type_page.dart';
+import 'edit_item_type_page.dart';
+import 'default_item_types.dart';
+import 'l10n/app_localizations.dart';
+
+class ItemTypeSettingsPage extends StatefulWidget {
+  final List<Category> categories;
+  const ItemTypeSettingsPage({super.key, required this.categories});
 
   @override
-  State<CategorySettingsPage> createState() => _CategorySettingsPageState();
+  State<ItemTypeSettingsPage> createState() => _ItemTypeSettingsPageState();
 }
 
-class _CategorySettingsPageState extends State<CategorySettingsPage> {
+class _ItemTypeSettingsPageState extends State<ItemTypeSettingsPage> {
   late final StreamSubscription<QuerySnapshot<Map<String, dynamic>>> _sub;
-  List<Category> _list = [];
+  List<ItemType> _list = [];
 
   @override
   void initState() {
     super.initState();
-    _list = List.from(widget.initial);
     _sub = FirebaseFirestore.instance
-        .collection('categories')
+        .collection('itemTypes')
         .orderBy('createdAt')
         .snapshots()
-        .listen((snapshot) {
+        .listen((snapshot) async {
+      if (snapshot.docs.isEmpty) {
+        await insertDefaultItemTypes();
+        return;
+      }
       setState(() {
         _list = snapshot.docs.map((d) {
           final data = d.data();
-          return Category(
+          return ItemType(
             id: data['id'] ?? 0,
+            category: data['category'] ?? '',
             name: data['name'] ?? '',
             createdAt: (data['createdAt'] as Timestamp).toDate(),
           );
         }).toList();
       });
-      widget.onChanged(List.from(_list));
     });
   }
 
@@ -52,12 +53,11 @@ class _CategorySettingsPageState extends State<CategorySettingsPage> {
     super.dispose();
   }
 
-  /// 削除ボタンの処理
-  Future<void> _deleteCategory(Category category) async {
+  Future<void> _delete(ItemType item) async {
     try {
       final snapshot = await FirebaseFirestore.instance
-          .collection('categories')
-          .where('id', isEqualTo: category.id)
+          .collection('itemTypes')
+          .where('id', isEqualTo: item.id)
           .get();
       for (final doc in snapshot.docs) {
         await doc.reference.delete();
@@ -77,12 +77,12 @@ class _CategorySettingsPageState extends State<CategorySettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(AppLocalizations.of(context).categorySettingsTitle)),
+      appBar: AppBar(title: Text(AppLocalizations.of(context).itemTypeSettingsTitle)),
       body: ListView(
         children: [
-          for (final c in _list)
+          for (final t in _list)
             ListTile(
-              title: Text(c.name),
+              title: Text('${t.category} / ${t.name}'),
               onLongPress: () async {
                 final result = await showModalBottomSheet<String>(
                   context: context,
@@ -92,7 +92,7 @@ class _CategorySettingsPageState extends State<CategorySettingsPage> {
                       children: [
                         ListTile(
                           leading: const Icon(Icons.edit),
-                          title: Text(AppLocalizations.of(context).categoryEditTitle),
+                          title: Text(AppLocalizations.of(context).itemTypeEditTitle),
                           onTap: () => Navigator.pop(context, 'edit'),
                         ),
                         ListTile(
@@ -105,12 +105,15 @@ class _CategorySettingsPageState extends State<CategorySettingsPage> {
                   ),
                 );
                 if (result == 'delete') {
-                  _deleteCategory(c);
+                  _delete(t);
                 } else if (result == 'edit') {
-                  await Navigator.push<String>(
+                  await Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => EditCategoryPage(category: c),
+                      builder: (_) => EditItemTypePage(
+                        itemType: t,
+                        categories: widget.categories,
+                      ),
                     ),
                   );
                 }
@@ -122,7 +125,9 @@ class _CategorySettingsPageState extends State<CategorySettingsPage> {
         onPressed: () async {
           await Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => const AddCategoryPage()),
+            MaterialPageRoute(
+              builder: (_) => AddItemTypePage(categories: widget.categories),
+            ),
           );
         },
         child: const Icon(Icons.add),

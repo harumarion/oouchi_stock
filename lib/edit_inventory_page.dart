@@ -5,7 +5,9 @@ import 'domain/entities/inventory.dart';
 import 'domain/entities/category.dart';
 import 'domain/usecases/update_inventory.dart';
 import 'data/repositories/inventory_repository_impl.dart';
+import 'default_item_types.dart';
 
+/// 商品を編集する画面のウィジェット
 class EditInventoryPage extends StatefulWidget {
   final String id;
   final String itemName;
@@ -41,11 +43,8 @@ class _EditInventoryPageState extends State<EditInventoryPage> {
   List<Category> _categories = [];
   late final StreamSubscription<QuerySnapshot<Map<String, dynamic>>>
       _catSub;
-  final Map<String, List<String>> _typesMap = {
-    '冷蔵庫': ['その他'],
-    '冷凍庫': ['その他'],
-    '日用品': ['柔軟剤', '洗濯洗剤', '食洗器洗剤', '衣料用漂白剤']
-  };
+  Map<String, List<String>> _typesMap = {};
+  late final StreamSubscription<QuerySnapshot<Map<String, dynamic>>> _typeSub;
   final List<String> _units = ['個', '本', '袋', 'ロール'];
 
   @override
@@ -77,8 +76,32 @@ class _EditInventoryPageState extends State<EditInventoryPage> {
         }
       });
     });
+    _typeSub = FirebaseFirestore.instance
+        .collection('itemTypes')
+        .orderBy('createdAt')
+        .snapshots()
+        .listen((snapshot) async {
+      if (snapshot.docs.isEmpty) {
+        await insertDefaultItemTypes();
+        return;
+      }
+      setState(() {
+        _typesMap = {};
+        for (final doc in snapshot.docs) {
+          final data = doc.data();
+          final cat = data['category'] ?? '';
+          final name = data['name'] ?? '';
+          _typesMap.putIfAbsent(cat, () => []).add(name);
+        }
+        final types = _typesMap[_category.name];
+        if (types != null && types.isNotEmpty) {
+          _itemType = types.contains(_itemType) ? _itemType : types.first;
+        }
+      });
+    });
   }
 
+  /// 保存ボタンの処理
   Future<void> _saveItem() async {
     final item = Inventory(
       id: widget.id,
@@ -96,6 +119,7 @@ class _EditInventoryPageState extends State<EditInventoryPage> {
   @override
   void dispose() {
     _catSub.cancel();
+    _typeSub.cancel();
     super.dispose();
   }
 
@@ -103,12 +127,12 @@ class _EditInventoryPageState extends State<EditInventoryPage> {
   Widget build(BuildContext context) {
     if (_categories.isEmpty) {
       return Scaffold(
-        appBar: AppBar(title: const Text('商品編集')),
+        appBar: AppBar(title: Text(AppLocalizations.of(context).inventoryEditTitle)),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
     return Scaffold(
-      appBar: AppBar(title: const Text('商品編集')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context).inventoryEditTitle)),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -117,14 +141,14 @@ class _EditInventoryPageState extends State<EditInventoryPage> {
             children: [
               TextFormField(
                 initialValue: _itemName,
-                decoration: const InputDecoration(labelText: '商品名'),
+                decoration: InputDecoration(labelText: AppLocalizations.of(context).itemName),
                 onChanged: (v) => _itemName = v,
                 validator: (v) =>
-                    v == null || v.isEmpty ? '商品名は必須です' : null,
+                    v == null || v.isEmpty ? AppLocalizations.of(context).itemNameRequired : null,
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<Category>(
-                decoration: const InputDecoration(labelText: 'カテゴリ'),
+                decoration: InputDecoration(labelText: AppLocalizations.of(context).category),
                 value: _category,
                 items: _categories
                     .map((c) => DropdownMenuItem(value: c, child: Text(c.name)))
@@ -142,7 +166,7 @@ class _EditInventoryPageState extends State<EditInventoryPage> {
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
-                decoration: const InputDecoration(labelText: '品種'),
+                decoration: InputDecoration(labelText: AppLocalizations.of(context).itemType),
                 value: _itemType,
                 items: (_typesMap[_category.name] ?? ['その他'])
                     .map((t) => DropdownMenuItem(value: t, child: Text(t)))
@@ -151,7 +175,7 @@ class _EditInventoryPageState extends State<EditInventoryPage> {
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
-                decoration: const InputDecoration(labelText: '単位'),
+                decoration: InputDecoration(labelText: AppLocalizations.of(context).unit),
                 value: _unit,
                 items:
                     _units.map((u) => DropdownMenuItem(value: u, child: Text(u))).toList(),
@@ -160,13 +184,13 @@ class _EditInventoryPageState extends State<EditInventoryPage> {
               const SizedBox(height: 12),
               TextFormField(
                 initialValue: _note,
-                decoration: const InputDecoration(labelText: 'メモ'),
+                decoration: InputDecoration(labelText: AppLocalizations.of(context).memo),
                 onChanged: (v) => _note = v,
               ),
               const SizedBox(height: 24),
               ElevatedButton.icon(
                 icon: const Icon(Icons.save),
-                label: const Text('保存'),
+                label: Text(AppLocalizations.of(context).save),
                 onPressed: () async {
                   if (_formKey.currentState!.validate()) {
                     await _saveItem();
