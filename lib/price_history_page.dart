@@ -22,7 +22,7 @@ class PriceHistoryPage extends StatelessWidget {
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             final err = snapshot.error?.toString() ?? 'unknown';
-            return Center(child: Text(AppLocalizations.of(context).loadError(err)));
+            return Center(child: Text(AppLocalizations.of(context)!.loadError(err)));
           }
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
@@ -35,7 +35,7 @@ class PriceHistoryPage extends StatelessWidget {
                   title: Text(p.itemName),
                   subtitle: Text(
                       '${_formatDate(p.checkedAt)} '
-                      '${AppLocalizations.of(context).priceSummary(
+                      '${AppLocalizations.of(context)!.priceSummary(
                           count: p.count.toString(),
                           unitStr: p.unit,
                           volume: p.volume.toString(),
@@ -49,7 +49,7 @@ class PriceHistoryPage extends StatelessWidget {
                       builder: (_) => SafeArea(
                         child: ListTile(
                           leading: const Icon(Icons.delete),
-                          title: Text(AppLocalizations.of(context).delete),
+                          title: Text(AppLocalizations.of(context)!.delete),
                           onTap: () => Navigator.pop(context, 'delete'),
                         ),
                       ),

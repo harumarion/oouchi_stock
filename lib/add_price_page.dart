@@ -72,7 +72,7 @@ class _AddPricePageState extends State<AddPricePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(AppLocalizations.of(context).priceAddTitle)),
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.priceAddTitle)),
       body: _inventories.isEmpty
           ? const Center(child: CircularProgressIndicator())
           : Padding(
@@ -82,7 +82,7 @@ class _AddPricePageState extends State<AddPricePage> {
                 child: ListView(
                   children: [
                     DropdownButtonFormField<Inventory>(
-                      decoration: InputDecoration(labelText: AppLocalizations.of(context).itemName),
+                      decoration: InputDecoration(labelText: AppLocalizations.of(context)!.itemName),
                       value: _inventory,
                       items: _inventories
                           .map((e) => DropdownMenuItem(
@@ -94,7 +94,7 @@ class _AddPricePageState extends State<AddPricePage> {
                     ),
                     const SizedBox(height: 12),
                     ListTile(
-                      title: Text(AppLocalizations.of(context).checkedDate('${_checkedAt.year}/${_checkedAt.month}/${_checkedAt.day}')),
+                      title: Text(AppLocalizations.of(context)!.checkedDate('${_checkedAt.year}/${_checkedAt.month}/${_checkedAt.day}')),
                       trailing: const Icon(Icons.calendar_today),
                       onTap: () async {
                         final picked = await showDatePicker(
@@ -108,32 +108,32 @@ class _AddPricePageState extends State<AddPricePage> {
                     ),
                     const SizedBox(height: 12),
                     TextFormField(
-                      decoration: InputDecoration(labelText: AppLocalizations.of(context).count),
+                      decoration: InputDecoration(labelText: AppLocalizations.of(context)!.count),
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
                       initialValue: '1',
                       onChanged: (v) => setState(() => _count = double.tryParse(v) ?? 1),
                     ),
                     const SizedBox(height: 12),
                     TextFormField(
-                      decoration: InputDecoration(labelText: AppLocalizations.of(context).volume),
+                      decoration: InputDecoration(labelText: AppLocalizations.of(context)!.volume),
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
                       initialValue: '1',
                       onChanged: (v) => setState(() => _volume = double.tryParse(v) ?? 1),
                     ),
                     const SizedBox(height: 12),
                     TextFormField(
-                      decoration: InputDecoration(labelText: AppLocalizations.of(context).price),
+                      decoration: InputDecoration(labelText: AppLocalizations.of(context)!.price),
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
                       onChanged: (v) => setState(() => _price = double.tryParse(v) ?? 0),
                     ),
                     const SizedBox(height: 12),
                     TextFormField(
-                      decoration: InputDecoration(labelText: AppLocalizations.of(context).shop),
+                      decoration: InputDecoration(labelText: AppLocalizations.of(context)!.shop),
                       onChanged: (v) => _shop = v,
                     ),
                     const SizedBox(height: 12),
-                    Text(AppLocalizations.of(context).totalVolume(_totalVolume.toStringAsFixed(2))),
-                    Text(AppLocalizations.of(context).unitPrice(_unitPrice.toStringAsFixed(2))),
+                    Text(AppLocalizations.of(context)!.totalVolume(_totalVolume.toStringAsFixed(2))),
+                    Text(AppLocalizations.of(context)!.unitPrice(_unitPrice.toStringAsFixed(2))),
                     const SizedBox(height: 24),
                     ElevatedButton(
                       onPressed: () async {
@@ -142,18 +142,18 @@ class _AddPricePageState extends State<AddPricePage> {
                             await _save();
                             if (!mounted) return;
                             await ScaffoldMessenger.of(context)
-                                .showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).saved)))
+                                .showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.saved)))
                                 .closed;
                             if (mounted) Navigator.pop(context);
                           } catch (_) {
                             if (mounted) {
                               ScaffoldMessenger.of(context)
-                                  .showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).saveFailed)));
+                                  .showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.saveFailed)));
                             }
                           }
                         }
                       },
-                      child: Text(AppLocalizations.of(context).save),
+                      child: Text(AppLocalizations.of(context)!.save),
                     ),
                   ],
                 ),

@@ -25,13 +25,13 @@ class _AddCategoryPageState extends State<AddCategoryPage> {
           .add({'id': id, 'name': _name, 'createdAt': Timestamp.now()});
       if (!mounted) return;
       await ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).saved)))
+          .showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.saved)))
           .closed;
       if (mounted) Navigator.pop(context);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).saveFailed)));
+            .showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.saveFailed)));
       }
     }
   }
@@ -39,7 +39,7 @@ class _AddCategoryPageState extends State<AddCategoryPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(AppLocalizations.of(context).categoryAddTitle)),
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.categoryAddTitle)),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -47,9 +47,9 @@ class _AddCategoryPageState extends State<AddCategoryPage> {
           child: Column(
             children: [
               TextFormField(
-                decoration: InputDecoration(labelText: AppLocalizations.of(context).categoryName),
+                decoration: InputDecoration(labelText: AppLocalizations.of(context)!.categoryName),
                 onChanged: (v) => _name = v,
-                validator: (v) => v == null || v.isEmpty ? AppLocalizations.of(context).required : null,
+                validator: (v) => v == null || v.isEmpty ? AppLocalizations.of(context)!.required : null,
               ),
               const SizedBox(height: 24),
               ElevatedButton(
@@ -58,7 +58,7 @@ class _AddCategoryPageState extends State<AddCategoryPage> {
                     _save();
                   }
                 },
-                child: Text(AppLocalizations.of(context).save),
+                child: Text(AppLocalizations.of(context)!.save),
               ),
             ],
           ),

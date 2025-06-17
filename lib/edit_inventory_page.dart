@@ -128,12 +128,12 @@ class _EditInventoryPageState extends State<EditInventoryPage> {
   Widget build(BuildContext context) {
     if (_categories.isEmpty) {
       return Scaffold(
-        appBar: AppBar(title: Text(AppLocalizations.of(context).inventoryEditTitle)),
+        appBar: AppBar(title: Text(AppLocalizations.of(context)!.inventoryEditTitle)),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
     return Scaffold(
-      appBar: AppBar(title: Text(AppLocalizations.of(context).inventoryEditTitle)),
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.inventoryEditTitle)),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -142,14 +142,14 @@ class _EditInventoryPageState extends State<EditInventoryPage> {
             children: [
               TextFormField(
                 initialValue: _itemName,
-                decoration: InputDecoration(labelText: AppLocalizations.of(context).itemName),
+                decoration: InputDecoration(labelText: AppLocalizations.of(context)!.itemName),
                 onChanged: (v) => _itemName = v,
                 validator: (v) =>
-                    v == null || v.isEmpty ? AppLocalizations.of(context).itemNameRequired : null,
+                    v == null || v.isEmpty ? AppLocalizations.of(context)!.itemNameRequired : null,
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<Category>(
-                decoration: InputDecoration(labelText: AppLocalizations.of(context).category),
+                decoration: InputDecoration(labelText: AppLocalizations.of(context)!.category),
                 value: _category,
                 items: _categories
                     .map((c) => DropdownMenuItem(value: c, child: Text(c.name)))
@@ -167,7 +167,7 @@ class _EditInventoryPageState extends State<EditInventoryPage> {
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
-                decoration: InputDecoration(labelText: AppLocalizations.of(context).itemType),
+                decoration: InputDecoration(labelText: AppLocalizations.of(context)!.itemType),
                 value: _itemType,
                 items: (_typesMap[_category.name] ?? ['その他'])
                     .map((t) => DropdownMenuItem(value: t, child: Text(t)))
@@ -176,7 +176,7 @@ class _EditInventoryPageState extends State<EditInventoryPage> {
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
-                decoration: InputDecoration(labelText: AppLocalizations.of(context).unit),
+                decoration: InputDecoration(labelText: AppLocalizations.of(context)!.unit),
                 value: _unit,
                 items:
                     _units.map((u) => DropdownMenuItem(value: u, child: Text(u))).toList(),
@@ -185,13 +185,13 @@ class _EditInventoryPageState extends State<EditInventoryPage> {
               const SizedBox(height: 12),
               TextFormField(
                 initialValue: _note,
-                decoration: InputDecoration(labelText: AppLocalizations.of(context).memo),
+                decoration: InputDecoration(labelText: AppLocalizations.of(context)!.memo),
                 onChanged: (v) => _note = v,
               ),
               const SizedBox(height: 24),
               ElevatedButton.icon(
                 icon: const Icon(Icons.save),
-                label: Text(AppLocalizations.of(context).save),
+                label: Text(AppLocalizations.of(context)!.save),
                 onPressed: () async {
                   if (_formKey.currentState!.validate()) {
                     await _saveItem();

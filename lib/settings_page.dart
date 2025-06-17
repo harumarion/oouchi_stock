@@ -17,11 +17,11 @@ class SettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(AppLocalizations.of(context).settings)),
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.settings)),
       body: ListView(
         children: [
           ListTile(
-            title: Text(AppLocalizations.of(context).categorySettings),
+            title: Text(AppLocalizations.of(context)!.categorySettings),
             onTap: () {
               Navigator.push(
                 context,
@@ -35,7 +35,7 @@ class SettingsPage extends StatelessWidget {
             },
           ),
           ListTile(
-            title: Text(AppLocalizations.of(context).itemTypeSettings),
+            title: Text(AppLocalizations.of(context)!.itemTypeSettings),
             onTap: () {
               Navigator.push(
                 context,
