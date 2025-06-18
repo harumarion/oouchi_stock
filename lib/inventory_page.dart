@@ -10,6 +10,7 @@ import 'settings_page.dart';
 import 'inventory_detail_page.dart';
 import 'edit_inventory_page.dart';
 import 'widgets/inventory_card.dart';
+import 'main.dart';
 import 'data/repositories/inventory_repository_impl.dart';
 import 'domain/entities/category.dart';
 import 'domain/entities/inventory.dart';
@@ -152,7 +153,10 @@ class _InventoryPageState extends State<InventoryPage> {
                                 categories: _categories,
                                 onChanged: _updateCategories,
                                 onLocaleChanged: (l) =>
+                                    // ルートの MyAppState に通知してアプリ全体の言語を更新
                                     context.findAncestorStateOfType<MyAppState>()?._updateLocale(l),
+                                // 在庫画面からは買い物リスト条件を利用しないため空実装
+                                onConditionChanged: () {},
                               )),
                     );
                   }

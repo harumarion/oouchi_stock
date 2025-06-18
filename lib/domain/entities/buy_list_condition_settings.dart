@@ -1,3 +1,5 @@
+import 'package:shared_preferences/shared_preferences.dart';
+
 enum BuyListConditionType { threshold, days, or }
 
 class BuyListConditionSettings {
@@ -10,8 +12,6 @@ class BuyListConditionSettings {
     required this.days,
   });
 }
-
-import 'package:shared_preferences/shared_preferences.dart';
 
 /// 設定を読み込む
 Future<BuyListConditionSettings> loadBuyListConditionSettings() async {
