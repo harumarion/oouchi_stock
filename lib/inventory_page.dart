@@ -232,10 +232,12 @@ class _InventoryListState extends State<InventoryList> {
                   decoration: InputDecoration(
                     labelText: AppLocalizations.of(context)!.searchHint,
                   ),
+                  // 入力文字列が変わるたびにリストを再検索
                   onChanged: (v) => setState(() => _search = v),
                 ),
               ),
               const SizedBox(width: 8),
+              // 並び替えドロップダウン。選択が変わるとリストを更新
               DropdownButton<String>(
                 value: _sort,
                 onChanged: (v) => setState(() => _sort = v!),
@@ -266,9 +268,14 @@ class _InventoryListState extends State<InventoryList> {
               if (!snapshot.hasData) {
                 return const Center(child: CircularProgressIndicator());
               }
+              // 商品名だけでなくカテゴリ名・品種名も検索対象とする
               var list = snapshot.data!
-                  .where((inv) => inv.itemName.contains(_search))
+                  .where((inv) =>
+                      inv.itemName.contains(_search) ||
+                      inv.category.contains(_search) ||
+                      inv.itemType.contains(_search))
                   .toList();
+              // ドロップダウンの選択に応じて並び替えを実施
               if (_sort == 'alphabet') {
                 list.sort((a, b) => a.itemName.compareTo(b.itemName));
               } else {
