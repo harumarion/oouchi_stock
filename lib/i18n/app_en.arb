@@ -66,5 +66,8 @@
   "daysCondition": "Prediction within days",
   "orCondition": "Either condition",
   "thresholdLabel": "Threshold",
-  "daysLabel": "Days"
+  "daysLabel": "Days",
+  "searchHint": "Search",
+  "sortAlphabet": "Alphabetical",
+  "sortUpdated": "Last updated"
 }

@@ -196,104 +196,167 @@ class _InventoryPageState extends State<InventoryPage> {
 }
 
 /// 指定カテゴリの在庫を一覧表示するウィジェット。
-class InventoryList extends StatelessWidget {
+class InventoryList extends StatefulWidget {
   final String category;
   final List<Category> categories;
   const InventoryList({super.key, required this.category, required this.categories});
 
   @override
+  State<InventoryList> createState() => _InventoryListState();
+}
+
+class _InventoryListState extends State<InventoryList> {
+  String _search = '';
+  String _sort = 'updated';
+  final TextEditingController _controller = TextEditingController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // 指定カテゴリの在庫一覧をストリームで監視して表示
     final watchUsecase = WatchInventories(InventoryRepositoryImpl());
-    // 削除処理を行うユースケース
     final deleteUsecase = DeleteInventory(InventoryRepositoryImpl());
-    return StreamBuilder<List<Inventory>>(
-      stream: watchUsecase(category),
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          final err = snapshot.error?.toString() ?? 'unknown';
-          return Center(
-            child: Text(AppLocalizations.of(context)!.loadError(err)),
-          );
-        }
-        if (!snapshot.hasData) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        final list = snapshot.data!;
-        return ListView(
-          padding: const EdgeInsets.all(16),
-          children: list.map((inv) {
-            return GestureDetector(
-              onTap: () {
-                // 在庫カードをタップすると詳細画面へ
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => InventoryDetailPage(
-                      inventoryId: inv.id,
-                      categories: categories,
-                    ),
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(8),
+          child: Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _controller,
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.searchHint,
                   ),
+                  // 入力文字列が変わるたびにリストを再検索
+                  onChanged: (v) => setState(() => _search = v),
+                ),
+              ),
+              const SizedBox(width: 8),
+              // 並び替えドロップダウン。選択が変わるとリストを更新
+              DropdownButton<String>(
+                value: _sort,
+                onChanged: (v) => setState(() => _sort = v!),
+                items: [
+                  DropdownMenuItem(
+                    value: 'alphabet',
+                    child: Text(AppLocalizations.of(context)!.sortAlphabet),
+                  ),
+                  DropdownMenuItem(
+                    value: 'updated',
+                    child: Text(AppLocalizations.of(context)!.sortUpdated),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: StreamBuilder<List<Inventory>>(
+            stream: watchUsecase(widget.category),
+            builder: (context, snapshot) {
+              if (snapshot.hasError) {
+                final err = snapshot.error?.toString() ?? 'unknown';
+                return Center(
+                  child: Text(AppLocalizations.of(context)!.loadError(err)),
                 );
-              },
-              onLongPress: () async {
-                // 長押しで編集・削除メニューを表示
-                final result = await showModalBottomSheet<String>(
-                  context: context,
-                  builder: (context) => SafeArea(
-                    child: ListView(
-                      shrinkWrap: true,
-                      children: [
-                        ListTile(
-                          leading: const Icon(Icons.edit),
-                          title: Text(AppLocalizations.of(context)!.categoryEditTitle),
-                          onTap: () => Navigator.pop(context, 'edit'),
+              }
+              if (!snapshot.hasData) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              // 商品名だけでなくカテゴリ名・品種名も検索対象とする
+              var list = snapshot.data!
+                  .where((inv) =>
+                      inv.itemName.contains(_search) ||
+                      inv.category.contains(_search) ||
+                      inv.itemType.contains(_search))
+                  .toList();
+              // ドロップダウンの選択に応じて並び替えを実施
+              if (_sort == 'alphabet') {
+                list.sort((a, b) => a.itemName.compareTo(b.itemName));
+              } else {
+                list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+              }
+              return ListView(
+                padding: const EdgeInsets.all(16),
+                children: list.map((inv) {
+                  return GestureDetector(
+                    onTap: () {
+                      // 在庫カードをタップすると詳細画面へ
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => InventoryDetailPage(
+                            inventoryId: inv.id,
+                            categories: widget.categories,
+                          ),
                         ),
-                        ListTile(
-                          leading: const Icon(Icons.delete),
-                          title: Text(AppLocalizations.of(context)!.delete),
-                          onTap: () => Navigator.pop(context, 'delete'),
-                        ),
-                      ],
-                    ),
-                  ),
-                ); // 選択結果が 'edit' または 'delete' で返る
-                if (result == 'delete') {
-                  try {
-                    await deleteUsecase(inv.id);
-                  } catch (e) {
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(AppLocalizations.of(context)!.deleteFailed)),
                       );
-                    }
-                  }
-                } else if (result == 'edit') {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => EditInventoryPage(
-                        id: inv.id,
-                        itemName: inv.itemName,
-                        category: categories.firstWhere(
-                          (e) => e.name == inv.category,
-                          orElse: () => Category(
-                              id: 0, name: inv.category, createdAt: DateTime.now()),
+                    },
+                    onLongPress: () async {
+                      // 長押しで編集・削除メニューを表示
+                      final result = await showModalBottomSheet<String>(
+                        context: context,
+                        builder: (context) => SafeArea(
+                          child: ListView(
+                            shrinkWrap: true,
+                            children: [
+                              ListTile(
+                                leading: const Icon(Icons.edit),
+                                title: Text(AppLocalizations.of(context)!.categoryEditTitle),
+                                onTap: () => Navigator.pop(context, 'edit'),
+                              ),
+                              ListTile(
+                                leading: const Icon(Icons.delete),
+                                title: Text(AppLocalizations.of(context)!.delete),
+                                onTap: () => Navigator.pop(context, 'delete'),
+                              ),
+                            ],
+                          ),
                         ),
-                        itemType: inv.itemType,
-                        unit: inv.unit,
-                        note: inv.note,
-                      ),
-                    ),
+                      );
+                      if (result == 'delete') {
+                        try {
+                          await deleteUsecase(inv.id);
+                        } catch (e) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(AppLocalizations.of(context)!.deleteFailed)),
+                            );
+                          }
+                        }
+                      } else if (result == 'edit') {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => EditInventoryPage(
+                              id: inv.id,
+                              itemName: inv.itemName,
+                              category: widget.categories.firstWhere(
+                                (e) => e.name == inv.category,
+                                orElse: () =>
+                                    Category(id: 0, name: inv.category, createdAt: DateTime.now()),
+                              ),
+                              itemType: inv.itemType,
+                              unit: inv.unit,
+                              note: inv.note,
+                            ),
+                          ),
+                        );
+                      }
+                    },
+                    child: InventoryCard(inventory: inv),
                   );
-                }
-              },
-              // 各在庫を表示するカードウィジェット
-              child: InventoryCard(inventory: inv),
-            );
-          }).toList(),
-        );
-      },
+                }).toList(),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }
