@@ -1,27 +1,74 @@
 import 'package:flutter/material.dart';
-
-import 'data/repositories/inventory_repository_impl.dart';
-import 'domain/entities/inventory.dart';
-import 'domain/usecases/watch_low_inventory.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:oouchi_stock/i18n/app_localizations.dart';
 
-class BuyListPage extends StatelessWidget {
-  final double threshold;
-  const BuyListPage({super.key, this.threshold = 0});
+import 'data/repositories/inventory_repository_impl.dart';
+import 'domain/entities/category.dart';
+import 'domain/entities/inventory.dart';
+import 'domain/entities/buy_list_condition_settings.dart';
+import 'domain/services/buy_list_strategy.dart';
+import 'inventory_detail_page.dart';
+import 'widgets/inventory_card.dart';
+
+/// 買うべきリスト画面
+class BuyListPage extends StatefulWidget {
+  final List<Category>? categories;
+  const BuyListPage({super.key, this.categories});
+
+  @override
+  State<BuyListPage> createState() => _BuyListPageState();
+}
+
+class _BuyListPageState extends State<BuyListPage> {
+  List<Category> _categories = [];
+  bool _loaded = false;
+  BuyListConditionSettings? _condition;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    if (widget.categories != null) {
+      _categories = List.from(widget.categories!);
+    } else {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('categories')
+          .orderBy('createdAt')
+          .get();
+      _categories = snapshot.docs.map((d) {
+        final data = d.data();
+        return Category(
+          id: data['id'] ?? 0,
+          name: data['name'] ?? '',
+          createdAt: (data['createdAt'] as Timestamp).toDate(),
+        );
+      }).toList();
+    }
+    _condition = await loadBuyListConditionSettings();
+    setState(() => _loaded = true);
+  }
 
   @override
   Widget build(BuildContext context) {
-    final watch = WatchLowInventory(InventoryRepositoryImpl());
+    if (!_loaded || _condition == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+    final strategy = createStrategy(_condition!);
+    final repo = InventoryRepositoryImpl();
     return Scaffold(
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.buyListTitle),
       ),
       body: StreamBuilder<List<Inventory>>(
-        stream: watch(threshold),
+        stream: strategy.watch(repo),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             final err = snapshot.error?.toString() ?? 'unknown';
-            return Center(child: Text(AppLocalizations.of(context)!.loadError(err)));
+            return Center(
+                child: Text(AppLocalizations.of(context)!.loadError(err)));
           }
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
@@ -34,9 +81,19 @@ class BuyListPage extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             children: [
               for (final inv in list)
-                ListTile(
-                  title: Text('${inv.itemType} / ${inv.itemName}'),
-                  subtitle: Text('${inv.quantity.toStringAsFixed(1)}${inv.unit}'),
+                InventoryCard(
+                  inventory: inv,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => InventoryDetailPage(
+                          inventoryId: inv.id,
+                          categories: _categories,
+                        ),
+                      ),
+                    );
+                  },
                 ),
             ],
           );

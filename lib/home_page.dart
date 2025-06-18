@@ -7,10 +7,13 @@ import 'add_category_page.dart';
 import 'price_list_page.dart';
 import 'inventory_page.dart';
 import 'settings_page.dart';
+import 'inventory_detail_page.dart';
+import 'widgets/inventory_card.dart';
 import 'data/repositories/inventory_repository_impl.dart';
 import 'domain/entities/category.dart';
 import 'domain/entities/inventory.dart';
-import 'domain/usecases/watch_low_inventory.dart';
+import 'domain/services/buy_list_strategy.dart';
+import 'domain/entities/buy_list_condition_settings.dart';
 
 /// ホーム画面。起動時に表示され、買い物リストを管理する。
 class HomePage extends StatefulWidget {
@@ -29,6 +32,8 @@ class _HomePageState extends State<HomePage> {
   bool _categoriesLoaded = false;
   /// カテゴリコレクションを監視するストリーム購読
   StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _catSub;
+  /// 買うべきリスト条件設定
+  BuyListConditionSettings? _conditionSettings;
 
   /// 設定画面から戻った際にカテゴリリストを更新する
   void _updateCategories(List<Category> list) {
@@ -38,9 +43,15 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  Future<void> _loadCondition() async {
+    final s = await loadBuyListConditionSettings();
+    setState(() => _conditionSettings = s);
+  }
+
   @override
   void initState() {
     super.initState();
+    _loadCondition();
     if (widget.categories != null) {
       _categories = List.from(widget.categories!);
       _categoriesLoaded = true;
@@ -100,8 +111,12 @@ class _HomePageState extends State<HomePage> {
       );
     }
 
-    // 残量がしきい値以下の在庫を監視するユースケース
-    final watch = WatchLowInventory(InventoryRepositoryImpl());
+    // 買うべきリスト抽出ストラテジーを作成
+    if (_conditionSettings == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+    final strategy = createStrategy(_conditionSettings!);
+    final repo = InventoryRepositoryImpl();
     return Scaffold(
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.buyListTitle),
@@ -139,6 +154,7 @@ class _HomePageState extends State<HomePage> {
                             onChanged: _updateCategories,
                             onLocaleChanged: (l) =>
                                 context.findAncestorStateOfType<MyAppState>()?._updateLocale(l),
+                            onConditionChanged: _loadCondition,
                           )),
                 );
               }
@@ -166,7 +182,7 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
       body: StreamBuilder<List<Inventory>>(
-        stream: watch(0),
+        stream: strategy.watch(repo),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             final err = snapshot.error?.toString() ?? 'unknown';
@@ -183,9 +199,19 @@ class _HomePageState extends State<HomePage> {
             padding: const EdgeInsets.all(16),
             children: [
               for (final inv in list)
-                ListTile(
-                  title: Text('${inv.itemType} / ${inv.itemName}'),
-                  subtitle: Text('${inv.quantity.toStringAsFixed(1)}${inv.unit}'),
+                InventoryCard(
+                  inventory: inv,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => InventoryDetailPage(
+                          inventoryId: inv.id,
+                          categories: _categories,
+                        ),
+                      ),
+                    );
+                  },
                 ),
             ],
           );

@@ -4,7 +4,7 @@ import 'package:oouchi_stock/buy_list_page.dart';
 
 void main() {
   testWidgets('BuyListPage が表示される', (WidgetTester tester) async {
-    await tester.pumpWidget(const MaterialApp(home: BuyListPage()));
+    await tester.pumpWidget(const MaterialApp(home: BuyListPage(categories: [])));
     expect(find.byType(AppBar), findsOneWidget);
   });
 }

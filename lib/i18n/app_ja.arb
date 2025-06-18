@@ -61,4 +61,10 @@
   "noBuyItems": "買うものはありません",
   "buyListNotificationTitle": "買い物リマインダー",
   "buyListNotificationBody": "買うべき在庫を確認してください"
+  "buyListConditionSettings": "買うべきリスト条件設定",
+  "thresholdCondition": "在庫数がしきい値以下",
+  "daysCondition": "予測日が日数以内",
+  "orCondition": "どちらかの条件を満たす",
+  "thresholdLabel": "しきい値",
+  "daysLabel": "日数",
 }

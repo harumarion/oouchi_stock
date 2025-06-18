@@ -11,9 +11,11 @@ void main() {
         categories: categories,
         onChanged: (_) {},
         onLocaleChanged: (_) {},
+        onConditionChanged: () {},
       ),
     ));
     expect(find.text('カテゴリ設定'), findsOneWidget);
     expect(find.text('言語'), findsOneWidget);
+    expect(find.text('買うべきリスト条件設定'), findsOneWidget);
   });
 }

@@ -140,7 +140,8 @@ class _InventoryPageState extends State<InventoryPage> {
                     // 買い物リスト画面を開く
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (_) => const BuyListPage()),
+                      MaterialPageRoute(
+                          builder: (_) => BuyListPage(categories: _categories)),
                     );
                   } else if (value == 'settings') {
                     // 設定画面を開く
