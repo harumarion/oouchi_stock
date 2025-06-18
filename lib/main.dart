@@ -89,12 +89,13 @@ class _MyAppState extends State<MyApp> {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
         useMaterial3: true,
       ),
-      home: HomePage(categories: widget.initialCategories),
+      // ホーム画面では買い物リストを表示する
+      home: HomePage(categories: initialCategories),
     );
   }
 }
 
-// 在庫一覧を表示する画面
+/// ホーム画面: 買い物リストを表示する
 class HomePage extends StatefulWidget {
   final List<Category>? categories;
   const HomePage({super.key, this.categories});
@@ -104,6 +105,177 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  List<Category> _categories = [];
+  bool _categoriesLoaded = false;
+  StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _catSub;
+
+  // カテゴリ設定画面で編集後にリストを更新する
+  void _updateCategories(List<Category> list) {
+    setState(() {
+      _categories = List.from(list);
+      _categoriesLoaded = true;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.categories != null) {
+      _categories = List.from(widget.categories!);
+      _categoriesLoaded = true;
+    } else {
+      _catSub = FirebaseFirestore.instance
+          .collection('categories')
+          .orderBy('createdAt')
+          .snapshots()
+          .listen((snapshot) {
+        setState(() {
+          _categories = snapshot.docs.map((d) {
+            final data = d.data();
+            return Category(
+              id: data['id'] ?? 0,
+              name: data['name'] ?? '',
+              createdAt: (data['createdAt'] as Timestamp).toDate(),
+            );
+          }).toList();
+          _categoriesLoaded = true;
+        });
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _catSub?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_categoriesLoaded) {
+      return Scaffold(
+        appBar: AppBar(title: Text(AppLocalizations.of(context)!.buyListTitle)),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+    if (_categories.isEmpty) {
+      return Scaffold(
+        appBar: AppBar(title: Text(AppLocalizations.of(context)!.buyListTitle)),
+        body: Center(
+          child: ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const AddCategoryPage()),
+              );
+            },
+            child: Text(AppLocalizations.of(context)!.addCategory),
+          ),
+        ),
+      );
+    }
+
+    final watch = WatchLowInventory(InventoryRepositoryImpl());
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(AppLocalizations.of(context)!.buyListTitle),
+        actions: [
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              if (value == 'add') {
+                // 商品追加画面を開く
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => AddInventoryPage(categories: _categories),
+                  ),
+                );
+              } else if (value == 'price') {
+                // 値段管理画面を開く
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const PriceListPage()),
+                );
+              } else if (value == 'inventory') {
+                // 在庫一覧画面を開く
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) => InventoryPage(categories: _categories)),
+                );
+              } else if (value == 'settings') {
+                // 設定画面を開く
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) => SettingsPage(
+                            categories: _categories,
+                            onChanged: _updateCategories,
+                          )),
+                );
+              }
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                  value: 'add',
+                  child: Text(AppLocalizations.of(context)!.addItem,
+                      style: const TextStyle(fontSize: 18))),
+              PopupMenuItem(
+                  value: 'price',
+                  child: Text(AppLocalizations.of(context)!.priceManagement,
+                      style: const TextStyle(fontSize: 18))),
+              PopupMenuItem(
+                  value: 'inventory',
+                  child: Text(AppLocalizations.of(context)!.inventoryList,
+                      style: const TextStyle(fontSize: 18))),
+              PopupMenuItem(
+                  value: 'settings',
+                  child: Text(AppLocalizations.of(context)!.settings,
+                      style: const TextStyle(fontSize: 18))),
+            ],
+          )
+        ],
+      ),
+      body: StreamBuilder<List<Inventory>>(
+        stream: watch(0),
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            final err = snapshot.error?.toString() ?? 'unknown';
+            return Center(child: Text(AppLocalizations.of(context)!.loadError(err)));
+          }
+          if (!snapshot.hasData) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          final list = snapshot.data!;
+          if (list.isEmpty) {
+            return Center(child: Text(AppLocalizations.of(context)!.noBuyItems));
+          }
+          return ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              for (final inv in list)
+                ListTile(
+                  title: Text('${inv.itemType} / ${inv.itemName}'),
+                  subtitle: Text('${inv.quantity.toStringAsFixed(1)}${inv.unit}'),
+                ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+// 在庫一覧を表示する画面
+class InventoryPage extends StatefulWidget {
+  final List<Category>? categories;
+  const InventoryPage({super.key, this.categories});
+
+  @override
+  State<InventoryPage> createState() => _InventoryPageState();
+}
+
+class _InventoryPageState extends State<InventoryPage> {
   List<Category> _categories = [];
   bool _categoriesLoaded = false;
   StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _catSub;
