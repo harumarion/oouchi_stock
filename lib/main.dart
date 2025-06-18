@@ -9,6 +9,8 @@ import 'inventory_detail_page.dart';
 import 'edit_inventory_page.dart';
 import 'price_list_page.dart';
 import 'buy_list_page.dart';
+import 'domain/usecases/watch_low_inventory.dart';
+import 'widgets/inventory_card.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -90,7 +92,7 @@ class _MyAppState extends State<MyApp> {
         useMaterial3: true,
       ),
       // ホーム画面では買い物リストを表示する
-      home: HomePage(categories: initialCategories),
+      home: HomePage(categories: widget.initialCategories),
     );
   }
 }
@@ -175,6 +177,7 @@ class _HomePageState extends State<HomePage> {
       );
     }
 
+    // 残量が少ない在庫を監視するユースケース
     final watch = WatchLowInventory(InventoryRepositoryImpl());
     return Scaffold(
       appBar: AppBar(
@@ -208,9 +211,12 @@ class _HomePageState extends State<HomePage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
+                      // 設定メニューを開いたときに表示する画面
                       builder: (_) => SettingsPage(
                             categories: _categories,
                             onChanged: _updateCategories,
+                            onLocaleChanged: (l) =>
+                                context.findAncestorStateOfType<_MyAppState>()?._updateLocale(l),
                           )),
                 );
               }
@@ -525,6 +531,7 @@ class InventoryList extends StatelessWidget {
                   );
                 }
               },
+              // 各在庫を表示するカードウィジェット
               child: InventoryCard(inventory: inv),
             );
           }).toList(),
