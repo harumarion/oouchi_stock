@@ -11,13 +11,16 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:oouchi_stock/main.dart';
 import 'firebase_test_utils.dart';
 import 'package:oouchi_stock/add_category_page.dart';
+import 'package:oouchi_stock/domain/entities/category.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets('アプリが起動する', (WidgetTester tester) async {
-    await tester.pumpWidget(
-        const MyApp(initialCategories: ['日用品']));
+    final categories = [
+      Category(id: 1, name: '日用品', createdAt: DateTime.now())
+    ];
+    await tester.pumpWidget(MyApp(initialCategories: categories));
     expect(find.text('おうちストック'), findsOneWidget);
   });
 
