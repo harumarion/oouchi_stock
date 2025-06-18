@@ -154,7 +154,7 @@ class _InventoryPageState extends State<InventoryPage> {
                                 onChanged: _updateCategories,
                                 onLocaleChanged: (l) =>
                                     // ルートの MyAppState に通知してアプリ全体の言語を更新
-                                    context.findAncestorStateOfType<MyAppState>()?._updateLocale(l),
+                                    context.findAncestorStateOfType<MyAppState>()?.updateLocale(l),
                                 // 在庫画面からは買い物リスト条件を利用しないため空実装
                                 onConditionChanged: () {},
                               )),

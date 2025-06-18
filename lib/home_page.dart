@@ -156,7 +156,7 @@ class _HomePageState extends State<HomePage> {
                             onChanged: _updateCategories,
                             onLocaleChanged: (l) =>
                                 // ルートの MyAppState に通知してアプリ全体の言語を更新
-                                context.findAncestorStateOfType<MyAppState>()?._updateLocale(l),
+                                context.findAncestorStateOfType<MyAppState>()?.updateLocale(l),
                             onConditionChanged: _loadCondition,
                           )),
                 );

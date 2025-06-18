@@ -51,7 +51,10 @@ class MyAppState extends State<MyApp> {
     if (code != null) setState(() => _locale = Locale(code));
   }
 
-  Future<void> _updateLocale(Locale locale) async {
+  /// アプリ全体の言語設定を更新する
+  ///
+  /// [locale] 新しく設定するロケール
+  Future<void> updateLocale(Locale locale) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('locale', locale.languageCode);
     setState(() => _locale = locale);
