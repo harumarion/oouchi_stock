@@ -121,11 +121,12 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
                   decoration: InputDecoration(
                     labelText: AppLocalizations.of(context)!.searchHint,
                   ),
+                  // 入力文字列に応じてリストをフィルタリング
                   onChanged: (v) => setState(() => _search = v),
                 ),
               ),
               const SizedBox(width: 8),
-              // 並び替えドロップダウン
+              // 並び替えドロップダウン。選択変更で並び替えを実行
               DropdownButton<String>(
                 value: _sort,
                 onChanged: (v) => setState(() => _sort = v!),
@@ -163,9 +164,14 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
                   map[p.itemType] = p;
                 }
               }
+              // 商品名だけでなくカテゴリ名・品種名も検索対象に含める
               var items = map.values
-                  .where((e) => e.itemName.contains(_search))
+                  .where((e) =>
+                      e.itemName.contains(_search) ||
+                      e.category.contains(_search) ||
+                      e.itemType.contains(_search))
                   .toList();
+              // 選択された並び替え順に従ってソート
               if (_sort == 'alphabet') {
                 items.sort((a, b) => a.itemType.compareTo(b.itemType));
               } else {
