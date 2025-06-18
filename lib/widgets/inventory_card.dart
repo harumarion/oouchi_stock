@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import "../i18n/app_localizations.dart";
+import "scrolling_text.dart"; // 長いテキストを流すウィジェット
 import "../domain/entities/inventory.dart";
 import "../domain/entities/history_entry.dart";
 import "../domain/services/purchase_prediction_strategy.dart";
@@ -157,11 +158,15 @@ class InventoryCard extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('${inventory.itemType} / ${inventory.itemName}',
-                        style: const TextStyle(fontSize: 18)),
+                // 商品情報表示エリア。長すぎる文字列は ScrollingText で横に流す
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ScrollingText(
+                        '${inventory.itemType} / ${inventory.itemName}',
+                        style: const TextStyle(fontSize: 18),
+                      ),
                     const SizedBox(height: 4),
                     Text(
                       '${inventory.quantity.toStringAsFixed(1)}${inventory.unit}',
@@ -172,6 +177,7 @@ class InventoryCard extends StatelessWidget {
                       style: const TextStyle(color: Colors.black87),
                     ),
                   ],
+                  ),
                 ),
                 // 操作ボタン。buyOnly=true のときは購入ボタンのみ表示
                 Row(

@@ -34,4 +34,18 @@ void main() {
         .pumpWidget(MaterialApp(home: InventoryCard(inventory: inv, buyOnly: true)));
     expect(find.byType(IconButton), findsOneWidget);
   });
+
+  testWidgets('長い名前の場合にスクロール表示される', (WidgetTester tester) async {
+    final inv = Inventory(
+      id: '3',
+      itemName: 'とてもとても長い商品名が続くテストケース',
+      category: '日用品',
+      itemType: 'ものすごく長い品種名テスト',
+      quantity: 1.0,
+      unit: '個',
+      createdAt: DateTime.now(),
+    );
+    await tester.pumpWidget(MaterialApp(home: InventoryCard(inventory: inv)));
+    expect(find.byType(SingleChildScrollView), findsOneWidget);
+  });
 }
