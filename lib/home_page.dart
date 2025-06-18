@@ -13,6 +13,7 @@ import 'main.dart';
 import 'data/repositories/inventory_repository_impl.dart';
 import 'domain/entities/category.dart';
 import 'domain/entities/inventory.dart';
+import 'domain/entities/category_order.dart';
 import 'domain/services/buy_list_strategy.dart';
 import 'domain/entities/buy_list_condition_settings.dart';
 
@@ -56,23 +57,30 @@ class _HomePageState extends State<HomePage> {
     _loadCondition();
     if (widget.categories != null) {
       _categories = List.from(widget.categories!);
-      _categoriesLoaded = true;
+      applyCategoryOrder(_categories).then((list) {
+        setState(() {
+          _categories = list;
+          _categoriesLoaded = true;
+        });
+      });
     } else {
       // Firestore からカテゴリ一覧を取得して監視
       _catSub = FirebaseFirestore.instance
           .collection('categories')
           .orderBy('createdAt')
           .snapshots()
-          .listen((snapshot) {
+          .listen((snapshot) async {
+        var list = snapshot.docs.map((d) {
+          final data = d.data();
+          return Category(
+            id: data['id'] ?? 0,
+            name: data['name'] ?? '',
+            createdAt: (data['createdAt'] as Timestamp).toDate(),
+          );
+        }).toList();
+        list = await applyCategoryOrder(list);
         setState(() {
-          _categories = snapshot.docs.map((d) {
-            final data = d.data();
-            return Category(
-              id: data['id'] ?? 0,
-              name: data['name'] ?? '',
-              createdAt: (data['createdAt'] as Timestamp).toDate(),
-            );
-          }).toList();
+          _categories = list;
           _categoriesLoaded = true;
         });
       });

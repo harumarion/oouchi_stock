@@ -4,11 +4,15 @@ import 'package:oouchi_stock/i18n/app_localizations.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'add_price_page.dart';
+import 'add_inventory_page.dart';
+import 'settings_page.dart';
 import 'data/repositories/price_repository_impl.dart';
 import 'domain/entities/category.dart';
 import 'domain/entities/price_info.dart';
+import 'domain/entities/category_order.dart';
 import 'domain/usecases/watch_price_by_category.dart';
 import 'price_history_page.dart';
+import 'main.dart';
 
 class PriceListPage extends StatefulWidget {
   const PriceListPage({super.key});
@@ -28,16 +32,18 @@ class _PriceListPageState extends State<PriceListPage> {
         .collection('categories')
         .orderBy('createdAt')
         .snapshots()
-        .listen((snapshot) {
+        .listen((snapshot) async {
+      var list = snapshot.docs.map((d) {
+        final data = d.data();
+        return Category(
+          id: data['id'] ?? 0,
+          name: data['name'] ?? '',
+          createdAt: (data['createdAt'] as Timestamp).toDate(),
+        );
+      }).toList();
+      list = await applyCategoryOrder(list);
       setState(() {
-        _categories = snapshot.docs.map((d) {
-          final data = d.data();
-          return Category(
-            id: data['id'] ?? 0,
-            name: data['name'] ?? '',
-            createdAt: (data['createdAt'] as Timestamp).toDate(),
-          );
-        }).toList();
+        _categories = list;
         _loaded = true;
       });
     }, onError: (_) {
@@ -62,6 +68,40 @@ class _PriceListPageState extends State<PriceListPage> {
       child: Scaffold(
         appBar: AppBar(
           title: Text(AppLocalizations.of(context)!.priceManagementTitle),
+          actions: [
+            PopupMenuButton<String>(
+              onSelected: (value) {
+                if (value == 'add') {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => AddInventoryPage(categories: _categories)),
+                  );
+                } else if (value == 'settings') {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => SettingsPage(
+                              categories: _categories,
+                              onChanged: (l) {},
+                              onLocaleChanged: (l) => context.findAncestorStateOfType<MyAppState>()?.updateLocale(l),
+                              onConditionChanged: () {},
+                            )),
+                  );
+                }
+              },
+              itemBuilder: (context) => [
+                PopupMenuItem(
+                    value: 'add',
+                    child: Text(AppLocalizations.of(context)!.addItem,
+                        style: const TextStyle(fontSize: 18))),
+                PopupMenuItem(
+                    value: 'settings',
+                    child: Text(AppLocalizations.of(context)!.settings,
+                        style: const TextStyle(fontSize: 18))),
+              ],
+            )
+          ],
           bottom: TabBar(
             isScrollable: true,
             tabs: [for (final c in _categories) Tab(text: c.name)],
