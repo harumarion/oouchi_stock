@@ -6,6 +6,8 @@
 - 画面内のコンポーネントを小さな StatelessWidget / StatefulWidget として切り出し、`lib/widgets` 配下に配置します。
 - これによりファイル単位で役割が明確になり、テストもしやすくなります。
 - 例として `InventoryCard` を `lib/widgets/inventory_card.dart` へ分離しました。
+- 同様に `main.dart` にあったホーム画面と在庫画面を
+  `lib/home_page.dart` と `lib/inventory_page.dart` に切り出しています。
 
 ## 2. 状態管理の導入
 - UI とビジネスロジックを分離するため、Riverpod や BLoC などの状態管理ライブラリを利用します。
