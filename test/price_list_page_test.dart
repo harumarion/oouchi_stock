@@ -6,5 +6,7 @@ void main() {
   testWidgets('PriceListPage 初期表示', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(home: PriceListPage()));
     expect(find.byType(AppBar), findsOneWidget);
+    // 検索バーが表示されるか確認
+    expect(find.byType(TextField), findsWidgets);
   });
 }
