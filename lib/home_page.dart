@@ -7,6 +7,7 @@ import 'add_category_page.dart';
 import 'price_list_page.dart';
 import 'inventory_page.dart';
 import 'settings_page.dart';
+import 'main.dart'; // アプリ全体の状態を取得するため
 import 'data/repositories/inventory_repository_impl.dart';
 import 'domain/entities/category.dart';
 import 'domain/entities/inventory.dart';
@@ -137,6 +138,7 @@ class _HomePageState extends State<HomePage> {
                       builder: (_) => SettingsPage(
                             categories: _categories,
                             onChanged: _updateCategories,
+                            // 設定画面で言語変更後、アプリのロケールを更新
                             onLocaleChanged: (l) =>
                                 context.findAncestorStateOfType<MyAppState>()?._updateLocale(l),
                           )),

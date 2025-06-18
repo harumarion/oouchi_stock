@@ -10,6 +10,7 @@ import 'settings_page.dart';
 import 'inventory_detail_page.dart';
 import 'edit_inventory_page.dart';
 import 'widgets/inventory_card.dart';
+import 'main.dart'; // 言語変更用にアプリ状態を参照する
 import 'data/repositories/inventory_repository_impl.dart';
 import 'domain/entities/category.dart';
 import 'domain/entities/inventory.dart';
@@ -150,6 +151,7 @@ class _InventoryPageState extends State<InventoryPage> {
                           builder: (c) => SettingsPage(
                                 categories: _categories,
                                 onChanged: _updateCategories,
+                                // 設定画面で言語を変えた後、アプリ全体のロケールを変更
                                 onLocaleChanged: (l) =>
                                     context.findAncestorStateOfType<MyAppState>()?._updateLocale(l),
                               )),
