@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:oouchi_stock/main.dart';
+import 'package:oouchi_stock/home_page.dart';
 import 'package:oouchi_stock/domain/entities/category.dart';
 
 void main() {
