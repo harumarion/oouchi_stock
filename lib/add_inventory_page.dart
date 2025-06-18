@@ -221,6 +221,7 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
               ),
               const SizedBox(height: 24),
               // 入力内容を保存するボタン
+              // 保存ボタン。入力が正しい場合は Firestore へ登録
               ElevatedButton.icon(
                 icon: const Icon(Icons.save),
                 label: Text(AppLocalizations.of(context)!.save),

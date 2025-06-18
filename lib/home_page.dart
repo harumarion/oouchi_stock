@@ -14,6 +14,7 @@ import 'domain/usecases/watch_low_inventory.dart';
 
 /// ホーム画面。起動時に表示され、買い物リストを管理する。
 class HomePage extends StatefulWidget {
+  /// 起動時に受け取るカテゴリ一覧。null の場合は Firestore から取得する
   final List<Category>? categories;
   const HomePage({super.key, this.categories});
 
@@ -22,11 +23,14 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  /// Firestore から取得したカテゴリ一覧
   List<Category> _categories = [];
+  /// カテゴリが読み込み済みかどうかのフラグ
   bool _categoriesLoaded = false;
+  /// カテゴリコレクションを監視するストリーム購読
   StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _catSub;
 
-  /// カテゴリ設定画面で編集後にリストを更新する
+  /// 設定画面から戻った際にカテゴリリストを更新する
   void _updateCategories(List<Category> list) {
     setState(() {
       _categories = List.from(list);
@@ -70,12 +74,14 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    // 画面描画。カテゴリが読み込まれるまではローディングを表示
     if (!_categoriesLoaded) {
       return Scaffold(
         appBar: AppBar(title: Text(AppLocalizations.of(context)!.buyListTitle)),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
+    // カテゴリがまだ存在しない場合は追加を促す画面を表示
     if (_categories.isEmpty) {
       return Scaffold(
         appBar: AppBar(title: Text(AppLocalizations.of(context)!.buyListTitle)),
@@ -94,7 +100,7 @@ class _HomePageState extends State<HomePage> {
       );
     }
 
-    // 残量が少ない在庫を監視するユースケース
+    // 残量がしきい値以下の在庫を監視するユースケース
     final watch = WatchLowInventory(InventoryRepositoryImpl());
     return Scaffold(
       appBar: AppBar(
@@ -137,6 +143,7 @@ class _HomePageState extends State<HomePage> {
                 );
               }
             },
+            // メニューに表示する項目を定義
             itemBuilder: (context) => [
               PopupMenuItem(
                   value: 'add',

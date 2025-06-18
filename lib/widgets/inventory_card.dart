@@ -47,6 +47,7 @@ class InventoryCard extends StatelessWidget {
     return '${d.year}/${d.month}/${d.day}';
   }
 
+  /// 数量を入力させるダイアログを表示する
   Future<double?> _inputAmountDialog(
     BuildContext context,
     String title,
@@ -95,7 +96,7 @@ class InventoryCard extends StatelessWidget {
     }
   }
 
-  /// 使った量ボタンの処理
+  /// 使った量ボタンをタップしたときの処理
   Future<void> onUsed(BuildContext context) async {
     final v = await _inputAmountDialog(
       context,
@@ -105,7 +106,7 @@ class InventoryCard extends StatelessWidget {
     await _updateQuantity(context, -v, 'used');
   }
 
-  /// 買った量ボタンの処理
+  /// 買った量ボタンをタップしたときの処理
   Future<void> onBought(BuildContext context) async {
     final v = await _inputAmountDialog(
       context,
@@ -115,7 +116,7 @@ class InventoryCard extends StatelessWidget {
     await _updateQuantity(context, v, 'bought');
   }
 
-  /// 在庫ボタンの処理
+  /// 在庫ボタンをタップしたときの処理
   Future<void> onStock(BuildContext context) async {
     final v = await _inputAmountDialog(
       context,

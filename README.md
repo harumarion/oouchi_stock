@@ -4,6 +4,7 @@ A new Flutter project.
 
 ユーザー向けの操作説明は[取扱説明書](docs/user_manual_ja.md)をご覧ください。
 開発者向けの設計方針は[アーキテクチャ案](docs/architecture_proposals_ja.md)を参照してください。
+主要画面の実装は `lib/home_page.dart` と `lib/inventory_page.dart` に分割されています。
 
 ## Getting Started
 
