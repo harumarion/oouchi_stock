@@ -9,6 +9,7 @@ import 'inventory_page.dart';
 import 'settings_page.dart';
 import 'inventory_detail_page.dart';
 import 'widgets/inventory_card.dart';
+import 'main.dart';
 import 'data/repositories/inventory_repository_impl.dart';
 import 'domain/entities/category.dart';
 import 'domain/entities/inventory.dart';
@@ -44,6 +45,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _loadCondition() async {
+    // 設定画面から戻った際にも呼ばれ、買い物リスト条件を再読込する
     final s = await loadBuyListConditionSettings();
     setState(() => _conditionSettings = s);
   }
@@ -153,6 +155,7 @@ class _HomePageState extends State<HomePage> {
                             categories: _categories,
                             onChanged: _updateCategories,
                             onLocaleChanged: (l) =>
+                                // ルートの MyAppState に通知してアプリ全体の言語を更新
                                 context.findAncestorStateOfType<MyAppState>()?._updateLocale(l),
                             onConditionChanged: _loadCondition,
                           )),

@@ -137,6 +137,7 @@ class InventoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ホーム画面や在庫一覧で表示される1商品のカードUI
     return FutureBuilder<DateTime>(
       future: _loadPrediction(),
       builder: (context, snapshot) {
@@ -188,7 +189,8 @@ class InventoryCard extends StatelessWidget {
               ],
             ),
           ),
-        );
+        ),
+      );
       },
     );
   }
