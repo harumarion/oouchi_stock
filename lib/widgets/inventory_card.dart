@@ -14,11 +14,14 @@ class InventoryCard extends StatelessWidget {
   final InventoryRepositoryImpl _repository = InventoryRepositoryImpl();
   final Stocktake _stocktake = Stocktake(InventoryRepositoryImpl());
   final VoidCallback? onTap;
+  // 購入ボタンのみ表示するかどうか
+  final bool buyOnly;
 
   InventoryCard({
     super.key,
     required this.inventory,
     this.onTap,
+    this.buyOnly = false,
   });
 
   /// 履歴を読み込み購入予測日を計算する。
@@ -170,16 +173,19 @@ class InventoryCard extends StatelessWidget {
                     ),
                   ],
                 ),
+                // 操作ボタン。buyOnly=true のときは購入ボタンのみ表示
                 Row(
                   children: [
-                    IconButton(
-                      icon: const Text('📦', style: TextStyle(fontSize: 20)),
-                      onPressed: () => onStock(context),
-                    ),
-                    IconButton(
-                      icon: const Text('✂️', style: TextStyle(fontSize: 20)),
-                      onPressed: () => onUsed(context),
-                    ),
+                    if (!buyOnly) ...[
+                      IconButton(
+                        icon: const Text('📦', style: TextStyle(fontSize: 20)),
+                        onPressed: () => onStock(context),
+                      ),
+                      IconButton(
+                        icon: const Text('✂️', style: TextStyle(fontSize: 20)),
+                        onPressed: () => onUsed(context),
+                      ),
+                    ],
                     IconButton(
                       icon: const Text('🛒', style: TextStyle(fontSize: 20)),
                       onPressed: () => onBought(context),

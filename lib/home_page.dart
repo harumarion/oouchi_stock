@@ -202,8 +202,10 @@ class _HomePageState extends State<HomePage> {
             padding: const EdgeInsets.all(16),
             children: [
               for (final inv in list)
+                // ホーム画面は買うべきリストのため購入ボタンのみ
                 InventoryCard(
                   inventory: inv,
+                  buyOnly: true, // 買うべきリストでは購入ボタンのみ表示
                   onTap: () {
                     Navigator.push(
                       context,

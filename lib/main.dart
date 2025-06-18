@@ -8,23 +8,56 @@ import 'domain/entities/category.dart';
 import 'notification_service.dart';
 import 'home_page.dart';
 
-// アプリのエントリーポイント。Firebase を初期化してから起動する。
+// アプリのエントリーポイント。初期化処理中はローディング画面を表示する。
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized(); // Flutter エンジンの初期化
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  ); // Firebase の初期設定
-  final locale = WidgetsBinding.instance.platformDispatcher.locale;
-  final loc = await AppLocalizations.delegate.load(locale);
-  final notification = NotificationService();
-  await notification.init();
-  await notification.scheduleWeekly(
-    id: 0,
-    title: loc.buyListNotificationTitle,
-    body: loc.buyListNotificationBody,
-  );
-  runApp(const MyApp()); // アプリのスタート
+void main() {
+  runApp(const AppLoader());
+}
+
+/// Firebase や通知の初期設定を行い、完了次第 MyApp を表示するウィジェット
+class AppLoader extends StatefulWidget {
+  const AppLoader({super.key});
+
+  @override
+  State<AppLoader> createState() => _AppLoaderState();
+}
+
+class _AppLoaderState extends State<AppLoader> {
+  bool _initialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _init();
+  }
+
+  Future<void> _init() async {
+    WidgetsFlutterBinding.ensureInitialized(); // Flutter エンジンの初期化
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    ); // Firebase の初期設定
+    final locale = WidgetsBinding.instance.platformDispatcher.locale;
+    final loc = await AppLocalizations.delegate.load(locale);
+    final notification = NotificationService();
+    await notification.init();
+    await notification.scheduleWeekly(
+      id: 0,
+      title: loc.buyListNotificationTitle,
+      body: loc.buyListNotificationBody,
+    );
+    setState(() => _initialized = true);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_initialized) {
+      // 初期化中はローディング画面を表示
+      return const MaterialApp(
+        home: Scaffold(body: Center(child: CircularProgressIndicator())),
+      );
+    }
+    return const MyApp();
+  }
 }
 
 // アプリのルートウィジェット
