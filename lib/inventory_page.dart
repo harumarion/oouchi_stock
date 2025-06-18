@@ -4,7 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:oouchi_stock/i18n/app_localizations.dart';
 import 'add_inventory_page.dart';
 import 'add_category_page.dart';
-import 'buy_list_page.dart';
 import 'price_list_page.dart';
 import 'settings_page.dart';
 import 'inventory_detail_page.dart';
@@ -14,6 +13,7 @@ import 'main.dart';
 import 'data/repositories/inventory_repository_impl.dart';
 import 'domain/entities/category.dart';
 import 'domain/entities/inventory.dart';
+import 'domain/entities/category_order.dart';
 import 'domain/usecases/watch_inventories.dart';
 import 'domain/usecases/delete_inventory.dart';
 
@@ -48,23 +48,30 @@ class _InventoryPageState extends State<InventoryPage> {
     super.initState();
     if (widget.categories != null) {
       _categories = List.from(widget.categories!);
-      _categoriesLoaded = true;
+      applyCategoryOrder(_categories).then((list) {
+        setState(() {
+          _categories = list;
+          _categoriesLoaded = true;
+        });
+      });
     } else {
       // Firestore からカテゴリ一覧を取得して監視
       _catSub = FirebaseFirestore.instance
           .collection('categories')
           .orderBy('createdAt')
           .snapshots()
-          .listen((snapshot) {
+          .listen((snapshot) async {
+        var list = snapshot.docs.map((d) {
+          final data = d.data();
+          return Category(
+            id: data['id'] ?? 0,
+            name: data['name'] ?? '',
+            createdAt: (data['createdAt'] as Timestamp).toDate(),
+          );
+        }).toList();
+        list = await applyCategoryOrder(list);
         setState(() {
-          _categories = snapshot.docs.map((d) {
-            final data = d.data();
-            return Category(
-              id: data['id'] ?? 0,
-              name: data['name'] ?? '',
-              createdAt: (data['createdAt'] as Timestamp).toDate(),
-            );
-          }).toList();
+          _categories = list;
           _categoriesLoaded = true;
         });
       });
@@ -137,13 +144,6 @@ class _InventoryPageState extends State<InventoryPage> {
                       context,
                       MaterialPageRoute(builder: (_) => const PriceListPage()),
                     );
-                  } else if (value == 'buylist') {
-                    // 買い物リスト画面を開く
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (_) => BuyListPage(categories: _categories)),
-                    );
                   } else if (value == 'settings') {
                     // 設定画面を開く
                     Navigator.push(
@@ -169,10 +169,6 @@ class _InventoryPageState extends State<InventoryPage> {
                   PopupMenuItem(
                       value: 'price',
                       child: Text(AppLocalizations.of(context)!.priceManagement,
-                          style: const TextStyle(fontSize: 18))),
-                  PopupMenuItem(
-                      value: 'buylist',
-                      child: Text(AppLocalizations.of(context)!.buyList,
                           style: const TextStyle(fontSize: 18))),
                   PopupMenuItem(
                       value: 'settings',

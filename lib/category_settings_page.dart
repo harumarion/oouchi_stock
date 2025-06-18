@@ -4,7 +4,9 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'add_category_page.dart';
 import 'edit_category_page.dart';
+import 'reorder_categories_page.dart';
 import 'domain/entities/category.dart';
+import 'domain/entities/category_order.dart';
 
 /// カテゴリを一覧表示し追加・削除・編集を行う画面。
 class CategorySettingsPage extends StatefulWidget {
@@ -32,18 +34,21 @@ class _CategorySettingsPageState extends State<CategorySettingsPage> {
         .collection('categories')
         .orderBy('createdAt')
         .snapshots()
-        .listen((snapshot) {
+        .listen((snapshot) async {
+      var list = snapshot.docs.map((d) {
+        final data = d.data();
+        return Category(
+          id: data['id'] ?? 0,
+          name: data['name'] ?? '',
+          createdAt: (data['createdAt'] as Timestamp).toDate(),
+        );
+      }).toList();
+      list = await applyCategoryOrder(list);
       setState(() {
-        _list = snapshot.docs.map((d) {
-          final data = d.data();
-          return Category(
-            id: data['id'] ?? 0,
-            name: data['name'] ?? '',
-            createdAt: (data['createdAt'] as Timestamp).toDate(),
-          );
-        }).toList();
+        _list = list;
       });
-      widget.onChanged(List.from(_list));
+      await saveCategoryOrder(list);
+      widget.onChanged(List.from(list));
     });
   }
 
@@ -75,6 +80,21 @@ class _CategorySettingsPageState extends State<CategorySettingsPage> {
     }
   }
 
+  /// 並び順変更画面を開き、結果を保存する
+  Future<void> _openReorder() async {
+    final result = await Navigator.push<List<Category>>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ReorderCategoriesPage(categories: _list),
+      ),
+    );
+    if (result != null) {
+      await saveCategoryOrder(result);
+      setState(() => _list = result);
+      widget.onChanged(List.from(result));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -101,6 +121,11 @@ class _CategorySettingsPageState extends State<CategorySettingsPage> {
                           title: Text(AppLocalizations.of(context)!.delete),
                           onTap: () => Navigator.pop(context, 'delete'),
                         ),
+                        ListTile(
+                          leading: const Icon(Icons.swap_vert),
+                          title: Text(AppLocalizations.of(context)!.reorder),
+                          onTap: () => Navigator.pop(context, 'reorder'),
+                        ),
                       ],
                     ),
                   ),
@@ -114,6 +139,8 @@ class _CategorySettingsPageState extends State<CategorySettingsPage> {
                       builder: (_) => EditCategoryPage(category: c),
                     ),
                   );
+                } else if (result == 'reorder') {
+                  await _openReorder();
                 }
               },
             ),

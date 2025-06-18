@@ -21,6 +21,7 @@
   "delete": "Delete",
   "deleted": "Deleted",
   "deleteFailed": "Failed to delete",
+  "reorder": "Reorder",
   "itemNameRequired": "Item name is required",
   "required": "Required",
   "inventoryAddTitle": "Add Item",
@@ -69,5 +70,7 @@
   "daysLabel": "Days",
   "searchHint": "Search",
   "sortAlphabet": "Alphabetical",
-  "sortUpdated": "Last updated"
+  "sortUpdated": "Last updated",
+  "offline": "Offline",
+  "online": "Online"
 }

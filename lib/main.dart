@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:oouchi_stock/i18n/app_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'firebase_options.dart'; // ← 自動生成された設定ファイル
 import 'domain/entities/category.dart';
@@ -36,6 +39,8 @@ class _AppLoaderState extends State<AppLoader> {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     ); // Firebase の初期設定
+    await FirebaseAuth.instance.signInAnonymously();
+    FirebaseFirestore.instance.settings = const Settings(persistenceEnabled: true);
     final locale = WidgetsBinding.instance.platformDispatcher.locale;
     final loc = await AppLocalizations.delegate.load(locale);
     final notification = NotificationService();
@@ -71,11 +76,22 @@ class MyApp extends StatefulWidget {
 
 class MyAppState extends State<MyApp> {
   Locale? _locale;
+  final _messengerKey = GlobalKey<ScaffoldMessengerState>();
+  StreamSubscription<ConnectivityResult>? _connSub;
 
   @override
   void initState() {
     super.initState();
     _loadLocale();
+    _connSub = Connectivity().onConnectivityChanged.listen((result) {
+      final offline = result == ConnectivityResult.none;
+      final text = offline
+          ? AppLocalizations.of(context)!.offline
+          : AppLocalizations.of(context)!.online;
+      _messengerKey.currentState?.showSnackBar(
+        SnackBar(content: Text(text)),
+      );
+    });
   }
 
   Future<void> _loadLocale() async {
@@ -94,8 +110,15 @@ class MyAppState extends State<MyApp> {
   }
 
   @override
+  void dispose() {
+    _connSub?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scaffoldMessengerKey: _messengerKey,
       onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
       localizationsDelegates: const [
         AppLocalizations.delegate,
