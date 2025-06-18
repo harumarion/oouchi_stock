@@ -18,6 +18,7 @@ import 'domain/usecases/delete_inventory.dart';
 
 /// 在庫一覧画面。カテゴリごとの在庫をタブ形式で表示する。
 class InventoryPage extends StatefulWidget {
+  /// 起動時に受け取るカテゴリ一覧。null の場合は Firestore から取得する
   final List<Category>? categories;
   const InventoryPage({super.key, this.categories});
 
@@ -26,11 +27,14 @@ class InventoryPage extends StatefulWidget {
 }
 
 class _InventoryPageState extends State<InventoryPage> {
+  /// Firestore から取得したカテゴリ一覧
   List<Category> _categories = [];
+  /// カテゴリが読み込み済みかどうかのフラグ
   bool _categoriesLoaded = false;
+  /// カテゴリコレクションを監視するストリーム購読
   StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _catSub;
 
-  /// カテゴリ設定画面で編集後にリストを更新する
+  /// 設定画面から戻った際にカテゴリリストを更新する
   void _updateCategories(List<Category> list) {
     setState(() {
       _categories = List.from(list);
@@ -74,12 +78,14 @@ class _InventoryPageState extends State<InventoryPage> {
 
   @override
   Widget build(BuildContext context) {
+    // 画面描画。カテゴリが読み込まれるまではローディングを表示
     if (!_categoriesLoaded) {
       return Scaffold(
         appBar: AppBar(title: Text(AppLocalizations.of(context)!.appTitle)),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
+    // カテゴリがまだ存在しない場合は追加を促す画面を表示
     if (_categories.isEmpty) {
       return Scaffold(
         appBar: AppBar(title: Text(AppLocalizations.of(context)!.appTitle)),
@@ -192,7 +198,9 @@ class InventoryList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 指定カテゴリの在庫一覧をストリームで監視して表示
     final watchUsecase = WatchInventories(InventoryRepositoryImpl());
+    // 削除処理を行うユースケース
     final deleteUsecase = DeleteInventory(InventoryRepositoryImpl());
     return StreamBuilder<List<Inventory>>(
       stream: watchUsecase(category),
@@ -244,7 +252,7 @@ class InventoryList extends StatelessWidget {
                       ],
                     ),
                   ),
-                );
+                ); // 選択結果が 'edit' または 'delete' で返る
                 if (result == 'delete') {
                   try {
                     await deleteUsecase(inv.id);
