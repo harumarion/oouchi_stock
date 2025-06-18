@@ -42,6 +42,7 @@ class _BuyListConditionSettingsPageState
     });
   }
 
+  // 保存ボタンを押したときに実行される処理
   Future<void> _save() async {
     // テキストフィールドの内容を変数へ反映
     _threshold = double.tryParse(_thresholdController.text) ?? _threshold;
@@ -100,6 +101,7 @@ class _BuyListConditionSettingsPageState
           ),
           const SizedBox(height: 16),
           ElevatedButton(
+            // 保存ボタンが押されたときの処理
             onPressed: () async {
               await _save();
               if (mounted) Navigator.pop(context, true);

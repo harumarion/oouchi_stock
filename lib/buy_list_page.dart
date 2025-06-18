@@ -30,6 +30,7 @@ class _BuyListPageState extends State<BuyListPage> {
     _load();
   }
 
+  // 画面起動時に呼び出し、カテゴリ一覧と条件設定を読み込む
   Future<void> _load() async {
     if (widget.categories != null) {
       _categories = List.from(widget.categories!);
@@ -62,7 +63,8 @@ class _BuyListPageState extends State<BuyListPage> {
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.buyListTitle),
       ),
-      body: StreamBuilder<List<Inventory>>(
+      // 在庫データのストリームを監視してリストを更新
+      body: StreamBuilder<List<Inventory>>( 
         stream: strategy.watch(repo),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
@@ -83,6 +85,7 @@ class _BuyListPageState extends State<BuyListPage> {
               for (final inv in list)
                 InventoryCard(
                   inventory: inv,
+                  // 在庫カードタップで詳細画面へ遷移
                   onTap: () {
                     Navigator.push(
                       context,
