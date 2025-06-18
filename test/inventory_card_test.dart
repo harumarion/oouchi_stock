@@ -14,7 +14,24 @@ void main() {
       unit: '個',
       createdAt: DateTime.now(),
     );
-    await tester.pumpWidget(MaterialApp(home: InventoryCard(inventory: inv)));
+    await tester
+        .pumpWidget(MaterialApp(home: InventoryCard(inventory: inv)));
     expect(find.textContaining('ティッシュ'), findsOneWidget);
+  });
+
+  testWidgets('buyOnly オプションで購入ボタンのみ表示',
+      (WidgetTester tester) async {
+    final inv = Inventory(
+      id: '2',
+      itemName: 'トイレットペーパー',
+      category: '日用品',
+      itemType: '消耗品',
+      quantity: 1.0,
+      unit: '個',
+      createdAt: DateTime.now(),
+    );
+    await tester
+        .pumpWidget(MaterialApp(home: InventoryCard(inventory: inv, buyOnly: true)));
+    expect(find.byType(IconButton), findsOneWidget);
   });
 }

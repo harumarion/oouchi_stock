@@ -83,8 +83,10 @@ class _BuyListPageState extends State<BuyListPage> {
             padding: const EdgeInsets.all(16),
             children: [
               for (final inv in list)
+                // 買うべきリストでは購入のみ可能
                 InventoryCard(
                   inventory: inv,
+                  buyOnly: true, // 購入ボタンのみ表示
                   // 在庫カードタップで詳細画面へ遷移
                   onTap: () {
                     Navigator.push(
