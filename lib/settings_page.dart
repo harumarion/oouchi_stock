@@ -3,6 +3,7 @@ import 'package:oouchi_stock/i18n/app_localizations.dart';
 import 'category_settings_page.dart';
 import 'item_type_settings_page.dart';
 import 'language_settings_page.dart';
+import 'buy_list_condition_settings_page.dart';
 import 'domain/entities/category.dart';
 
 /// 設定画面。カテゴリ設定ページへの遷移を提供する
@@ -10,11 +11,13 @@ class SettingsPage extends StatelessWidget {
   final List<Category> categories;
   final ValueChanged<List<Category>> onChanged;
   final ValueChanged<Locale> onLocaleChanged;
+  final VoidCallback onConditionChanged;
   const SettingsPage({
     super.key,
     required this.categories,
     required this.onChanged,
     required this.onLocaleChanged,
+    required this.onConditionChanged,
   });
 
   @override
@@ -61,6 +64,18 @@ class SettingsPage extends StatelessWidget {
               ),
             );
             if (locale != null) onLocaleChanged(locale);
+          },
+        ),
+        ListTile(
+          title: Text(AppLocalizations.of(context)!.buyListConditionSettings),
+          onTap: () async {
+            final changed = await Navigator.push<bool>(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const BuyListConditionSettingsPage(),
+              ),
+            );
+            if (changed == true) onConditionChanged();
           },
         ),
       ],

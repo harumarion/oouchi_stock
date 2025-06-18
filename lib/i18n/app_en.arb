@@ -61,4 +61,10 @@
   "noBuyItems": "No items to buy",
   "buyListNotificationTitle": "Shopping Reminder",
   "buyListNotificationBody": "Check items to buy"
+  "buyListConditionSettings": "Buy List Condition Settings",
+  "thresholdCondition": "Quantity below threshold",
+  "daysCondition": "Prediction within days",
+  "orCondition": "Either condition",
+  "thresholdLabel": "Threshold",
+  "daysLabel": "Days",
 }

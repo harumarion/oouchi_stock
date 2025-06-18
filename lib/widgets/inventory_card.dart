@@ -13,10 +13,12 @@ class InventoryCard extends StatelessWidget {
   final UpdateQuantity _update = UpdateQuantity(InventoryRepositoryImpl());
   final InventoryRepositoryImpl _repository = InventoryRepositoryImpl();
   final Stocktake _stocktake = Stocktake(InventoryRepositoryImpl());
+  final VoidCallback? onTap;
 
   InventoryCard({
     super.key,
     required this.inventory,
+    this.onTap,
   });
 
   /// 履歴を読み込み購入予測日を計算する。
@@ -142,9 +144,11 @@ class InventoryCard extends StatelessWidget {
         final dateText = predicted != null
             ? _formatDate(predicted)
             : AppLocalizations.of(context)!.calculating;
-        return Card(
-          margin: const EdgeInsets.only(bottom: 12),
-          child: Padding(
+        return InkWell(
+          onTap: onTap,
+          child: Card(
+            margin: const EdgeInsets.only(bottom: 12),
+            child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
