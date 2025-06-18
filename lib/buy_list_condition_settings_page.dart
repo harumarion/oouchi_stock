@@ -10,35 +10,59 @@ class BuyListConditionSettingsPage extends StatefulWidget {
   State<BuyListConditionSettingsPage> createState() => _BuyListConditionSettingsPageState();
 }
 
-class _BuyListConditionSettingsPageState extends State<BuyListConditionSettingsPage> {
+class _BuyListConditionSettingsPageState
+    extends State<BuyListConditionSettingsPage> {
+  // 現在選択されている条件種別
   BuyListConditionType _type = BuyListConditionType.threshold;
+  // しきい値入力用コントローラ
+  late TextEditingController _thresholdController;
+  // 日数入力用コントローラ
+  late TextEditingController _daysController;
+  // 入力値を保持する変数
   double _threshold = 0;
   int _days = 7;
 
   @override
   void initState() {
     super.initState();
+    _thresholdController = TextEditingController();
+    _daysController = TextEditingController();
     _load();
   }
 
   Future<void> _load() async {
+    // 保存済みの条件を取得
     final settings = await loadBuyListConditionSettings();
     setState(() {
       _type = settings.type;
       _threshold = settings.threshold;
       _days = settings.days;
+      _thresholdController.text = _threshold.toString();
+      _daysController.text = _days.toString();
     });
   }
 
   Future<void> _save() async {
+    // テキストフィールドの内容を変数へ反映
+    _threshold = double.tryParse(_thresholdController.text) ?? _threshold;
+    _days = int.tryParse(_daysController.text) ?? _days;
     await saveBuyListConditionSettings(
       BuyListConditionSettings(type: _type, threshold: _threshold, days: _days),
     );
   }
 
   @override
+  void dispose() {
+    // コントローラを破棄してメモリリークを防ぐ
+    _thresholdController.dispose();
+    _daysController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
+    // 画面描画。しきい値や日数を入力し、保存ボタンで設定を更新する
     return Scaffold(
       appBar: AppBar(title: Text(loc.buyListConditionSettings)),
       body: ListView(
@@ -53,7 +77,7 @@ class _BuyListConditionSettingsPageState extends State<BuyListConditionSettingsP
           TextField(
             decoration: InputDecoration(labelText: loc.thresholdLabel),
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            controller: TextEditingController(text: _threshold.toString()),
+            controller: _thresholdController,
             onChanged: (v) => _threshold = double.tryParse(v) ?? _threshold,
           ),
           RadioListTile<BuyListConditionType>(
@@ -65,7 +89,7 @@ class _BuyListConditionSettingsPageState extends State<BuyListConditionSettingsP
           TextField(
             decoration: InputDecoration(labelText: loc.daysLabel),
             keyboardType: TextInputType.number,
-            controller: TextEditingController(text: _days.toString()),
+            controller: _daysController,
             onChanged: (v) => _days = int.tryParse(v) ?? _days,
           ),
           RadioListTile<BuyListConditionType>(
