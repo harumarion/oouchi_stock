@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:oouchi_stock/i18n/app_localizations.dart';
 import 'domain/entities/buy_list_condition_settings.dart';
 
-/// 買うべきリスト条件設定画面
+/// 買い物予報条件設定画面
+/// 設定画面から遷移し、予報に使用するしきい値や日数を入力する
 class BuyListConditionSettingsPage extends StatefulWidget {
   const BuyListConditionSettingsPage({super.key});
 

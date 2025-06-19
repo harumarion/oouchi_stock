@@ -5,7 +5,7 @@ import 'package:oouchi_stock/buy_list_condition_settings_page.dart';
 void main() {
   testWidgets('BuyListConditionSettingsPage 表示', (tester) async {
     await tester.pumpWidget(const MaterialApp(home: BuyListConditionSettingsPage()));
-    expect(find.text('買うべきリスト条件設定'), findsOneWidget);
+    expect(find.text('買い物予報条件設定'), findsOneWidget);
   });
 
   testWidgets('入力値が状態として保持される', (tester) async {

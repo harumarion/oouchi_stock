@@ -16,7 +16,7 @@ void main() {
     ));
     expect(find.text('カテゴリ設定'), findsOneWidget);
     expect(find.text('言語'), findsOneWidget);
-    expect(find.text('買うべきリスト条件設定'), findsOneWidget);
+    expect(find.text('買い物予報条件設定'), findsOneWidget);
     expect(find.text('バックアップ'), findsOneWidget);
     expect(find.text('復元'), findsOneWidget);
   });

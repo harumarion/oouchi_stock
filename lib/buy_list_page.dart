@@ -11,7 +11,8 @@ import 'domain/services/buy_list_strategy.dart';
 import 'inventory_detail_page.dart';
 import 'widgets/inventory_card.dart';
 
-/// 買うべきリスト画面
+/// 買い物予報画面
+/// ホーム画面のメニューから遷移し、今買っておいた方が良い商品を表示する
 class BuyListPage extends StatefulWidget {
   final List<Category>? categories;
   const BuyListPage({super.key, this.categories});

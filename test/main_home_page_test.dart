@@ -7,6 +7,6 @@ void main() {
   testWidgets('HomePage で買い物リストが表示される', (WidgetTester tester) async {
     final categories = [Category(id: 1, name: '日用品', createdAt: DateTime.now())];
     await tester.pumpWidget(MaterialApp(home: HomePage(categories: categories)));
-    expect(find.text('買うべきリスト'), findsOneWidget);
+    expect(find.text('買い物予報'), findsOneWidget);
   });
 }
