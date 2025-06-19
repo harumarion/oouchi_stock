@@ -20,7 +20,7 @@ double _currentQuantity(List<HistoryEntry> history) {
   return total;
 }
 
-/// 買うべきリスト抽出用ストラテジー
+/// 買い物予報抽出用ストラテジー
 abstract class BuyListStrategy {
   Stream<List<Inventory>> watch(InventoryRepository repository);
 }

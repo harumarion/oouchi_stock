@@ -35,7 +35,7 @@ class _HomePageState extends State<HomePage> {
   bool _categoriesLoaded = false;
   /// カテゴリコレクションを監視するストリーム購読
   StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _catSub;
-  /// 買うべきリスト条件設定
+  /// 買い物予報の条件設定
   BuyListConditionSettings? _conditionSettings;
 
   /// 設定画面から戻った際にカテゴリリストを更新する
@@ -121,7 +121,7 @@ class _HomePageState extends State<HomePage> {
       );
     }
 
-    // 買うべきリスト抽出ストラテジーを作成
+    // 買い物予報を生成するストラテジーを作成
     if (_conditionSettings == null) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
