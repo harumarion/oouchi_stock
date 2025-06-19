@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'util/firestore_refs.dart';
 
 import 'domain/entities/category.dart';
 import 'package:oouchi_stock/i18n/app_localizations.dart';
@@ -29,7 +30,7 @@ class _AddItemTypePageState extends State<AddItemTypePage> {
   Future<void> _save() async {
     try {
       final id = Random().nextInt(0xffffffff);
-      await FirebaseFirestore.instance.collection('itemTypes').add({
+      await userCollection('itemTypes').add({
         'id': id,
         'category': _category?.name ?? '',
         'name': _name,

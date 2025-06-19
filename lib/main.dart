@@ -2,14 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:oouchi_stock/i18n/app_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'firebase_options.dart'; // ← 自動生成された設定ファイル
 import 'domain/entities/category.dart';
 import 'notification_service.dart';
 import 'home_page.dart';
+import 'login_page.dart';
 
 // アプリのエントリーポイント。初期化処理中はローディング画面を表示する。
 
@@ -27,6 +28,7 @@ class AppLoader extends StatefulWidget {
 
 class _AppLoaderState extends State<AppLoader> {
   bool _initialized = false;
+  bool _loggedIn = false;
 
   @override
   void initState() {
@@ -39,8 +41,16 @@ class _AppLoaderState extends State<AppLoader> {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     ); // Firebase の初期設定
-    await FirebaseAuth.instance.signInAnonymously();
     FirebaseFirestore.instance.settings = const Settings(persistenceEnabled: true);
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      await _setupNotification();
+      _loggedIn = true;
+    }
+    setState(() => _initialized = true);
+  }
+
+  Future<void> _setupNotification() async {
     final locale = WidgetsBinding.instance.platformDispatcher.locale;
     final loc = await AppLocalizations.delegate.load(locale);
     final notification = NotificationService();
@@ -50,7 +60,6 @@ class _AppLoaderState extends State<AppLoader> {
       title: loc.buyListNotificationTitle,
       body: loc.buyListNotificationBody,
     );
-    setState(() => _initialized = true);
   }
 
   @override
@@ -60,6 +69,13 @@ class _AppLoaderState extends State<AppLoader> {
       return const MaterialApp(
         home: Scaffold(body: Center(child: CircularProgressIndicator())),
       );
+    }
+    if (!_loggedIn) {
+      // 未ログインならログイン画面を表示
+      return MaterialApp(home: LoginPage(onLoggedIn: () async {
+        await _setupNotification();
+        setState(() => _loggedIn = true);
+      }));
     }
     return const MyApp();
   }

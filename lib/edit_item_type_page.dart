@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'util/firestore_refs.dart';
 
 import 'domain/entities/item_type.dart';
 import 'domain/entities/category.dart';
@@ -35,8 +36,7 @@ class _EditItemTypePageState extends State<EditItemTypePage> {
 
   Future<void> _save() async {
     try {
-      final snapshot = await FirebaseFirestore.instance
-          .collection('itemTypes')
+      final snapshot = await userCollection('itemTypes')
           .where('id', isEqualTo: widget.itemType.id)
           .get();
       for (final doc in snapshot.docs) {

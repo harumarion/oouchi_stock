@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'util/firestore_refs.dart';
 
 import 'domain/entities/item_type.dart';
 import 'domain/entities/category.dart';
@@ -24,8 +25,7 @@ class _ItemTypeSettingsPageState extends State<ItemTypeSettingsPage> {
   @override
   void initState() {
     super.initState();
-    _sub = FirebaseFirestore.instance
-        .collection('itemTypes')
+    _sub = userCollection('itemTypes')
         .orderBy('createdAt')
         .snapshots()
         .listen((snapshot) async {
@@ -55,8 +55,7 @@ class _ItemTypeSettingsPageState extends State<ItemTypeSettingsPage> {
 
   Future<void> _delete(ItemType item) async {
     try {
-      final snapshot = await FirebaseFirestore.instance
-          .collection('itemTypes')
+      final snapshot = await userCollection('itemTypes')
           .where('id', isEqualTo: item.id)
           .get();
       for (final doc in snapshot.docs) {

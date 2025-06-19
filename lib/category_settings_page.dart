@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:oouchi_stock/i18n/app_localizations.dart';
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'util/firestore_refs.dart';
 import 'add_category_page.dart';
 import 'edit_category_page.dart';
 import 'reorder_categories_page.dart';
@@ -30,8 +31,7 @@ class _CategorySettingsPageState extends State<CategorySettingsPage> {
   void initState() {
     super.initState();
     _list = List.from(widget.initial);
-    _sub = FirebaseFirestore.instance
-        .collection('categories')
+    _sub = userCollection('categories')
         .orderBy('createdAt')
         .snapshots()
         .listen((snapshot) async {
@@ -61,8 +61,7 @@ class _CategorySettingsPageState extends State<CategorySettingsPage> {
   /// 削除ボタンの処理
   Future<void> _deleteCategory(Category category) async {
     try {
-      final snapshot = await FirebaseFirestore.instance
-          .collection('categories')
+      final snapshot = await userCollection('categories')
           .where('id', isEqualTo: category.id)
           .get();
       for (final doc in snapshot.docs) {

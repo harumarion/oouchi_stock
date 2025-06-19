@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:oouchi_stock/i18n/app_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'util/firestore_refs.dart';
 import 'domain/entities/inventory.dart';
 import 'domain/entities/category.dart';
 import 'default_item_types.dart';
@@ -71,8 +72,7 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
         _category = _categories.first;
       }
     } else {
-      _catSub = FirebaseFirestore.instance
-          .collection('categories')
+      _catSub = userCollection('categories')
           .orderBy('createdAt')
           .snapshots()
           .listen((snapshot) {
@@ -93,8 +93,7 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
         });
       });
     }
-    _typeSub = FirebaseFirestore.instance
-        .collection('itemTypes')
+    _typeSub = userCollection('itemTypes')
         .orderBy('createdAt')
         .snapshots()
         .listen((snapshot) async {

@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:oouchi_stock/i18n/app_localizations.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'util/firestore_refs.dart';
 
 /// カテゴリを追加する画面。
 /// 入力されたカテゴリ名を Firestore の `categories` コレクションに保存する。
@@ -20,8 +21,7 @@ class _AddCategoryPageState extends State<AddCategoryPage> {
   Future<void> _save() async {
     try {
       final id = Random().nextInt(0xffffffff);
-      await FirebaseFirestore.instance
-          .collection('categories')
+      await userCollection('categories')
           .add({'id': id, 'name': _name, 'createdAt': Timestamp.now()});
       if (!mounted) return;
       await ScaffoldMessenger.of(context)

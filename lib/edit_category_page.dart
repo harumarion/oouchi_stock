@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:oouchi_stock/i18n/app_localizations.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'util/firestore_refs.dart';
 
 import 'domain/entities/category.dart';
 
@@ -26,8 +27,7 @@ class _EditCategoryPageState extends State<EditCategoryPage> {
   /// 保存ボタンの処理
   Future<void> _save() async {
     try {
-      final snapshot = await FirebaseFirestore.instance
-          .collection('categories')
+      final snapshot = await userCollection('categories')
           .where('id', isEqualTo: widget.category.id)
           .get();
       for (final doc in snapshot.docs) {

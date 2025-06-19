@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:oouchi_stock/i18n/app_localizations.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'util/firestore_refs.dart';
 import 'domain/entities/inventory.dart';
 import 'domain/entities/category.dart';
 import 'domain/usecases/update_inventory.dart';
@@ -56,8 +57,7 @@ class _EditInventoryPageState extends State<EditInventoryPage> {
     _itemType = widget.itemType;
     _unit = widget.unit;
     _note = widget.note;
-    _catSub = FirebaseFirestore.instance
-        .collection('categories')
+    _catSub = userCollection('categories')
         .orderBy('createdAt')
         .snapshots()
         .listen((snapshot) {
@@ -77,8 +77,7 @@ class _EditInventoryPageState extends State<EditInventoryPage> {
         }
       });
     });
-    _typeSub = FirebaseFirestore.instance
-        .collection('itemTypes')
+    _typeSub = userCollection('itemTypes')
         .orderBy('createdAt')
         .snapshots()
         .listen((snapshot) async {

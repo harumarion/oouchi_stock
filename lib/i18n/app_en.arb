@@ -73,4 +73,11 @@
   "sortUpdated": "Last updated",
   "offline": "Offline",
   "online": "Online"
+  ,"loginTitle": "Login"
+  ,"signInWithGoogle": "Sign in with Google"
+  ,"anonymousLogin": "Continue anonymously"
+  ,"backup": "Backup"
+  ,"restore": "Restore"
+  ,"backupDone": "Backup completed"
+  ,"restoreDone": "Restore completed"
 }
