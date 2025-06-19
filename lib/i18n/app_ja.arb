@@ -73,6 +73,7 @@
   "buyListNotificationTitle": "買い物リマインダー",
   "buyListNotificationBody": "買い物予報を確認してください",
   "buyListConditionSettings": "買い物予報条件設定",
+  "saleList": "買い得リスト",
   "thresholdCondition": "在庫数がしきい値以下",
   "daysCondition": "予測日が日数以内",
   "orCondition": "どちらかの条件を満たす",
