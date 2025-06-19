@@ -6,6 +6,8 @@ import 'domain/entities/price_info.dart';
 import 'domain/usecases/delete_price_info.dart';
 import 'domain/usecases/watch_price_by_type.dart';
 
+// セール情報履歴画面
+
 class PriceHistoryPage extends StatelessWidget {
   final String category;
   final String itemType;

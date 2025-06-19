@@ -8,6 +8,8 @@ import 'domain/entities/price_info.dart';
 import 'domain/usecases/add_price_info.dart';
 import 'domain/usecases/fetch_all_inventory.dart';
 
+// セール情報追加画面
+
 class AddPricePage extends StatefulWidget {
   const AddPricePage({super.key});
 
