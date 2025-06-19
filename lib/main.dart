@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:oouchi_stock/i18n/app_localizations.dart';
@@ -94,12 +95,14 @@ class MyApp extends StatefulWidget {
 class MyAppState extends State<MyApp> {
   Locale? _locale;
   final _messengerKey = GlobalKey<ScaffoldMessengerState>();
+  // 接続状態の変化を監視するためのストリーム購読
   StreamSubscription<ConnectivityResult>? _connSub;
 
   @override
   void initState() {
     super.initState();
     _loadLocale();
+    // 接続状態が変わった際にオンライン/オフラインのメッセージを表示
     _connSub = Connectivity().onConnectivityChanged.listen((result) {
       final offline = result == ConnectivityResult.none;
       final text = offline
@@ -128,6 +131,7 @@ class MyAppState extends State<MyApp> {
 
   @override
   void dispose() {
+    // ストリーム購読を解除してリソースを解放
     _connSub?.cancel();
     super.dispose();
   }
