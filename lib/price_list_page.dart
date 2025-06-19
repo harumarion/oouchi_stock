@@ -15,6 +15,8 @@ import 'domain/usecases/watch_price_by_category.dart';
 import 'price_history_page.dart';
 import 'main.dart';
 
+// セール情報管理画面
+
 class PriceListPage extends StatefulWidget {
   const PriceListPage({super.key});
 
@@ -114,6 +116,7 @@ class _PriceListPageState extends State<PriceListPage> {
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
+            // セール情報追加画面を開く
             Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const AddPricePage()),
@@ -136,7 +139,7 @@ class PriceCategoryList extends StatefulWidget {
 
 class _PriceCategoryListState extends State<PriceCategoryList> {
   String _search = '';
-  String _sort = 'updated';
+  String _sort = 'updated'; // デフォルトは最終更新順
   final TextEditingController _controller = TextEditingController();
 
   @override
@@ -179,6 +182,10 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
                     value: 'updated',
                     child: Text(AppLocalizations.of(context)!.sortUpdated),
                   ),
+                  DropdownMenuItem(
+                    value: 'unitPrice',
+                    child: Text(AppLocalizations.of(context)!.sortUnitPrice),
+                  ),
                 ],
               ),
             ],
@@ -212,8 +219,11 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
                       e.itemType.contains(_search))
                   .toList();
               // 選択された並び替え順に従ってソート
+              // 並び替えの条件に応じてソートを実行
               if (_sort == 'alphabet') {
                 items.sort((a, b) => a.itemType.compareTo(b.itemType));
+              } else if (_sort == 'unitPrice') {
+                items.sort((a, b) => a.unitPrice.compareTo(b.unitPrice));
               } else {
                 items.sort((a, b) => b.checkedAt.compareTo(a.checkedAt));
               }
@@ -221,33 +231,32 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
                 scrollDirection: Axis.vertical,
                 child: SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
-                  child: DataTable(
+                    child: DataTable(
                     columns: [
                       DataColumn(label: Text(AppLocalizations.of(context)!.itemName)),
-                      DataColumn(label: Text(AppLocalizations.of(context)!.count)),
-                      DataColumn(label: Text(AppLocalizations.of(context)!.unit)),
+                      DataColumn(label: Text(AppLocalizations.of(context)!.quantity)),
                       DataColumn(label: Text(AppLocalizations.of(context)!.volume)),
                       DataColumn(label: Text(AppLocalizations.of(context)!.totalVolumeLabel)),
                       DataColumn(label: Text(AppLocalizations.of(context)!.regularPrice)),
                       DataColumn(label: Text(AppLocalizations.of(context)!.salePrice)),
                       DataColumn(label: Text(AppLocalizations.of(context)!.shop)),
-                      DataColumn(label: Text(AppLocalizations.of(context)!.unitPriceLabel)),
+                      DataColumn(label: Text(AppLocalizations.of(context)!.expiry)),
                     ],
                     rows: [
                       for (final p in items)
                         DataRow(
                           cells: [
                             DataCell(Text(p.itemName)),
-                            DataCell(Text(p.count.toString())),
-                            DataCell(Text(p.unit)),
+                            DataCell(Text('${p.count} ${p.unit}')),
                             DataCell(Text(p.volume.toString())),
                             DataCell(Text(p.totalVolume.toString())),
                             DataCell(Text(p.regularPrice.toString())),
                             DataCell(Text(p.salePrice.toString())),
                             DataCell(Text(p.shop)),
-                            DataCell(Text(p.unitPrice.toStringAsFixed(2))),
+                            DataCell(Text(_formatDate(p.checkedAt))),
                           ],
                           onSelectChanged: (_) {
+                            // 履歴画面へ遷移
                             Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -268,5 +277,10 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
         ),
       ],
     );
+  }
+
+  // 日付を表示用の文字列に変換
+  String _formatDate(DateTime d) {
+    return '${d.year}/${d.month}/${d.day}';
   }
 }
