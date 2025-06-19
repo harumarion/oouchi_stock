@@ -43,6 +43,9 @@ class _AppLoaderState extends State<AppLoader> {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     ); // Firebase の初期設定
+    // 起動時の端末言語を FirebaseAuth に反映する
+    final systemLocale = WidgetsBinding.instance.platformDispatcher.locale;
+    FirebaseAuth.instance.setLanguageCode(systemLocale.languageCode);
     FirebaseFirestore.instance.settings = const Settings(persistenceEnabled: true);
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
@@ -136,7 +139,11 @@ class MyAppState extends State<MyApp> {
   Future<void> _loadLocale() async {
     final prefs = await SharedPreferences.getInstance();
     final code = prefs.getString('locale');
-    if (code != null) setState(() => _locale = Locale(code));
+    if (code != null) {
+      // 保存済みの言語設定を FirebaseAuth に適用
+      FirebaseAuth.instance.setLanguageCode(code);
+      setState(() => _locale = Locale(code));
+    }
   }
 
   /// アプリ全体の言語設定を更新する
@@ -145,6 +152,9 @@ class MyAppState extends State<MyApp> {
   Future<void> updateLocale(Locale locale) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('locale', locale.languageCode);
+    // 設定画面で言語変更が行われた際に呼び出される
+    // FirebaseAuth にも同じロケールを設定する
+    FirebaseAuth.instance.setLanguageCode(locale.languageCode);
     setState(() => _locale = locale);
   }
 
