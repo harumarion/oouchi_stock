@@ -43,8 +43,11 @@ void main() {
       unit: '個',
       volume: 1,
       totalVolume: 1,
-      price: 100,
+      regularPrice: 120,
+      salePrice: 100,
       shop: 'A',
+      approvalUrl: '',
+      memo: '',
       unitPrice: 100,
     );
     final p2 = PriceInfo(
@@ -58,8 +61,11 @@ void main() {
       unit: '本',
       volume: 1,
       totalVolume: 1,
-      price: 50,
+      regularPrice: 70,
+      salePrice: 50,
       shop: 'B',
+      approvalUrl: '',
+      memo: '',
       unitPrice: 50,
     );
     final list = [p1, p2];
