@@ -45,7 +45,10 @@ class LoginPage extends StatelessWidget {
   /// 「匿名で続行」ボタンを押したときの処理
   ///
   /// Firebase の設定が不完全な場合は [FirebaseAuthException] が
-  /// 投げられるため、ここで捕捉してエラーメッセージを表示する
+  /// 投げられるため、ここで捕捉してエラーメッセージを表示する。
+  /// 例えば匿名認証を有効にしていないと `CONFIGURATION_NOT_FOUND`
+  /// エラーが発生するので、Firebase コンソールで Anonymous
+  /// Sign-in を有効にする必要がある。
   Future<void> _signInAnonymously(BuildContext context) async {
     try {
       await FirebaseAuth.instance.signInAnonymously();
