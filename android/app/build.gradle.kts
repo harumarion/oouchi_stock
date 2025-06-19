@@ -15,15 +15,19 @@ android {
     ndkVersion = "27.0.12077973"
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        // Java 17 を利用する設定。Flutter 3.13 以降の推奨バージョンに合わせています
+        // この設定は Android ビルド時に使用され、ホーム画面や在庫画面など
+        // すべての画面をビルドする際に適用されます
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
         // flutter_local_notifications などの依存ライブラリが利用する
-        // Java 8+ API を有効化するため desugaring をオンにする
+        // Java 8 以降の API を下位 API レベルでも利用できるよう desugaring を有効化
         isCoreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11.toString()
+        // Kotlin コンパイルターゲットも JDK 17 に合わせる
+        jvmTarget = JavaVersion.VERSION_17.toString()
     }
 
     defaultConfig {
