@@ -38,6 +38,10 @@ flutterfire configure
 - `FIREBASE_OPTIONS` : `firebase_options.dart` へのパス
 - `GOOGLE_APPLICATION_CREDENTIALS` : サービスアカウント認証情報の JSON ファイル
 
+Firebase Authentication を利用する場合は、Firebase コンソールで
+匿名認証や Google 認証など必要なログイン方法を有効にしてください。
+設定がされていないとログイン時に `CONFIGURATION_NOT_FOUND` エラーが発生します。
+
 ## Firestore のインデックス
 
 一部のクエリでは複合インデックスが必要となります。リポジトリには
