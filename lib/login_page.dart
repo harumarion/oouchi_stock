@@ -32,9 +32,12 @@ class LoginPage extends StatelessWidget {
         await FirebaseAuth.instance.signInWithCredential(credential);
       }
       onLoggedIn();
-    } catch (_) {
+    } on FirebaseAuthException catch (e) {
+      // 認証エラーの詳細を表示して原因特定を容易にする
+      final msg = '${AppLocalizations.of(context)!.saveFailed}: '
+          '${e.message ?? e.code}';
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.saveFailed)),
+        SnackBar(content: Text(msg)),
       );
     }
   }
@@ -47,9 +50,12 @@ class LoginPage extends StatelessWidget {
     try {
       await FirebaseAuth.instance.signInAnonymously();
       onLoggedIn();
-    } on FirebaseAuthException catch (_) {
+    } on FirebaseAuthException catch (e) {
+      // Firebase の設定不足や Play サービスの問題などで失敗した場合
+      final msg = '${AppLocalizations.of(context)!.saveFailed}: '
+          '${e.message ?? e.code}';
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.saveFailed)),
+        SnackBar(content: Text(msg)),
       );
     }
   }
