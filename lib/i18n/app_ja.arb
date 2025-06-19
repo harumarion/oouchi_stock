@@ -73,4 +73,11 @@
   "sortUpdated": "最終更新順",
   "offline": "オフラインになりました",
   "online": "オンラインに接続しました"
+  ,"loginTitle": "ログイン"
+  ,"signInWithGoogle": "Googleでログイン"
+  ,"anonymousLogin": "匿名で続行"
+  ,"backup": "バックアップ"
+  ,"restore": "復元"
+  ,"backupDone": "バックアップしました"
+  ,"restoreDone": "復元しました"
 }

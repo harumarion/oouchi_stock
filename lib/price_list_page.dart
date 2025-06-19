@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:oouchi_stock/i18n/app_localizations.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'util/firestore_refs.dart';
 
 import 'add_price_page.dart';
 import 'add_inventory_page.dart';
@@ -28,8 +29,7 @@ class _PriceListPageState extends State<PriceListPage> {
   @override
   void initState() {
     super.initState();
-    FirebaseFirestore.instance
-        .collection('categories')
+    userCollection('categories')
         .orderBy('createdAt')
         .snapshots()
         .listen((snapshot) async {

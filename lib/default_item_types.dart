@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'util/firestore_refs.dart';
 
 const Map<String, List<String>> defaultItemTypes = {
   '冷蔵庫': ['その他'],
@@ -24,15 +25,14 @@ const Map<String, List<String>> defaultItemTypes = {
 };
 
 Future<void> insertDefaultItemTypes() async {
-  final snapshot =
-      await FirebaseFirestore.instance.collection('itemTypes').get();
+  final snapshot = await userCollection('itemTypes').get();
   if (snapshot.docs.isNotEmpty) return;
   final batch = FirebaseFirestore.instance.batch();
   final random = Random();
   final now = Timestamp.now();
   defaultItemTypes.forEach((category, list) {
     for (final name in list) {
-      final doc = FirebaseFirestore.instance.collection('itemTypes').doc();
+      final doc = userCollection('itemTypes').doc();
       batch.set(doc, {
         'id': random.nextInt(0xffffffff),
         'category': category,

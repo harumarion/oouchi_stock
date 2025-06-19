@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'util/firestore_refs.dart';
 import 'package:oouchi_stock/i18n/app_localizations.dart';
 import 'add_inventory_page.dart';
 import 'add_category_page.dart';
@@ -56,8 +57,7 @@ class _InventoryPageState extends State<InventoryPage> {
       });
     } else {
       // Firestore からカテゴリ一覧を取得して監視
-      _catSub = FirebaseFirestore.instance
-          .collection('categories')
+      _catSub = userCollection('categories')
           .orderBy('createdAt')
           .snapshots()
           .listen((snapshot) async {

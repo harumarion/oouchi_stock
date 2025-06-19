@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../util/firestore_refs.dart';
 
 import '../../domain/entities/inventory.dart';
 import '../../domain/entities/history_entry.dart';
@@ -11,8 +12,7 @@ class InventoryRepositoryImpl implements InventoryRepository {
 
   @override
   Stream<List<Inventory>> watchByCategory(String category) {
-    return _firestore
-        .collection('inventory')
+    return userCollection('inventory')
         .where('category', isEqualTo: category)
         .orderBy('createdAt', descending: true)
         .snapshots()
@@ -33,8 +33,7 @@ class InventoryRepositoryImpl implements InventoryRepository {
 
   @override
   Future<List<Inventory>> fetchAll() async {
-    final snapshot = await _firestore
-        .collection('inventory')
+    final snapshot = await userCollection('inventory')
         .orderBy('createdAt')
         .get();
     return snapshot.docs.map((doc) {
@@ -54,7 +53,7 @@ class InventoryRepositoryImpl implements InventoryRepository {
 
   @override
   Future<String> addInventory(Inventory inventory) async {
-    final doc = await _firestore.collection('inventory').add({
+    final doc = await userCollection('inventory').add({
       'itemName': inventory.itemName,
       'category': inventory.category,
       'itemType': inventory.itemType,
@@ -73,7 +72,7 @@ class InventoryRepositoryImpl implements InventoryRepository {
 
   @override
   Future<void> updateQuantity(String id, double amount, String type) async {
-    final doc = _firestore.collection('inventory').doc(id);
+    final doc = userCollection('inventory').doc(id);
     await doc.update({'quantity': FieldValue.increment(amount)});
     await doc.collection('history').add({
       'type': type,
@@ -84,7 +83,7 @@ class InventoryRepositoryImpl implements InventoryRepository {
 
   @override
   Future<void> updateInventory(Inventory inventory) async {
-    await _firestore.collection('inventory').doc(inventory.id).update({
+    await userCollection('inventory').doc(inventory.id).update({
       'itemName': inventory.itemName,
       'category': inventory.category,
       'itemType': inventory.itemType,
@@ -95,8 +94,7 @@ class InventoryRepositoryImpl implements InventoryRepository {
 
   @override
   Stream<Inventory?> watchInventory(String inventoryId) {
-    return _firestore
-        .collection('inventory')
+    return userCollection('inventory')
         .doc(inventoryId)
         .snapshots()
         .map((doc) {
@@ -117,8 +115,7 @@ class InventoryRepositoryImpl implements InventoryRepository {
 
   @override
   Stream<List<HistoryEntry>> watchHistory(String inventoryId) {
-    return _firestore
-        .collection('inventory')
+    return userCollection('inventory')
         .doc(inventoryId)
         .collection('history')
         .orderBy('timestamp', descending: true)
@@ -140,7 +137,7 @@ class InventoryRepositoryImpl implements InventoryRepository {
   @override
   Future<void> stocktake(
       String id, double before, double after, double diff) async {
-    final doc = _firestore.collection('inventory').doc(id);
+    final doc = userCollection('inventory').doc(id);
     await doc.update({'quantity': after});
     await doc.collection('history').add({
       'type': 'stocktake',
@@ -153,13 +150,12 @@ class InventoryRepositoryImpl implements InventoryRepository {
 
   @override
   Future<void> deleteInventory(String id) async {
-    await _firestore.collection('inventory').doc(id).delete();
+    await userCollection('inventory').doc(id).delete();
   }
 
   @override
   Stream<List<Inventory>> watchNeedsBuy(double threshold) {
-    return _firestore
-        .collection('inventory')
+    return userCollection('inventory')
         .where('quantity', isLessThanOrEqualTo: threshold)
         .orderBy('quantity')
         .snapshots()

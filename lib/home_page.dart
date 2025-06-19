@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'util/firestore_refs.dart';
 import 'package:oouchi_stock/i18n/app_localizations.dart';
 import 'add_inventory_page.dart';
 import 'add_category_page.dart';
@@ -65,8 +66,7 @@ class _HomePageState extends State<HomePage> {
       });
     } else {
       // Firestore からカテゴリ一覧を取得して監視
-      _catSub = FirebaseFirestore.instance
-          .collection('categories')
+      _catSub = userCollection('categories')
           .orderBy('createdAt')
           .snapshots()
           .listen((snapshot) async {
@@ -206,27 +206,56 @@ class _HomePageState extends State<HomePage> {
           if (list.isEmpty) {
             return Center(child: Text(AppLocalizations.of(context)!.noBuyItems));
           }
-          return ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              for (final inv in list)
-                // ホーム画面は買うべきリストのため購入ボタンのみ
-                InventoryCard(
-                  inventory: inv,
-                  buyOnly: true, // 買うべきリストでは購入ボタンのみ表示
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => InventoryDetailPage(
-                          inventoryId: inv.id,
-                          categories: _categories,
-                        ),
-                      ),
-                    );
-                  },
+          final map = {for (final c in _categories) c.name: <Inventory>[]};
+          for (final inv in list) {
+            map[inv.category]?.add(inv);
+          }
+          return DefaultTabController(
+            length: _categories.length,
+            child: Column(
+              children: [
+                Material(
+                  color: Theme.of(context).colorScheme.primary,
+                  child: TabBar(
+                    isScrollable: true,
+                    tabs: [
+                      for (final c in _categories)
+                        Tab(text: map[c.name]!.isNotEmpty ? '${c.name}❗' : c.name),
+                    ],
+                  ),
                 ),
-            ],
+                Expanded(
+                  child: TabBarView(
+                    children: [
+                      for (final c in _categories)
+                        map[c.name]!.isEmpty
+                            ? Center(child: Text(AppLocalizations.of(context)!.noBuyItems))
+                            : ListView(
+                                padding: const EdgeInsets.all(16),
+                                children: [
+                                  for (final inv in map[c.name]!)
+                                    InventoryCard(
+                                      inventory: inv,
+                                      buyOnly: true,
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) => InventoryDetailPage(
+                                              inventoryId: inv.id,
+                                              categories: _categories,
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                ],
+                              ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           );
         },
       ),

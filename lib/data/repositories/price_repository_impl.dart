@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../util/firestore_refs.dart';
 
 import '../../domain/entities/price_info.dart';
 import '../../domain/repositories/price_repository.dart';
@@ -10,7 +11,7 @@ class PriceRepositoryImpl implements PriceRepository {
 
   @override
   Future<String> addPriceInfo(PriceInfo info) async {
-    final doc = await _firestore.collection('priceInfos').add({
+    final doc = await userCollection('priceInfos').add({
       'inventoryId': info.inventoryId,
       'checkedAt': Timestamp.fromDate(info.checkedAt),
       'category': info.category,
@@ -30,8 +31,7 @@ class PriceRepositoryImpl implements PriceRepository {
 
   @override
   Stream<List<PriceInfo>> watchByCategory(String category) {
-    return _firestore
-        .collection('priceInfos')
+    return userCollection('priceInfos')
         .where('category', isEqualTo: category)
         .orderBy('checkedAt', descending: true)
         .snapshots()
@@ -40,8 +40,7 @@ class PriceRepositoryImpl implements PriceRepository {
 
   @override
   Stream<List<PriceInfo>> watchByType(String category, String itemType) {
-    return _firestore
-        .collection('priceInfos')
+    return userCollection('priceInfos')
         .where('category', isEqualTo: category)
         .where('itemType', isEqualTo: itemType)
         .orderBy('checkedAt', descending: true)
@@ -70,6 +69,6 @@ class PriceRepositoryImpl implements PriceRepository {
 
   @override
   Future<void> deletePriceInfo(String id) async {
-    await _firestore.collection('priceInfos').doc(id).delete();
+    await userCollection('priceInfos').doc(id).delete();
   }
 }

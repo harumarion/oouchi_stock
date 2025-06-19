@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'util/firestore_refs.dart';
 import 'package:oouchi_stock/i18n/app_localizations.dart';
 
 import 'data/repositories/inventory_repository_impl.dart';
@@ -35,8 +36,7 @@ class _BuyListPageState extends State<BuyListPage> {
     if (widget.categories != null) {
       _categories = List.from(widget.categories!);
     } else {
-      final snapshot = await FirebaseFirestore.instance
-          .collection('categories')
+      final snapshot = await userCollection('categories')
           .orderBy('createdAt')
           .get();
       _categories = snapshot.docs.map((d) {
@@ -59,51 +59,74 @@ class _BuyListPageState extends State<BuyListPage> {
     }
     final strategy = createStrategy(_condition!);
     final repo = InventoryRepositoryImpl();
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.buyListTitle),
-      ),
-      // 在庫データのストリームを監視してリストを更新
-      body: StreamBuilder<List<Inventory>>( 
+    return StreamBuilder<List<Inventory>>(
         stream: strategy.watch(repo),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             final err = snapshot.error?.toString() ?? 'unknown';
-            return Center(
-                child: Text(AppLocalizations.of(context)!.loadError(err)));
+            return Scaffold(
+              appBar: AppBar(title: Text(AppLocalizations.of(context)!.buyListTitle)),
+              body: Center(child: Text(AppLocalizations.of(context)!.loadError(err))),
+            );
           }
           if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
+            return const Scaffold(body: Center(child: CircularProgressIndicator()));
           }
           final list = snapshot.data!;
           if (list.isEmpty) {
-            return Center(child: Text(AppLocalizations.of(context)!.noBuyItems));
+            return Scaffold(
+              appBar: AppBar(title: Text(AppLocalizations.of(context)!.buyListTitle)),
+              body: Center(child: Text(AppLocalizations.of(context)!.noBuyItems)),
+            );
           }
-          return ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              for (final inv in list)
-                // 買うべきリストでは購入のみ可能
-                InventoryCard(
-                  inventory: inv,
-                  buyOnly: true, // 購入ボタンのみ表示
-                  // 在庫カードタップで詳細画面へ遷移
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => InventoryDetailPage(
-                          inventoryId: inv.id,
-                          categories: _categories,
-                        ),
-                      ),
-                    );
-                  },
+          final map = {for (final c in _categories) c.name: <Inventory>[]};
+          for (final inv in list) {
+            map[inv.category]?.add(inv);
+          }
+          return DefaultTabController(
+            length: _categories.length,
+            child: Scaffold(
+              appBar: AppBar(
+                title: Text(AppLocalizations.of(context)!.buyListTitle),
+                bottom: TabBar(
+                  isScrollable: true,
+                  tabs: [
+                    for (final c in _categories)
+                      Tab(text: map[c.name]!.isNotEmpty ? '${c.name}❗' : c.name),
+                  ],
                 ),
-            ],
+              ),
+              body: TabBarView(
+                children: [
+                  for (final c in _categories)
+                    map[c.name]!.isEmpty
+                        ? Center(child: Text(AppLocalizations.of(context)!.noBuyItems))
+                        : ListView(
+                            padding: const EdgeInsets.all(16),
+                            children: [
+                              for (final inv in map[c.name]!)
+                                InventoryCard(
+                                  inventory: inv,
+                                  buyOnly: true,
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => InventoryDetailPage(
+                                          inventoryId: inv.id,
+                                          categories: _categories,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                            ],
+                          ),
+                ],
+              ),
+            ),
           );
         },
-      ),
-    );
+      );
   }
 }
