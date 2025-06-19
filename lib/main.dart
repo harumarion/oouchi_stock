@@ -11,6 +11,7 @@ import 'domain/entities/category.dart';
 import 'notification_service.dart';
 import 'home_page.dart';
 import 'login_page.dart';
+import 'root_navigation_page.dart';
 
 // アプリのエントリーポイント。初期化処理中はローディング画面を表示する。
 
@@ -148,8 +149,8 @@ class MyAppState extends State<MyApp> {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
         useMaterial3: true,
       ),
-      // ホーム画面では買い物リストを表示する
-      home: HomePage(categories: widget.initialCategories),
+      // 画面下部のメニューで各機能へ移動できる RootNavigationPage を表示
+      home: const RootNavigationPage(),
     );
   }
 }

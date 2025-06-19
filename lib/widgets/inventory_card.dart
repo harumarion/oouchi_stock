@@ -49,8 +49,10 @@ class InventoryCard extends StatelessWidget {
     return total;
   }
 
-  String _formatDate(DateTime d) {
-    return '${d.year}/${d.month}/${d.day}';
+  /// 予測日までの残り日数を計算する
+  int _daysLeft(DateTime predicted) {
+    final diff = predicted.difference(DateTime.now()).inDays;
+    return diff >= 0 ? diff : 0;
   }
 
   /// 数量を入力させるダイアログを表示する
@@ -147,7 +149,8 @@ class InventoryCard extends StatelessWidget {
       builder: (context, snapshot) {
         final predicted = snapshot.data;
         final dateText = predicted != null
-            ? _formatDate(predicted)
+            ? AppLocalizations.of(context)!
+                .daysLeft(_daysLeft(predicted).toString())
             : AppLocalizations.of(context)!.calculating;
         return InkWell(
           onTap: onTap,
