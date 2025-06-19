@@ -73,6 +73,7 @@
   "buyListNotificationTitle": "Shopping Reminder",
   "buyListNotificationBody": "Check the shopping forecast",
   "buyListConditionSettings": "Shopping Forecast Condition Settings",
+  "saleList": "Deals",
   "thresholdCondition": "Quantity below threshold",
   "daysCondition": "Prediction within days",
   "orCondition": "Either condition",

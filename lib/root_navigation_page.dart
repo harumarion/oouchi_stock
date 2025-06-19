@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'home_page.dart';
 import 'inventory_page.dart';
 import 'price_list_page.dart';
+import 'sale_list_page.dart';
 import 'add_inventory_page.dart';
 import 'settings_page.dart';
 import 'main.dart';
@@ -22,6 +23,7 @@ class _RootNavigationPageState extends State<RootNavigationPage> {
     const HomePage(),
     const InventoryPage(),
     const PriceListPage(),
+    const SaleListPage(),
     const AddInventoryPage(),
     SettingsPage(
       categories: const [],
@@ -53,6 +55,10 @@ class _RootNavigationPageState extends State<RootNavigationPage> {
           BottomNavigationBarItem(
             icon: const Icon(Icons.price_change),
             label: AppLocalizations.of(context)!.priceManagementTitle,
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.local_offer),
+            label: AppLocalizations.of(context)!.saleList,
           ),
           BottomNavigationBarItem(
             icon: const Icon(Icons.add_box),
