@@ -41,6 +41,7 @@
   "stockAmount": "Current stock",
   "updateFailed": "Update failed",
   "predictLabel": "Prediction:",
+  "daysLeft": "in {value} days",
   "calculating": "Calculating...",
   "history": "History",
   "priceAddTitle": "Add Price",
