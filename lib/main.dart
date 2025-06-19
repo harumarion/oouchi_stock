@@ -74,10 +74,25 @@ class _AppLoaderState extends State<AppLoader> {
     }
     if (!_loggedIn) {
       // 未ログインならログイン画面を表示
-      return MaterialApp(home: LoginPage(onLoggedIn: () async {
-        await _setupNotification();
-        setState(() => _loggedIn = true);
-      }));
+      return MaterialApp(
+        // アプリ名などのローカライズに必要なデリゲートを設定
+        onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
+          useMaterial3: true,
+        ),
+        home: LoginPage(onLoggedIn: () async {
+          await _setupNotification();
+          setState(() => _loggedIn = true);
+        }),
+      );
     }
     return const MyApp();
   }
