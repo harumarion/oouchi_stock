@@ -96,15 +96,19 @@ class MyAppState extends State<MyApp> {
   Locale? _locale;
   final _messengerKey = GlobalKey<ScaffoldMessengerState>();
   // 接続状態の変化を監視するためのストリーム購読
-  StreamSubscription<ConnectivityResult>? _connSub;
+  // 全画面共通で利用し、通信状況が変わるたびにスナックバーで通知する
+  StreamSubscription<List<ConnectivityResult>>? _connSub;
 
   @override
   void initState() {
     super.initState();
     _loadLocale();
     // 接続状態が変わった際にオンライン/オフラインのメッセージを表示
-    _connSub = Connectivity().onConnectivityChanged.listen((result) {
-      final offline = result == ConnectivityResult.none;
+    // onConnectivityChanged は複数の接続結果を返すようになったため
+    // すべて none であればオフラインと判断する
+    _connSub = Connectivity().onConnectivityChanged.listen((results) {
+      final offline =
+          results.every((r) => r == ConnectivityResult.none);
       final text = offline
           ? AppLocalizations.of(context)!.offline
           : AppLocalizations.of(context)!.online;
