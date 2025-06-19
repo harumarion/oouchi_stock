@@ -9,8 +9,15 @@ class PriceInfo {
   final String unit;
   final double volume;
   final double totalVolume;
-  final double price;
+  // 通常価格
+  final double regularPrice;
+  // セール価格
+  final double salePrice;
   final String shop;
+  // 承認ページURL
+  final String approvalUrl;
+  // メモ
+  final String memo;
   final double unitPrice;
 
   PriceInfo({
@@ -24,8 +31,11 @@ class PriceInfo {
     required this.unit,
     required this.volume,
     required this.totalVolume,
-    required this.price,
+    required this.regularPrice,
+    required this.salePrice,
     required this.shop,
+    required this.approvalUrl,
+    required this.memo,
     required this.unitPrice,
   });
 }

@@ -21,8 +21,14 @@ class PriceRepositoryImpl implements PriceRepository {
       'unit': info.unit,
       'volume': info.volume,
       'totalVolume': info.totalVolume,
-      'price': info.price,
+      // 通常価格とセール価格の両方を保存
+      'regularPrice': info.regularPrice,
+      'salePrice': info.salePrice,
+      // 旧フィールドとの互換のため price も保存
+      'price': info.salePrice,
       'shop': info.shop,
+      'approvalUrl': info.approvalUrl,
+      'memo': info.memo,
       'unitPrice': info.unitPrice,
       'createdAt': Timestamp.now(),
     });
@@ -61,8 +67,11 @@ class PriceRepositoryImpl implements PriceRepository {
       unit: data['unit'] ?? '',
       volume: (data['volume'] ?? 0).toDouble(),
       totalVolume: (data['totalVolume'] ?? 0).toDouble(),
-      price: (data['price'] ?? 0).toDouble(),
+      regularPrice: (data['regularPrice'] ?? 0).toDouble(),
+      salePrice: (data['salePrice'] ?? data['price'] ?? 0).toDouble(),
       shop: data['shop'] ?? '',
+      approvalUrl: data['approvalUrl'] ?? '',
+      memo: data['memo'] ?? '',
       unitPrice: (data['unitPrice'] ?? 0).toDouble(),
     );
   }

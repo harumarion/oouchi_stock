@@ -25,8 +25,15 @@ class _AddPricePageState extends State<AddPricePage> {
 
   double _count = 1;
   double _volume = 1;
-  double _price = 0;
+  // 通常価格
+  double _regularPrice = 0;
+  // セール価格
+  double _salePrice = 0;
   String _shop = '';
+  // 承認ページURL
+  String _approvalUrl = '';
+  // メモ
+  String _memo = '';
 
   final AddPriceInfo _usecase = AddPriceInfo(PriceRepositoryImpl());
 
@@ -49,7 +56,8 @@ class _AddPricePageState extends State<AddPricePage> {
   }
 
   double get _totalVolume => _count * _volume;
-  double get _unitPrice => _totalVolume == 0 ? 0 : _price / _totalVolume;
+  // 単価はセール価格から計算
+  double get _unitPrice => _totalVolume == 0 ? 0 : _salePrice / _totalVolume;
 
   Future<void> _save() async {
     if (_inventory == null) return;
@@ -64,8 +72,11 @@ class _AddPricePageState extends State<AddPricePage> {
       unit: _inventory!.unit,
       volume: _volume,
       totalVolume: _totalVolume,
-      price: _price,
+      regularPrice: _regularPrice,
+      salePrice: _salePrice,
       shop: _shop,
+      approvalUrl: _approvalUrl,
+      memo: _memo,
       unitPrice: _unitPrice,
     );
     await _usecase(info);
@@ -124,14 +135,30 @@ class _AddPricePageState extends State<AddPricePage> {
                     ),
                     const SizedBox(height: 12),
                     TextFormField(
-                      decoration: InputDecoration(labelText: AppLocalizations.of(context)!.price),
+                      decoration: InputDecoration(labelText: AppLocalizations.of(context)!.regularPrice),
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      onChanged: (v) => setState(() => _price = double.tryParse(v) ?? 0),
+                      onChanged: (v) => setState(() => _regularPrice = double.tryParse(v) ?? 0),
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      decoration: InputDecoration(labelText: AppLocalizations.of(context)!.salePrice),
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      onChanged: (v) => setState(() => _salePrice = double.tryParse(v) ?? 0),
                     ),
                     const SizedBox(height: 12),
                     TextFormField(
                       decoration: InputDecoration(labelText: AppLocalizations.of(context)!.shop),
                       onChanged: (v) => _shop = v,
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      decoration: InputDecoration(labelText: AppLocalizations.of(context)!.approvalUrl),
+                      onChanged: (v) => _approvalUrl = v,
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      decoration: InputDecoration(labelText: AppLocalizations.of(context)!.memoOptional),
+                      onChanged: (v) => _memo = v,
                     ),
                     const SizedBox(height: 12),
                     Text(AppLocalizations.of(context)!.totalVolume(_totalVolume.toStringAsFixed(2))),

@@ -35,16 +35,28 @@ class PriceHistoryPage extends StatelessWidget {
               for (final p in list)
                 ListTile(
                   title: Text(p.itemName),
-                  subtitle: Text(
-                      '${_formatDate(p.checkedAt)} '
-                      '${AppLocalizations.of(context)!.priceSummary(
-                          p.count.toString(),
-                          p.unit,
-                          p.volume.toString(),
-                          p.totalVolume.toString(),
-                          p.price.toString(),
-                          p.shop,
-                          p.unitPrice.toStringAsFixed(2))}'),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${_formatDate(p.checkedAt)} '
+                        '${AppLocalizations.of(context)!.priceSummary(
+                            p.count.toString(),
+                            p.unit,
+                            p.volume.toString(),
+                            p.totalVolume.toString(),
+                            p.salePrice.toString(),
+                            p.shop,
+                            p.unitPrice.toStringAsFixed(2))}',
+                      ),
+                      Text('${AppLocalizations.of(context)!.regularPriceLabel(p.regularPrice.toString())}'),
+                      Text('${AppLocalizations.of(context)!.salePriceLabel(p.salePrice.toString())}'),
+                      if (p.approvalUrl.isNotEmpty)
+                        Text('${AppLocalizations.of(context)!.approvalUrlLabel(p.approvalUrl)}'),
+                      if (p.memo.isNotEmpty)
+                        Text('${AppLocalizations.of(context)!.memoLabel(p.memo)}'),
+                    ],
+                  ),
                   onLongPress: () async {
                     final res = await showModalBottomSheet<String>(
                       context: context,
