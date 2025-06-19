@@ -4,6 +4,9 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'i18n/app_localizations.dart';
 
 /// ログイン画面。匿名ログインと Google ログインを選択できる
+///
+/// アプリ起動直後に表示され、ユーザーがどの方法でログインするか
+/// 選択するための画面。
 class LoginPage extends StatelessWidget {
   /// ログイン完了後に呼び出されるコールバック
   final VoidCallback onLoggedIn;
@@ -11,6 +14,8 @@ class LoginPage extends StatelessWidget {
   const LoginPage({super.key, required this.onLoggedIn});
 
   /// Google ログインボタンを押したときの処理
+  ///
+  /// ログイン画面で「Googleでログイン」を選択すると実行される
   Future<void> _signInWithGoogle(BuildContext context) async {
     try {
       final user = FirebaseAuth.instance.currentUser;
@@ -35,13 +40,24 @@ class LoginPage extends StatelessWidget {
   }
 
   /// 「匿名で続行」ボタンを押したときの処理
+  ///
+  /// Firebase の設定が不完全な場合は [FirebaseAuthException] が
+  /// 投げられるため、ここで捕捉してエラーメッセージを表示する
   Future<void> _signInAnonymously(BuildContext context) async {
-    await FirebaseAuth.instance.signInAnonymously();
-    onLoggedIn();
+    try {
+      await FirebaseAuth.instance.signInAnonymously();
+      onLoggedIn();
+    } on FirebaseAuthException catch (_) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppLocalizations.of(context)!.saveFailed)),
+      );
+    }
   }
 
   @override
   /// ログイン画面の UI を構築する
+  ///
+  /// 匿名ログイン・Google ログインの2つのボタンを中央に配置
   Widget build(BuildContext context) {
     // ローカライズデータが読み込まれる前はローディングを表示
     final loc = AppLocalizations.of(context);
