@@ -142,7 +142,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                 );
               } else if (value == 'price') {
-                // 値段管理画面を開く
+                // セール情報管理画面を開く
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => const PriceListPage()),

@@ -8,5 +8,8 @@ void main() {
     expect(find.byType(AppBar), findsOneWidget);
     // 検索バーが表示されるか確認
     expect(find.byType(TextField), findsWidgets);
+    // 表の列数が6であることを確認
+    final dataTable = tester.widget<DataTable>(find.byType(DataTable).first);
+    expect(dataTable.columns.length, 6);
   });
 }
