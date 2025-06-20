@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'util/firestore_refs.dart';
+import 'util/date_time_parser.dart';
 
 import 'domain/entities/item_type.dart';
 import 'domain/entities/category.dart';
@@ -46,7 +47,7 @@ class _ItemTypeSettingsPageState extends State<ItemTypeSettingsPage> {
             id: data['id'] ?? 0,
             category: data['category'] ?? '',
             name: data['name'] ?? '',
-            createdAt: (data['createdAt'] as Timestamp).toDate(),
+            createdAt: parseDateTime(data['createdAt']),
           );
         }).toList();
       });

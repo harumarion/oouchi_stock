@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../util/firestore_refs.dart';
+import '../../util/date_time_parser.dart';
 
 import '../../domain/entities/inventory.dart';
 import '../../domain/entities/history_entry.dart';
@@ -26,7 +27,7 @@ class InventoryRepositoryImpl implements InventoryRepository {
                 quantity: (data['quantity'] ?? 0).toDouble(),
                 unit: data['unit'] ?? '',
                 note: data['note'] ?? '',
-                createdAt: (data['createdAt'] as Timestamp).toDate(),
+                createdAt: parseDateTime(data['createdAt']),
               );
             }).toList());
   }
@@ -46,7 +47,7 @@ class InventoryRepositoryImpl implements InventoryRepository {
         quantity: (data['quantity'] ?? 0).toDouble(),
         unit: data['unit'] ?? '',
         note: data['note'] ?? '',
-        createdAt: (data['createdAt'] as Timestamp).toDate(),
+        createdAt: parseDateTime(data['createdAt']),
       );
     }).toList();
   }
@@ -108,7 +109,7 @@ class InventoryRepositoryImpl implements InventoryRepository {
         quantity: (data['quantity'] ?? 0).toDouble(),
         unit: data['unit'] ?? '',
         note: data['note'] ?? '',
-        createdAt: (data['createdAt'] as Timestamp).toDate(),
+        createdAt: parseDateTime(data['createdAt']),
       );
     });
   }
@@ -169,7 +170,7 @@ class InventoryRepositoryImpl implements InventoryRepository {
                 quantity: (data['quantity'] ?? 0).toDouble(),
                 unit: data['unit'] ?? '',
                 note: data['note'] ?? '',
-                createdAt: (data['createdAt'] as Timestamp).toDate(),
+                createdAt: parseDateTime(data['createdAt']),
               );
             }).toList());
   }

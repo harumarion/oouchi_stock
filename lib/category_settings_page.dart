@@ -3,6 +3,7 @@ import 'package:oouchi_stock/i18n/app_localizations.dart';
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'util/firestore_refs.dart';
+import 'util/date_time_parser.dart';
 import 'add_category_page.dart';
 import 'edit_category_page.dart';
 import 'reorder_categories_page.dart';
@@ -40,7 +41,7 @@ class _CategorySettingsPageState extends State<CategorySettingsPage> {
         return Category(
           id: data['id'] ?? 0,
           name: data['name'] ?? '',
-          createdAt: (data['createdAt'] as Timestamp).toDate(),
+          createdAt: parseDateTime(data['createdAt']),
           color: data['color'],
         );
       }).toList();
