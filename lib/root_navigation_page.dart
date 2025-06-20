@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'home_page.dart';
+import 'buy_list_page.dart';
 import 'inventory_page.dart';
-import 'price_list_page.dart';
-import 'sale_list_page.dart';
+import 'home_page.dart';
 import 'add_inventory_page.dart';
-import 'settings_page.dart';
+import 'price_list_page.dart';
 import 'main.dart';
 import 'i18n/app_localizations.dart';
 
@@ -20,25 +19,17 @@ class _RootNavigationPageState extends State<RootNavigationPage> {
   int _index = 0; // 選択中のメニュー
 
   // 各インデックスに対応する画面のリスト
-  // 0: ホーム画面
+  // 0: 買い物リスト画面
   // 1: 在庫一覧画面
-  // 2: セール情報管理画面
-  // 3: セール速報画面
-  // 4: 商品追加画面
-  // 5: 設定画面
+  // 2: 買い物予報画面
+  // 3: 商品追加画面
+  // 4: セール情報管理画面
   late final List<Widget> _pages = [
-    const HomePage(),
+    const BuyListPage(),
     const InventoryPage(),
-    const PriceListPage(),
-    const SaleListPage(),
+    const HomePage(),
     const AddInventoryPage(),
-    SettingsPage(
-      categories: const [],
-      onChanged: (_) {},
-      onLocaleChanged: (l) =>
-          context.findAncestorStateOfType<MyAppState>()?.updateLocale(l),
-      onConditionChanged: () {},
-    ),
+    const PriceListPage(),
   ];
 
   @override
@@ -51,7 +42,7 @@ class _RootNavigationPageState extends State<RootNavigationPage> {
         currentIndex: _index,
         onTap: (i) => setState(() => _index = i),
         items: [
-          // ホーム
+          // 買い物リスト
           BottomNavigationBarItem(
             icon: const Icon(Icons.list_alt),
             label: AppLocalizations.of(context)!.buyList,
@@ -61,25 +52,20 @@ class _RootNavigationPageState extends State<RootNavigationPage> {
             icon: const Icon(Icons.inventory_2),
             label: AppLocalizations.of(context)!.inventoryList,
           ),
-          // セール管理
+          // 買い物予報
           BottomNavigationBarItem(
-            icon: const Icon(Icons.price_change),
-            label: AppLocalizations.of(context)!.priceManagementTitle,
-          ),
-          // セール速報
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.local_offer),
-            label: AppLocalizations.of(context)!.saleList,
+            icon: const Icon(Icons.event_note),
+            label: AppLocalizations.of(context)!.buyListTitle,
           ),
           // 商品追加
           BottomNavigationBarItem(
             icon: const Icon(Icons.add_box),
             label: AppLocalizations.of(context)!.addItem,
           ),
-          // 設定
+          // セール情報
           BottomNavigationBarItem(
-            icon: const Icon(Icons.settings),
-            label: AppLocalizations.of(context)!.settings,
+            icon: const Icon(Icons.price_change),
+            label: AppLocalizations.of(context)!.priceManagementTitle,
           ),
         ],
       ),

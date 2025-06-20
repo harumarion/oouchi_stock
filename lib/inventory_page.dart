@@ -10,6 +10,7 @@ import 'settings_page.dart';
 import 'inventory_detail_page.dart';
 import 'edit_inventory_page.dart';
 import 'widgets/inventory_card.dart';
+import 'widgets/settings_menu_button.dart';
 import 'main.dart';
 import 'data/repositories/inventory_repository_impl.dart';
 import 'domain/entities/category.dart';
@@ -128,53 +129,13 @@ class _InventoryPageState extends State<InventoryPage> {
               ],
             ),
             actions: [
-              PopupMenuButton<String>(
-                onSelected: (value) {
-                  if (value == 'add') {
-                    // 商品追加画面を開く
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => AddInventoryPage(categories: _categories),
-                      ),
-                    );
-                  } else if (value == 'price') {
-                    // 値段管理画面を開く
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const PriceListPage()),
-                    );
-                  } else if (value == 'settings') {
-                    // 設定画面を開く
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (c) => SettingsPage(
-                                categories: _categories,
-                                onChanged: _updateCategories,
-                                onLocaleChanged: (l) =>
-                                    // ルートの MyAppState に通知してアプリ全体の言語を更新
-                                    context.findAncestorStateOfType<MyAppState>()?.updateLocale(l),
-                                // 在庫画面からは買い物リスト条件を利用しないため空実装
-                                onConditionChanged: () {},
-                              )),
-                    );
-                  }
-                },
-                itemBuilder: (context) => [
-                  PopupMenuItem(
-                      value: 'add',
-                      child: Text(AppLocalizations.of(context)!.addItem,
-                          style: const TextStyle(fontSize: 18))),
-                  PopupMenuItem(
-                      value: 'price',
-                      child: Text(AppLocalizations.of(context)!.priceManagement,
-                          style: const TextStyle(fontSize: 18))),
-                  PopupMenuItem(
-                      value: 'settings',
-                      child: Text(AppLocalizations.of(context)!.settings,
-                          style: const TextStyle(fontSize: 18))),
-                ],
+              // 設定のみを表示する統一メニュー
+              SettingsMenuButton(
+                categories: _categories,
+                onCategoriesChanged: _updateCategories,
+                onLocaleChanged: (l) =>
+                    context.findAncestorStateOfType<MyAppState>()?.updateLocale(l),
+                onConditionChanged: () {},
               )
             ],
           ),
