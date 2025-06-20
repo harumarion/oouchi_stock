@@ -17,6 +17,7 @@ import 'domain/services/buy_list_strategy.dart';
 import 'inventory_detail_page.dart';
 import 'widgets/inventory_card.dart';
 import 'domain/entities/category_order.dart';
+import 'widgets/settings_menu_button.dart';
 
 /// 買い物予報画面
 /// ホーム画面のメニューから遷移し、今買っておいた方が良い商品を表示する
@@ -39,6 +40,11 @@ class _BuyListPageState extends State<BuyListPage> {
   late final TextEditingController _itemController;
   // 在庫一覧のストリームを購読し、買い物予報に反映する
   StreamSubscription<List<Inventory>>? _invSub;
+
+  /// 設定画面から戻った際に呼び出され、カテゴリリストを更新する
+  void _updateCategories(List<Category> list) {
+    setState(() => _categories = List.from(list));
+  }
 
   @override
   void initState() {
@@ -115,6 +121,15 @@ class _BuyListPageState extends State<BuyListPage> {
           child: Scaffold(
             appBar: AppBar(
               title: Text(loc.buyList),
+              // 設定画面を開くメニューボタンを追加
+              actions: [
+                SettingsMenuButton(
+                  categories: _categories,
+                  onCategoriesChanged: _updateCategories,
+                  onLocaleChanged: (l) => context.findAncestorStateOfType<MyAppState>()?.updateLocale(l),
+                  onConditionChanged: _load,
+                )
+              ],
               bottom: TabBar(
                 isScrollable: true,
                 tabs: [

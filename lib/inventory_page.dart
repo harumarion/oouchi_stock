@@ -122,8 +122,9 @@ class _InventoryPageState extends State<InventoryPage> {
       child: Scaffold(
           appBar: AppBar(
             // 上部タイトルを在庫一覧にする
+            // 他画面と同様に左寄せ表示にするため centerTitle を false に設定
             title: Text(AppLocalizations.of(context)!.inventoryList),
-            centerTitle: true,
+            centerTitle: false,
             bottom: TabBar(
               isScrollable: true,
               tabs: [
