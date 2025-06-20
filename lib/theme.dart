@@ -17,26 +17,31 @@ class AppTheme {
   static const Color subTextColor = Color(0xFF888888);
 
   /// ライトテーマの定義
+  /// MaterialApp の `theme` に設定され、全画面で利用されます。
   static ThemeData get lightTheme {
     // アプリ全体で使用するテキストスタイルを定義
-    // 画面読み込み時に ThemeData として読み込まれます
+    // 各画面のウィジェットツリー生成時に参照されます
     final baseTextTheme = TextTheme(
-      titleLarge: GoogleFonts.notoSansJP(
+      // 画面タイトルの基本フォント
+      titleLarge: GoogleFonts.notoSansJp(
         fontSize: 20,
         fontWeight: FontWeight.bold,
         color: textColor,
       ),
-      bodyLarge: GoogleFonts.notoSansJP(
+      // 一般的な本文に使用するフォント
+      bodyLarge: GoogleFonts.notoSansJp(
         fontSize: 16,
         fontWeight: FontWeight.normal,
         color: textColor,
       ),
-      labelLarge: GoogleFonts.notoSansJP(
+      // ボタンやラベルで使用するフォント
+      labelLarge: GoogleFonts.notoSansJp(
         fontSize: 14,
         fontWeight: FontWeight.w500,
         color: textColor,
       ),
-      bodySmall: GoogleFonts.notoSansJP(
+      // 注釈や補足に使用するフォント
+      bodySmall: GoogleFonts.notoSansJp(
         fontSize: 12,
         fontWeight: FontWeight.w400,
         color: subTextColor,
