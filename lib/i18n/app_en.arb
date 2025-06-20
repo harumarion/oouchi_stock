@@ -90,5 +90,9 @@
   ,"backup": "Backup"
   ,"restore": "Restore"
   ,"backupDone": "Backup completed"
-  ,"restoreDone": "Restore completed"
+  ,"restoreDone": "Restore completed",
+  "addBuyItem": "Add Item",
+  "enterItemName": "Enter item name",
+  "addedBuyItem": "Added to buy list",
+  "confirmDelete": "Delete this item?"
 }
