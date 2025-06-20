@@ -70,10 +70,18 @@ class _EditInventoryPageState extends State<EditInventoryPage> {
             createdAt: (data['createdAt'] as Timestamp).toDate(),
           );
         }).toList();
-        if (_categories.isNotEmpty &&
-            _categories.every(
-                (c) => c.id != _category.id && c.name != _category.name)) {
-          _category = _categories.first;
+        if (_categories.isNotEmpty) {
+          // id が一致するカテゴリを最新のリストから取得
+          final matched = _categories.firstWhere(
+            (c) => c.id == _category.id,
+            orElse: () => _categories.first,
+          );
+          _category = matched;
+          // カテゴリ変更に合わせて品種を更新
+          final types = _typesMap[_category.name];
+          if (types != null && types.isNotEmpty) {
+            _itemType = types.contains(_itemType) ? _itemType : types.first;
+          }
         }
       });
     });

@@ -142,62 +142,81 @@ class _HomePageState extends State<HomePage> {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
     // 画面表示時に在庫一覧を取得
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.buyListTitle),
-        actions: [
-          // 各画面共通の設定メニューボタンを表示
-          SettingsMenuButton(
-            categories: _categories,
-            onCategoriesChanged: _updateCategories,
-            onLocaleChanged: (l) =>
-                context.findAncestorStateOfType<MyAppState>()?.updateLocale(l),
-            onConditionChanged: _loadCondition,
-          )
-        ],
-      ),
-      body: FutureBuilder<List<Inventory>>(
-        future: _fetchAllUsecase(),
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            final err = snapshot.error?.toString() ?? 'unknown';
-            return Center(child: Text(AppLocalizations.of(context)!.loadError(err)));
+    return FutureBuilder<List<Inventory>>(
+      future: _fetchAllUsecase(),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          final err = snapshot.error?.toString() ?? 'unknown';
+          return Center(child: Text(AppLocalizations.of(context)!.loadError(err)));
+        }
+        if (!snapshot.hasData) {
+          return const Scaffold(body: Center(child: CircularProgressIndicator()));
+        }
+        final list = snapshot.data!;
+        if (list.isEmpty) {
+          return Scaffold(
+            appBar: AppBar(title: Text(AppLocalizations.of(context)!.buyListTitle)),
+            body: Center(child: Text(AppLocalizations.of(context)!.noBuyItems)),
+          );
+        }
+          final map = {for (final c in _categories) c.name: <Inventory>[]};
+          for (final inv in list) {
+            map[inv.category]?.add(inv);
           }
-          if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          final list = snapshot.data!;
-          if (list.isEmpty) {
-            return Center(child: Text(AppLocalizations.of(context)!.noBuyItems));
-          }
-          return GridView.builder(
-            padding: const EdgeInsets.all(8),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              childAspectRatio: 1,
-              mainAxisSpacing: 8,
-              crossAxisSpacing: 8,
+          return DefaultTabController(
+            length: _categories.length,
+            child: Scaffold(
+              appBar: AppBar(
+                title: Text(AppLocalizations.of(context)!.buyListTitle),
+                actions: [
+                  SettingsMenuButton(
+                    categories: _categories,
+                    onCategoriesChanged: _updateCategories,
+                    onLocaleChanged: (l) => context.findAncestorStateOfType<MyAppState>()?.updateLocale(l),
+                    onConditionChanged: _loadCondition,
+                  )
+                ],
+                bottom: TabBar(
+                  isScrollable: true,
+                  tabs: [
+                    for (final c in _categories) Tab(text: c.name),
+                  ],
+                ),
+              ),
+              body: TabBarView(
+                children: [
+                  for (final c in _categories)
+                    map[c.name]!.isEmpty
+                        ? Center(
+                            child: Text(
+                              AppLocalizations.of(context)!.noBuyItems,
+                            ),
+                          )
+                        : ListView(
+                            padding: const EdgeInsets.all(16),
+                            children: [
+                              for (final inv in map[c.name]!)
+                                InventoryCard(
+                                  inventory: inv,
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => InventoryDetailPage(
+                                          inventoryId: inv.id,
+                                          categories: _categories,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                            ],
+                          ),
+                ],
+              ),
             ),
-            itemCount: list.length,
-            itemBuilder: (context, index) {
-              final inv = list[index];
-              // 各在庫カード表示時に残り日数を計算
-              return FutureBuilder<int>(
-                future: _calcDaysLeft(inv),
-                builder: (context, daySnap) {
-                  final days = daySnap.data ?? 0;
-                  return DashboardTile(
-                    inventory: inv,
-                    daysLeft: days,
-                    onSale: false,
-                    onAdd: () {},
-                  );
-                },
-              );
-            },
           );
         },
-      ),
-    );
+      );
   }
 }
