@@ -83,6 +83,7 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
               id: data['id'] ?? 0,
               name: data['name'] ?? '',
               createdAt: (data['createdAt'] as Timestamp).toDate(),
+              color: data['color'],
             );
           }).toList();
           if (_categories.isNotEmpty &&

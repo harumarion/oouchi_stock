@@ -16,13 +16,29 @@ class AddCategoryPage extends StatefulWidget {
 class _AddCategoryPageState extends State<AddCategoryPage> {
   final _formKey = GlobalKey<FormState>();
   String _name = '';
+  Color? _color;
+  final _colors = [
+    Colors.red,
+    Colors.green,
+    Colors.blue,
+    Colors.orange,
+    Colors.purple,
+    Colors.brown,
+    Colors.pink,
+    Colors.cyan,
+  ];
 
   /// 保存ボタンの処理。入力されたカテゴリ名を保存する
   Future<void> _save() async {
     try {
       final id = Random().nextInt(0xffffffff);
-      await userCollection('categories')
-          .add({'id': id, 'name': _name, 'createdAt': Timestamp.now()});
+      await userCollection('categories').add({
+        'id': id,
+        'name': _name,
+        'createdAt': Timestamp.now(),
+        if (_color != null)
+          'color': '#${_color!.value.toRadixString(16).padLeft(8, '0').substring(2)}',
+      });
       if (!mounted) return;
       await ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.saved)))
@@ -50,6 +66,36 @@ class _AddCategoryPageState extends State<AddCategoryPage> {
                 decoration: InputDecoration(labelText: AppLocalizations.of(context)!.categoryName),
                 onChanged: (v) => _name = v,
                 validator: (v) => v == null || v.isEmpty ? AppLocalizations.of(context)!.required : null,
+              ),
+              const SizedBox(height: 16),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(AppLocalizations.of(context)!.selectColor),
+              ),
+              // カラー選択エリア。タップすると色を選択できる
+              SizedBox(
+                height: 48,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  children: [
+                    for (final c in _colors)
+                      GestureDetector(
+                        onTap: () => setState(() => _color = c),
+                        child: Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 4),
+                          width: 40,
+                          decoration: BoxDecoration(
+                            color: c,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: _color == c ? Colors.black : Colors.transparent,
+                              width: 3,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
               ),
               const SizedBox(height: 24),
               ElevatedButton(

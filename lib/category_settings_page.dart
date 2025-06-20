@@ -41,6 +41,7 @@ class _CategorySettingsPageState extends State<CategorySettingsPage> {
           id: data['id'] ?? 0,
           name: data['name'] ?? '',
           createdAt: (data['createdAt'] as Timestamp).toDate(),
+          color: data['color'],
         );
       }).toList();
       list = await applyCategoryOrder(list);
@@ -102,6 +103,21 @@ class _CategorySettingsPageState extends State<CategorySettingsPage> {
         children: [
           for (final c in _list)
             ListTile(
+              leading: c.color == null
+                  ? null
+                  : Container(
+                      width: 16,
+                      height: 16,
+                      decoration: BoxDecoration(
+                        color: Color(
+                          int.parse(
+                            'ff${c.color!.replaceFirst('#', '')}',
+                            radix: 16,
+                          ),
+                        ),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
               title: Text(c.name),
               onLongPress: () async {
                 final result = await showModalBottomSheet<String>(
