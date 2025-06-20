@@ -16,6 +16,7 @@ import 'domain/entities/buy_list_condition_settings.dart';
 import 'domain/services/buy_list_strategy.dart';
 import 'inventory_detail_page.dart';
 import 'widgets/inventory_card.dart';
+import 'domain/entities/category_order.dart';
 
 /// 買い物予報画面
 /// ホーム画面のメニューから遷移し、今買っておいた方が良い商品を表示する
@@ -49,7 +50,9 @@ class _BuyListPageState extends State<BuyListPage> {
   // BuyListPage 起動時に呼び出し、カテゴリ一覧と条件設定を読み込む
   Future<void> _load() async {
     if (widget.categories != null) {
+      // 設定画面から受け取ったカテゴリを並び順付きで保持
       _categories = List.from(widget.categories!);
+      _categories = await applyCategoryOrder(_categories);
     } else {
       final snapshot = await userCollection('categories')
           .orderBy('createdAt')
@@ -62,6 +65,8 @@ class _BuyListPageState extends State<BuyListPage> {
           createdAt: (data['createdAt'] as Timestamp).toDate(),
         );
       }).toList();
+      // Firestore 取得時にも並び順を適用する
+      _categories = await applyCategoryOrder(_categories);
     }
     _condition = await loadBuyListConditionSettings();
     setState(() => _loaded = true);
