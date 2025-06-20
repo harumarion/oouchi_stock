@@ -7,6 +7,7 @@ import 'domain/entities/inventory.dart';
 import 'domain/entities/price_info.dart';
 import 'domain/usecases/add_price_info.dart';
 import 'domain/usecases/fetch_all_inventory.dart';
+import 'util/input_validators.dart';
 
 // セール情報追加画面
 
@@ -125,6 +126,7 @@ class _AddPricePageState extends State<AddPricePage> {
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
                       initialValue: '1',
                       onChanged: (v) => setState(() => _count = double.tryParse(v) ?? 1),
+                      validator: (v) => positiveNumberValidator(context, v),
                     ),
                     const SizedBox(height: 12),
                     TextFormField(
@@ -132,18 +134,21 @@ class _AddPricePageState extends State<AddPricePage> {
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
                       initialValue: '1',
                       onChanged: (v) => setState(() => _volume = double.tryParse(v) ?? 1),
+                      validator: (v) => positiveNumberValidator(context, v),
                     ),
                     const SizedBox(height: 12),
                     TextFormField(
                       decoration: InputDecoration(labelText: AppLocalizations.of(context)!.regularPrice),
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
                       onChanged: (v) => setState(() => _regularPrice = double.tryParse(v) ?? 0),
+                      validator: (v) => nonNegativeNumberValidator(context, v),
                     ),
                     const SizedBox(height: 12),
                     TextFormField(
                       decoration: InputDecoration(labelText: AppLocalizations.of(context)!.salePrice),
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
                       onChanged: (v) => setState(() => _salePrice = double.tryParse(v) ?? 0),
+                      validator: (v) => nonNegativeNumberValidator(context, v),
                     ),
                     const SizedBox(height: 12),
                     TextFormField(

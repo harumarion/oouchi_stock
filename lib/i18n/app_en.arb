@@ -24,6 +24,8 @@
   "reorder": "Reorder",
   "itemNameRequired": "Item name is required",
   "required": "Required",
+  "positiveNumber": "Enter a positive number",
+  "nonNegativeNumber": "Enter zero or a positive number",
   "inventoryAddTitle": "Add Item",
   "inventoryEditTitle": "Edit Item",
   "category": "Category",

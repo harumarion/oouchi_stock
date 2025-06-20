@@ -24,6 +24,8 @@
   "reorder": "並び替え",
   "itemNameRequired": "商品名は必須です",
   "required": "必須項目です",
+  "positiveNumber": "正の数値を入力してください",
+  "nonNegativeNumber": "0以上の数値を入力してください",
   "inventoryAddTitle": "商品を追加",
   "inventoryEditTitle": "商品編集",
   "category": "カテゴリ",
