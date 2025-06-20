@@ -8,8 +8,6 @@ import 'add_category_page.dart';
 import 'price_list_page.dart';
 import 'inventory_page.dart';
 import 'settings_page.dart';
-import 'inventory_detail_page.dart';
-import 'widgets/inventory_card.dart';
 import 'widgets/dashboard_tile.dart';
 import 'main.dart';
 import 'data/repositories/inventory_repository_impl.dart';

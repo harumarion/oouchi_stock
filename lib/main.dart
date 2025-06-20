@@ -10,7 +10,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'firebase_options.dart'; // ← 自動生成された設定ファイル
 import 'domain/entities/category.dart';
 import 'notification_service.dart';
-import 'home_page.dart';
 import 'login_page.dart';
 import 'root_navigation_page.dart';
 import 'theme.dart';
