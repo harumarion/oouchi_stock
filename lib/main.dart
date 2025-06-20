@@ -7,6 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'firebase_options.dart'; // ← 自動生成された設定ファイル
 import 'domain/entities/category.dart';
 import 'notification_service.dart';
@@ -43,6 +44,8 @@ class _AppLoaderState extends State<AppLoader> {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     ); // Firebase の初期設定
+    // AdMob SDK の初期化
+    await MobileAds.instance.initialize();
     // 起動時の端末言語を FirebaseAuth に反映する
     final systemLocale = WidgetsBinding.instance.platformDispatcher.locale;
     FirebaseAuth.instance.setLanguageCode(systemLocale.languageCode);

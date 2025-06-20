@@ -104,6 +104,7 @@
   "enterItemName": "商品名を入力",
   "addedBuyItem": "買い物リストに追加しました",
   "addToBuyList": "買い物リストに追加",
-  "confirmDelete": "削除しますか?"
-  ,"selectColor": "色を選択"
+  "confirmDelete": "削除しますか?",
+  "selectColor": "色を選択",
+  "showAds": "広告を表示"
 }

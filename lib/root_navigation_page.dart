@@ -7,6 +7,7 @@ import 'price_list_page.dart';
 import 'add_price_page.dart';
 import 'main.dart';
 import 'i18n/app_localizations.dart';
+import 'widgets/ad_banner.dart';
 
 /// アプリのメイン画面。下部のナビゲーションバーで各画面を切り替える
 class RootNavigationPage extends StatefulWidget {
@@ -37,7 +38,14 @@ class _RootNavigationPageState extends State<RootNavigationPage> {
   Widget build(BuildContext context) {
     // 画面をインデックスで切り替える
     return Scaffold(
-      body: IndexedStack(index: _index, children: _pages),
+      body: Column(
+        children: [
+          // 各画面を表示する領域
+          Expanded(child: IndexedStack(index: _index, children: _pages)),
+          // 画面下部に常に表示する広告バナー
+          const AdBanner(),
+        ],
+      ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: _index,
