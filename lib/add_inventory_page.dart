@@ -249,7 +249,18 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
                       );
                       await snackBar.closed;
                       if (!mounted) return;
-                      Navigator.pop(context);
+                      // 画面がスタックに積まれている場合のみ前の画面へ戻る
+                      if (Navigator.of(context).canPop()) {
+                        Navigator.pop(context);
+                      } else {
+                        // ルート画面から商品追加した場合はフォームをリセットする
+                        setState(() {
+                          _formKey.currentState?.reset();
+                          _itemName = '';
+                          _note = '';
+                          _quantity = 1.0;
+                        });
+                      }
                     } on FirebaseException catch (e) {
                       if (mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
