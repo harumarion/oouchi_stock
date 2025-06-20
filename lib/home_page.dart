@@ -10,12 +10,14 @@ import 'inventory_page.dart';
 import 'settings_page.dart';
 import 'inventory_detail_page.dart';
 import 'widgets/inventory_card.dart';
+import 'widgets/dashboard_tile.dart';
 import 'main.dart';
 import 'data/repositories/inventory_repository_impl.dart';
 import 'domain/entities/category.dart';
 import 'domain/entities/inventory.dart';
 import 'domain/entities/category_order.dart';
 import 'domain/services/buy_list_strategy.dart';
+import 'domain/services/purchase_prediction_strategy.dart';
 import 'domain/entities/buy_list_condition_settings.dart';
 
 /// ホーム画面。起動時に表示され、買い物リストを管理する。
@@ -50,6 +52,24 @@ class _HomePageState extends State<HomePage> {
     // 設定画面から戻った際にも呼ばれ、買い物リスト条件を再読込する
     final s = await loadBuyListConditionSettings();
     setState(() => _conditionSettings = s);
+  }
+
+  /// 履歴から残り日数を計算する
+  Future<int> _calcDaysLeft(Inventory inv) async {
+    final history = await InventoryRepositoryImpl().watchHistory(inv.id).first;
+    double quantity = 0;
+    for (final h in history.reversed) {
+      if (h.type == 'stocktake') {
+        quantity = h.after;
+      } else if (h.type == 'add' || h.type == 'bought') {
+        quantity += h.quantity;
+      } else if (h.type == 'used') {
+        quantity -= h.quantity;
+      }
+    }
+    const strategy = DummyPredictionStrategy();
+    final predicted = strategy.predict(DateTime.now(), history, quantity);
+    return predicted.difference(DateTime.now()).inDays;
   }
 
   @override
@@ -192,8 +212,8 @@ class _HomePageState extends State<HomePage> {
           )
         ],
       ),
-      body: StreamBuilder<List<Inventory>>(
-        stream: strategy.watch(repo),
+      body: FutureBuilder<List<Inventory>>(
+        future: repo.fetchAll(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             final err = snapshot.error?.toString() ?? 'unknown';
@@ -206,56 +226,30 @@ class _HomePageState extends State<HomePage> {
           if (list.isEmpty) {
             return Center(child: Text(AppLocalizations.of(context)!.noBuyItems));
           }
-          final map = {for (final c in _categories) c.name: <Inventory>[]};
-          for (final inv in list) {
-            map[inv.category]?.add(inv);
-          }
-          return DefaultTabController(
-            length: _categories.length,
-            child: Column(
-              children: [
-                Material(
-                  color: Theme.of(context).colorScheme.primary,
-                  child: TabBar(
-                    isScrollable: true,
-                    tabs: [
-                      for (final c in _categories)
-                        Tab(text: map[c.name]!.isNotEmpty ? '${c.name}❗' : c.name),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: TabBarView(
-                    children: [
-                      for (final c in _categories)
-                        map[c.name]!.isEmpty
-                            ? Center(child: Text(AppLocalizations.of(context)!.noBuyItems))
-                            : ListView(
-                                padding: const EdgeInsets.all(16),
-                                children: [
-                                  for (final inv in map[c.name]!)
-                                    InventoryCard(
-                                      inventory: inv,
-                                      buyOnly: true,
-                                      onTap: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (_) => InventoryDetailPage(
-                                              inventoryId: inv.id,
-                                              categories: _categories,
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                ],
-                              ),
-                    ],
-                  ),
-                ),
-              ],
+          return GridView.builder(
+            padding: const EdgeInsets.all(8),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              childAspectRatio: 1,
+              mainAxisSpacing: 8,
+              crossAxisSpacing: 8,
             ),
+            itemCount: list.length,
+            itemBuilder: (context, index) {
+              final inv = list[index];
+              return FutureBuilder<int>(
+                future: _calcDaysLeft(inv),
+                builder: (context, daySnap) {
+                  final days = daySnap.data ?? 0;
+                  return DashboardTile(
+                    inventory: inv,
+                    daysLeft: days,
+                    onSale: false,
+                    onAdd: () {},
+                  );
+                },
+              );
+            },
           );
         },
       ),
