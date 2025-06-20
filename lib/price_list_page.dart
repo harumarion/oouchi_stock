@@ -7,6 +7,7 @@ import 'util/firestore_refs.dart';
 import 'add_price_page.dart';
 import 'add_inventory_page.dart';
 import 'settings_page.dart';
+import 'widgets/settings_menu_button.dart';
 import 'data/repositories/price_repository_impl.dart';
 import 'domain/entities/category.dart';
 import 'domain/entities/price_info.dart';
@@ -71,37 +72,13 @@ class _PriceListPageState extends State<PriceListPage> {
         appBar: AppBar(
           title: Text(AppLocalizations.of(context)!.priceManagementTitle),
           actions: [
-            PopupMenuButton<String>(
-              onSelected: (value) {
-                if (value == 'add') {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (_) => AddInventoryPage(categories: _categories)),
-                  );
-                } else if (value == 'settings') {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (_) => SettingsPage(
-                              categories: _categories,
-                              onChanged: (l) {},
-                              onLocaleChanged: (l) => context.findAncestorStateOfType<MyAppState>()?.updateLocale(l),
-                              onConditionChanged: () {},
-                            )),
-                  );
-                }
-              },
-              itemBuilder: (context) => [
-                PopupMenuItem(
-                    value: 'add',
-                    child: Text(AppLocalizations.of(context)!.addItem,
-                        style: const TextStyle(fontSize: 18))),
-                PopupMenuItem(
-                    value: 'settings',
-                    child: Text(AppLocalizations.of(context)!.settings,
-                        style: const TextStyle(fontSize: 18))),
-              ],
+            // 共通の設定メニューボタンを使用
+            SettingsMenuButton(
+              categories: _categories,
+              onCategoriesChanged: (l) {},
+              onLocaleChanged: (l) =>
+                  context.findAncestorStateOfType<MyAppState>()?.updateLocale(l),
+              onConditionChanged: () {},
             )
           ],
           bottom: TabBar(
