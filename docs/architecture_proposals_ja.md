@@ -8,6 +8,8 @@
 - 例として `InventoryCard` を `lib/widgets/inventory_card.dart` へ分離しました。
 - 同様に `main.dart` にあったホーム画面と在庫画面を
   `lib/home_page.dart` と `lib/inventory_page.dart` に切り出しています。
+- 論理処理は可能な限り UseCase として切り出します。例えば
+  `HomePage` にあった残り日数計算処理を `CalculateDaysLeft` ユースケースへ移動しました。
 
 ## 2. 状態管理の導入
 - UI とビジネスロジックを分離するため、Riverpod や BLoC などの状態管理ライブラリを利用します。
