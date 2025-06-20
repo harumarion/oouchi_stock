@@ -113,6 +113,9 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
           final types = _typesMap[_category!.name];
           if (types != null && types.isNotEmpty) {
             _itemType = types.first;
+          } else {
+            // 品種が存在しない場合は "その他" を初期値とする
+            _itemType = 'その他';
           }
         }
       });
@@ -165,20 +168,31 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
                     final types = _typesMap[value.name];
                     if (types != null && types.isNotEmpty) {
                       _itemType = types.first;
+                    } else {
+                      // 品種が存在しないカテゴリを選んだ場合は "その他" に変更
+                      _itemType = 'その他';
                     }
                   });
                 },
               ),
               const SizedBox(height: 12),
               // 品種選択
-              DropdownButtonFormField<String>(
-                decoration: InputDecoration(labelText: AppLocalizations.of(context)!.itemType),
-                value: _itemType,
-                items: (_typesMap[_category?.name] ?? ['その他'])
-                    .map((t) => DropdownMenuItem(value: t, child: Text(t)))
-                .toList(),
-                onChanged: (value) => setState(() => _itemType = value ?? ''),
-              ),
+              Builder(builder: (context) {
+                // 現在選択中のカテゴリに対応する品種リストを取得
+                final itemTypes = _typesMap[_category?.name] ?? ['その他'];
+                // ドロップダウンに存在しない値を選んでいる場合は先頭に合わせる
+                if (!itemTypes.contains(_itemType)) {
+                  _itemType = itemTypes.first;
+                }
+                return DropdownButtonFormField<String>(
+                  decoration: InputDecoration(labelText: AppLocalizations.of(context)!.itemType),
+                  value: _itemType,
+                  items: itemTypes
+                      .map((t) => DropdownMenuItem(value: t, child: Text(t)))
+                      .toList(),
+                  onChanged: (value) => setState(() => _itemType = value ?? ''),
+                );
+              }),
               const SizedBox(height: 12),
               Row(
                 children: [
