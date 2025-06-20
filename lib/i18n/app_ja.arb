@@ -90,5 +90,9 @@
   ,"backup": "バックアップ"
   ,"restore": "復元"
   ,"backupDone": "バックアップしました"
-  ,"restoreDone": "復元しました"
+  ,"restoreDone": "復元しました",
+  "addBuyItem": "商品を追加",
+  "enterItemName": "商品名を入力",
+  "addedBuyItem": "買い物リストに追加しました",
+  "confirmDelete": "削除しますか?"
 }
