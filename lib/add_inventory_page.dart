@@ -10,6 +10,8 @@ import 'domain/entities/category.dart';
 import 'default_item_types.dart';
 import 'domain/usecases/add_inventory.dart';
 import 'data/repositories/inventory_repository_impl.dart';
+import 'widgets/settings_menu_button.dart';
+import 'main.dart';
 
 // 商品を追加する画面のウィジェット
 
@@ -141,7 +143,19 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
     }
     // 画面のレイアウトを構築
     return Scaffold(
-      appBar: AppBar(title: Text(AppLocalizations.of(context)!.inventoryAddTitle)),
+      appBar: AppBar(
+        title: Text(AppLocalizations.of(context)!.inventoryAddTitle),
+        actions: [
+          // 設定メニュー。買い物リスト画面と同じ内容を表示
+          SettingsMenuButton(
+            categories: _categories,
+            onCategoriesChanged: (l) => setState(() => _categories = List.from(l)),
+            onLocaleChanged: (l) =>
+                context.findAncestorStateOfType<MyAppState>()?.updateLocale(l),
+            onConditionChanged: () {},
+          )
+        ],
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Form(

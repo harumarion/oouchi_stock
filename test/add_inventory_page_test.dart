@@ -30,6 +30,18 @@ void main() {
     expect(find.text('1'), findsOneWidget);
   });
 
+  testWidgets('設定メニューが表示される', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: AddInventoryPage(
+          categories: [Category(id: 1, name: '日用品', createdAt: DateTime.now())],
+        ),
+      ),
+    );
+    await tester.pump();
+    expect(find.byIcon(Icons.more_vert), findsOneWidget);
+  });
+
   // Navigator.canPop が false の場合でも画面が消えないことを確認するテスト
   testWidgets('保存後も画面が残る', (WidgetTester tester) async {
     await tester.pumpWidget(

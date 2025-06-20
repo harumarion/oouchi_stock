@@ -11,6 +11,7 @@ import 'domain/usecases/remove_buy_item.dart';
 import 'domain/usecases/watch_buy_items.dart';
 
 import 'data/repositories/inventory_repository_impl.dart';
+import 'domain/usecases/update_quantity.dart';
 import 'domain/entities/category.dart';
 import 'domain/entities/inventory.dart';
 import 'domain/entities/buy_list_condition_settings.dart';
@@ -47,6 +48,60 @@ class _BuyListPageState extends State<BuyListPage> {
   /// 設定画面から戻った際に呼び出され、カテゴリリストを更新する
   void _updateCategories(List<Category> list) {
     setState(() => _categories = List.from(list));
+  }
+
+  /// 数量入力ダイアログを表示し、プラスマイナスボタンで1ずつ増減できるようにする
+  Future<double?> _inputAmountDialog(BuildContext context) async {
+    final controller = TextEditingController(text: '1');
+    return showDialog<double>(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(builder: (context, setState) {
+          // ダイアログ内で状態を更新するため StatefulBuilder を使用
+          void add() {
+            final v = double.tryParse(controller.text) ?? 0;
+            controller.text = (v + 1).toStringAsFixed(0);
+            setState(() {});
+          }
+
+          void remove() {
+            final v = double.tryParse(controller.text) ?? 0;
+            if (v > 0) controller.text = (v - 1).toStringAsFixed(0);
+            setState(() {});
+          }
+
+          return AlertDialog(
+            title: Text(AppLocalizations.of(context)!.boughtAmount),
+            content: Row(
+              children: [
+                IconButton(onPressed: remove, icon: const Icon(Icons.remove)),
+                Expanded(
+                  child: TextField(
+                    controller: controller,
+                    keyboardType:
+                        const TextInputType.numberWithOptions(decimal: true),
+                  ),
+                ),
+                IconButton(onPressed: add, icon: const Icon(Icons.add)),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(AppLocalizations.of(context)!.cancel),
+              ),
+              TextButton(
+                onPressed: () {
+                  final v = double.tryParse(controller.text);
+                  Navigator.pop(context, v);
+                },
+                child: Text(AppLocalizations.of(context)!.ok),
+              ),
+            ],
+          );
+        });
+      },
+    );
   }
 
   @override
@@ -178,6 +233,19 @@ class _BuyListPageState extends State<BuyListPage> {
       key: ValueKey(item.key),
       direction: DismissDirection.startToEnd,
       confirmDismiss: (_) async {
+        if (item.inventoryId != null) {
+          // 在庫数を入力してから削除する
+          final v = await _inputAmountDialog(context);
+          if (v == null) return false;
+          try {
+            await UpdateQuantity(InventoryRepositoryImpl())(
+              item.inventoryId!,
+              v,
+              'bought',
+            );
+          } catch (_) {}
+          return true;
+        }
         return await showDialog<bool>(
               context: context,
               builder: (_) => AlertDialog(
