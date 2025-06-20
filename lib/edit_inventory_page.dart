@@ -57,6 +57,7 @@ class _EditInventoryPageState extends State<EditInventoryPage> {
     _itemType = widget.itemType;
     _unit = widget.unit;
     _note = widget.note;
+    // カテゴリコレクションの更新を監視
     _catSub = userCollection('categories')
         .orderBy('createdAt')
         .snapshots()
@@ -70,13 +71,22 @@ class _EditInventoryPageState extends State<EditInventoryPage> {
             createdAt: (data['createdAt'] as Timestamp).toDate(),
           );
         }).toList();
-        if (_categories.isNotEmpty &&
-            _categories.every(
-                (c) => c.id != _category.id && c.name != _category.name)) {
-          _category = _categories.first;
+        if (_categories.isNotEmpty) {
+          // id が一致するカテゴリを最新のリストから取得
+          final matched = _categories.firstWhere(
+            (c) => c.id == _category.id,
+            orElse: () => _categories.first,
+          );
+          _category = matched;
+          // カテゴリ変更に合わせて品種を更新
+          final types = _typesMap[_category.name];
+          if (types != null && types.isNotEmpty) {
+            _itemType = types.contains(_itemType) ? _itemType : types.first;
+          }
         }
       });
     });
+    // 品種コレクションの更新を監視
     _typeSub = userCollection('itemTypes')
         .orderBy('createdAt')
         .snapshots()
@@ -101,7 +111,7 @@ class _EditInventoryPageState extends State<EditInventoryPage> {
     });
   }
 
-  /// 保存ボタンの処理
+  /// 保存ボタンを押したときの処理
   Future<void> _saveItem() async {
     final item = Inventory(
       id: widget.id,
@@ -125,12 +135,14 @@ class _EditInventoryPageState extends State<EditInventoryPage> {
 
   @override
   Widget build(BuildContext context) {
+    // カテゴリがまだ読み込まれていない場合はローディング
     if (_categories.isEmpty) {
       return Scaffold(
         appBar: AppBar(title: Text(AppLocalizations.of(context)!.inventoryEditTitle)),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
+    // 商品編集フォームを表示
     return Scaffold(
       appBar: AppBar(title: Text(AppLocalizations.of(context)!.inventoryEditTitle)),
       body: Padding(
