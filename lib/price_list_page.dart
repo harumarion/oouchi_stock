@@ -83,7 +83,14 @@ class _PriceListPageState extends State<PriceListPage> {
           ],
           bottom: TabBar(
             isScrollable: true,
-            tabs: [for (final c in _categories) Tab(text: c.name)],
+            tabs: [
+              for (final c in _categories)
+                // 最大3件までを幅いっぱいに表示
+                SizedBox(
+                  width: MediaQuery.of(context).size.width / 3,
+                  child: Tab(text: c.name),
+                )
+            ],
           ),
         ),
         body: TabBarView(

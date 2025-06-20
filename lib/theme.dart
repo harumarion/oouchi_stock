@@ -104,6 +104,12 @@ class AppTheme {
           textStyle: baseTextTheme.labelLarge,
         ),
       ),
+      // タブバーの選択時に文字が見えなくならないよう色を調整
+      tabBarTheme: const TabBarTheme(
+        labelColor: Colors.white,
+        unselectedLabelColor: Colors.white70,
+        indicatorColor: Colors.white,
+      ),
     );
   }
 }
