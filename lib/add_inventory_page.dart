@@ -278,6 +278,8 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
                         });
                       }
                     } on FirebaseException catch (e) {
+                      // Firestore からの例外をログに出力
+                      debugPrint('在庫保存失敗: ${e.message ?? e.code}');
                       if (mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
@@ -286,7 +288,9 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
                           ),
                         );
                       }
-                    } catch (_) {
+                    } catch (e) {
+                      // その他の例外をログに出力
+                      debugPrint('在庫保存失敗: $e');
                       if (mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text(AppLocalizations.of(context)!.saveFailed)),

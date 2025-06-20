@@ -41,7 +41,9 @@ class _AddItemTypePageState extends State<AddItemTypePage> {
           .showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.saved)))
           .closed;
       if (mounted) Navigator.pop(context);
-    } catch (_) {
+    } catch (e) {
+      // エラー内容をログに出力
+      debugPrint('品種保存失敗: $e');
       if (mounted) {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.saveFailed)));

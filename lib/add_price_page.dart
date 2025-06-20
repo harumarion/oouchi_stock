@@ -170,11 +170,13 @@ class _AddPricePageState extends State<AddPricePage> {
                           try {
                             await _save();
                             if (!mounted) return;
-                            await ScaffoldMessenger.of(context)
-                                .showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.saved)))
-                                .closed;
-                            if (mounted) Navigator.pop(context);
-                          } catch (_) {
+                          await ScaffoldMessenger.of(context)
+                              .showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.saved)))
+                              .closed;
+                          if (mounted) Navigator.pop(context);
+                          } catch (e) {
+                            // 例外をログに出力
+                            debugPrint('セール情報保存失敗: $e');
                             if (mounted) {
                               ScaffoldMessenger.of(context)
                                   .showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.saveFailed)));

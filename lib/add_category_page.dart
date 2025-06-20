@@ -45,6 +45,8 @@ class _AddCategoryPageState extends State<AddCategoryPage> {
           .closed;
       if (mounted) Navigator.pop(context);
     } catch (e) {
+      // 例外内容をログに出力
+      debugPrint('カテゴリ保存失敗: $e');
       if (mounted) {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.saveFailed)));
