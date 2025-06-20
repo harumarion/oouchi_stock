@@ -234,7 +234,8 @@ class _BuyListPageState extends State<BuyListPage> {
       direction: DismissDirection.startToEnd,
       confirmDismiss: (_) async {
         if (item.inventoryId != null) {
-          // 在庫数を入力してから削除する
+          // 在庫数を入力してから削除する。
+          // 入力値は在庫一覧の数量に加算される
           final v = await _inputAmountDialog(context);
           if (v == null) return false;
           try {

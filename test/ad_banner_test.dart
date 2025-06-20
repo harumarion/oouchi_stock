@@ -7,5 +7,8 @@ void main() {
     await tester.pumpWidget(const MaterialApp(home: AdBanner()));
     // 端末によっては広告が読み込めないため、とりあえずウィジェットが存在するか確認
     expect(find.byType(AdBanner), findsOneWidget);
+    final sizedBox = tester.widget<SizedBox>(find.byType(SizedBox).first);
+    // バナーの高さがナビゲーションバーと同じか確認
+    expect(sizedBox.height, kBottomNavigationBarHeight);
   });
 }
