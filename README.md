@@ -25,7 +25,8 @@ Android ビルドを行う場合は JDK 17 が必要です。`JAVA_HOME` が JDK
 ることを確認してください。
 
 折りたたみ端末などの最新機種に対応するため、AndroidX Window ライブラリを利用しています。
-ビルド時にエラーが発生する場合は `androidx.window:window` が取得できているか確認してください。
+Flutter エンジンと互換性のある `1.1.x` 系を使用しており、`android/app/build.gradle.kts` では `1.1.0` を指定しています。
+ビルド時にエラーが発生する場合は `androidx.window:window` が正しいバージョンで取得できているか確認してください。
 
 ## Firebase の設定
 
