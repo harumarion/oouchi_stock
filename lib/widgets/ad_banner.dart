@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+
+// google_mobile_ads 4.0.0 以上で動作する広告表示用ウィジェット
 import '../data/repositories/ad_config_repository_impl.dart';
 import '../domain/usecases/load_ad_enabled.dart';
 
