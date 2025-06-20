@@ -17,24 +17,36 @@ class AppTheme {
   static const Color subTextColor = Color(0xFF888888);
 
   /// ライトテーマの定義
+  /// MaterialApp の `theme` に設定され、全画面で利用されます。
   static ThemeData get lightTheme {
+    // アプリ全体で使用するテキストスタイルを定義
+    // 各画面のウィジェットツリー生成時に参照されます
     final baseTextTheme = TextTheme(
-      titleLarge: GoogleFonts.notoSansJp(
+      // 画面タイトルの基本フォント
+      // ログイン画面や在庫一覧画面のタイトルに使用
+      // ここでは Roboto フォントを利用
+      titleLarge: GoogleFonts.roboto(
         fontSize: 20,
         fontWeight: FontWeight.bold,
         color: textColor,
       ),
-      bodyLarge: GoogleFonts.notoSansJp(
+      // 一般的な本文に使用するフォント
+      // すべての画面の説明文や入力フォームに適用される
+      bodyLarge: GoogleFonts.roboto(
         fontSize: 16,
         fontWeight: FontWeight.normal,
         color: textColor,
       ),
-      labelLarge: GoogleFonts.notoSansJp(
+      // ボタンやラベルで使用するフォント
+      // ユーザー操作時のフィードバックに関わる
+      labelLarge: GoogleFonts.roboto(
         fontSize: 14,
         fontWeight: FontWeight.w500,
         color: textColor,
       ),
-      bodySmall: GoogleFonts.notoSansJp(
+      // 注釈や補足に使用するフォント
+      // 詳細画面の備考欄などで利用
+      bodySmall: GoogleFonts.roboto(
         fontSize: 12,
         fontWeight: FontWeight.w400,
         color: subTextColor,
