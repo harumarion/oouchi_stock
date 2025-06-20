@@ -1,6 +1,7 @@
 # oouchi_stock
 
 天気予報のように在庫とセール情報をもとに買っておくべき商品を提案するFlutterアプリです。
+広告表示には `google_mobile_ads` (>=4.0.0) を利用しています。
 
 ユーザー向けの操作説明は[取扱説明書](docs/user_manual_ja.md)をご覧ください。
 開発者向けの設計方針は[アーキテクチャ案](docs/architecture_proposals_ja.md)を参照してください。
