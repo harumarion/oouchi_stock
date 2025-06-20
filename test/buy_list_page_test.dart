@@ -11,25 +11,8 @@ void main() {
     await tester.pumpWidget(MaterialApp(home: BuyListPage(categories: categories)));
     await tester.pump();
     expect(find.byType(TextField), findsOneWidget);
-    // 手動タブが表示されているか確認
-    expect(find.text('手動'), findsOneWidget);
-  });
-
-  testWidgets('カテゴリの並び順が保存順に反映される', (WidgetTester tester) async {
-    // SharedPreferences に並び順を保存
-    SharedPreferences.setMockInitialValues({
-      'category_order': ['2', '1']
-    });
-    final categories = [
-      Category(id: 1, name: 'A', createdAt: DateTime.now()),
-      Category(id: 2, name: 'B', createdAt: DateTime.now()),
-    ];
-    await tester.pumpWidget(MaterialApp(home: BuyListPage(categories: categories)));
-    // タブが描画されるまで待機
-    await tester.pumpAndSettle();
-    final tabs = tester.widgetList<Tab>(find.byType(Tab)).toList();
-    final labels = tabs.map((t) => t.text).toList();
-    expect(labels, ['手動', 'B', 'A']);
+    // タブは廃止されたため存在しない
+    expect(find.byType(TabBar), findsNothing);
   });
 
   testWidgets('設定メニューボタンが表示される', (WidgetTester tester) async {

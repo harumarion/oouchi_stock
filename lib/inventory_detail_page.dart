@@ -58,6 +58,7 @@ class InventoryDetailPage extends StatelessWidget {
                           id: 0,
                           name: inv.category,
                           createdAt: DateTime.now(),
+                          color: null,
                         ),
                       ),
                       itemType: inv.itemType,

@@ -71,6 +71,7 @@ class _InventoryPageState extends State<InventoryPage> {
             id: data['id'] ?? 0,
             name: data['name'] ?? '',
             createdAt: (data['createdAt'] as Timestamp).toDate(),
+            color: data['color'],
           );
         }).toList();
         list = await applyCategoryOrder(list);
@@ -304,8 +305,12 @@ class _InventoryListState extends State<InventoryList> {
                               itemName: inv.itemName,
                               category: widget.categories.firstWhere(
                                 (e) => e.name == inv.category,
-                                orElse: () =>
-                                    Category(id: 0, name: inv.category, createdAt: DateTime.now()),
+                                orElse: () => Category(
+                                  id: 0,
+                                  name: inv.category,
+                                  createdAt: DateTime.now(),
+                                  color: null,
+                                ),
                               ),
                               itemType: inv.itemType,
                               unit: inv.unit,

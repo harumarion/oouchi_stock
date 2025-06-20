@@ -71,6 +71,7 @@ class _BuyListPageState extends State<BuyListPage> {
           id: data['id'] ?? 0,
           name: data['name'] ?? '',
           createdAt: (data['createdAt'] as Timestamp).toDate(),
+          color: data['color'],
         );
       }).toList();
       // Firestore 取得時にも並び順を適用する
@@ -108,105 +109,69 @@ class _BuyListPageState extends State<BuyListPage> {
           return const Scaffold(body: Center(child: CircularProgressIndicator()));
         }
         final list = snapshot.data!;
-        final map = {for (final c in _categories) c.name: <BuyItem>[]};
-        final manual = <BuyItem>[];
-        for (final item in list) {
-          if (map.containsKey(item.category)) {
-            map[item.category]!.add(item);
-          } else {
-            manual.add(item);
-          }
-        }
-        final tabs = ['手動', ..._categories.map((e) => e.name)];
-        return DefaultTabController(
-          length: tabs.length,
-          child: Scaffold(
-            appBar: AppBar(
-              title: Text(loc.buyList),
-              // 設定画面を開くメニューボタンを追加
-              actions: [
-                SettingsMenuButton(
-                  categories: _categories,
-                  onCategoriesChanged: _updateCategories,
-                  // 設定画面で言語を変更したときにアプリ全体のロケールを更新する
-                  onLocaleChanged: (l) =>
-                      context.findAncestorStateOfType<MyAppState>()?.updateLocale(l),
-                  onConditionChanged: _load,
-                )
-              ],
-              bottom: TabBar(
-                isScrollable: true,
-                tabs: [
-                  for (final t in tabs)
-                    // 最大3件まで画面幅いっぱいに表示し、それ以上はスクロール
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width / 3,
-                      child: Tab(text: t),
-                    )
-                ],
+        final catMap = {for (final c in _categories) c.name: c};
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(loc.buyList),
+            actions: [
+              SettingsMenuButton(
+                categories: _categories,
+                onCategoriesChanged: _updateCategories,
+                onLocaleChanged: (l) =>
+                    context.findAncestorStateOfType<MyAppState>()?.updateLocale(l),
+                onConditionChanged: _load,
+              )
+            ],
+          ),
+          body: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _itemController,
+                        decoration: InputDecoration(labelText: loc.enterItemName),
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () async {
+                        final text = _itemController.text.trim();
+                        if (text.isEmpty) return;
+                        await _addUsecase(BuyItem(text, ''));
+                        _itemController.clear();
+                        if (!mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(loc.addedBuyItem)),
+                        );
+                      },
+                      icon: const Icon(Icons.add),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            body: TabBarView(
-              children: [
-                _manualTab(manual, loc),
-                for (final c in _categories)
-                  _categoryTab(map[c.name]!, loc),
-              ],
-            ),
+              Expanded(
+                child: list.isEmpty
+                    ? Center(child: Text(loc.noBuyItems))
+                    : ListView(
+                        padding: const EdgeInsets.all(16),
+                        children: [
+                          for (final item in list)
+                            _dismissibleCard(item, loc, catMap[item.category]?.color),
+                        ],
+                      ),
+              ),
+            ],
           ),
         );
       },
     );
   }
 
-  Widget _categoryTab(List<BuyItem> items, AppLocalizations loc) {
-    if (items.isEmpty) {
-      return Center(child: Text(loc.noBuyItems));
-    }
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        for (final item in items)
-          _dismissibleCard(item, loc),
-      ],
-    );
-  }
+  // _categoryTab と _manualTab はタブ廃止に伴い未使用となった
 
-  Widget _manualTab(List<BuyItem> items, AppLocalizations loc) {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _itemController,
-                  decoration: InputDecoration(labelText: loc.enterItemName),
-                ),
-              ),
-              IconButton(
-                onPressed: () async {
-                  final text = _itemController.text.trim();
-                  if (text.isEmpty) return;
-                  await _addUsecase(BuyItem(text, ''));
-                  _itemController.clear();
-                  if (!mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(loc.addedBuyItem)),
-                  );
-                },
-                icon: const Icon(Icons.add),
-              ),
-            ],
-          ),
-        ),
-        Expanded(child: _categoryTab(items, loc)),
-      ],
-    );
-  }
-
-  Widget _dismissibleCard(BuyItem item, AppLocalizations loc) {
+  Widget _dismissibleCard(BuyItem item, AppLocalizations loc, String? color) {
     return Dismissible(
       key: ValueKey(item.key),
       direction: DismissDirection.startToEnd,
@@ -237,6 +202,16 @@ class _BuyListPageState extends State<BuyListPage> {
       child: Card(
         margin: const EdgeInsets.only(bottom: 12),
         child: ListTile(
+          leading: color == null
+              ? null
+              : Container(
+                  width: 12,
+                  height: 12,
+                  decoration: BoxDecoration(
+                    color: Color(int.parse('ff${color.replaceFirst('#', '')}', radix: 16)),
+                    shape: BoxShape.circle,
+                  ),
+                ),
           title: Text(item.name),
           trailing: item.inventoryId == null
               ? null
