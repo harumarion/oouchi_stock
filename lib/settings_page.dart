@@ -40,10 +40,11 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   void initState() {
     super.initState();
+    // 起動時にバックアップ・復元日時を読み込む
     _loadTimes();
   }
 
-  /// 端末に保存されたバックアップ日時を読み込む
+  /// SharedPreferences からバックアップ・復元日時を取得して状態に反映
   Future<void> _loadTimes() async {
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) return;
@@ -56,7 +57,8 @@ class _SettingsPageState extends State<SettingsPage> {
       _restoredTime = restoreStr != null ? DateTime.parse(restoreStr) : null;
     });
   }
-  /// バックアップ実行前に確認ダイアログを表示する
+  /// 設定画面の「バックアップ」タップ時に呼び出される
+  /// 実行前に確認ダイアログを表示する
   Future<void> _backup() async {
     final loc = AppLocalizations.of(context)!;
     final result = await showDialog<bool>(
@@ -76,8 +78,20 @@ class _SettingsPageState extends State<SettingsPage> {
     final catSnap = await userCollection('categories').get();
     final invSnap = await userCollection('inventory').get();
     final data = {
-      'categories': catSnap.docs.map((d) => d.data()).toList(),
-      'inventory': invSnap.docs.map((d) => d.data()).toList(),
+      'categories': catSnap.docs.map((d) {
+        final m = d.data();
+        final ts = m['createdAt'];
+        // Firestore Timestamp を ISO8601 文字列に変換する
+        if (ts is Timestamp) m['createdAt'] = ts.toDate().toIso8601String();
+        return m;
+      }).toList(),
+      'inventory': invSnap.docs.map((d) {
+        final m = d.data();
+        final ts = m['createdAt'];
+        // Firestore Timestamp を ISO8601 文字列に変換する
+        if (ts is Timestamp) m['createdAt'] = ts.toDate().toIso8601String();
+        return m;
+      }).toList(),
     };
     final now = DateTime.now();
     await prefs.setString('backup_$uid', jsonEncode(data));
@@ -93,6 +107,7 @@ class _SettingsPageState extends State<SettingsPage> {
     }
   }
 
+  /// 設定画面の「復元」タップ時に呼び出される
   /// SharedPreferences に保存したバックアップからデータを復元する
   Future<void> _restore() async {
     final uid = FirebaseAuth.instance.currentUser!.uid;
@@ -216,17 +231,23 @@ class _SettingsPageState extends State<SettingsPage> {
         ListTile(
           key: const Key('backupTile'),
           title: Text(AppLocalizations.of(context)!.backup),
-          trailing: _backupTime != null
-              ? Text(DateFormat('yyyy/MM/dd HH:mm').format(_backupTime!))
-              : null,
+          // 最後にバックアップした日時を表示。未実行なら"未バックアップ"を表示
+          trailing: Text(
+            _backupTime != null
+                ? DateFormat('yyyy/MM/dd HH:mm').format(_backupTime!)
+                : AppLocalizations.of(context)!.noBackupYet,
+          ),
           onTap: _backup,
         ),
         ListTile(
           key: const Key('restoreTile'),
           title: Text(AppLocalizations.of(context)!.restore),
-          trailing: _restoredTime != null
-              ? Text(DateFormat('yyyy/MM/dd HH:mm').format(_restoredTime!))
-              : null,
+          // 最後にバックアップから復元した日時を表示。未実行なら"未復元"を表示
+          trailing: Text(
+            _restoredTime != null
+                ? DateFormat('yyyy/MM/dd HH:mm').format(_restoredTime!)
+                : AppLocalizations.of(context)!.noRestoreYet,
+          ),
           onTap: _restore,
         ),
       ],
