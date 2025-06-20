@@ -12,4 +12,10 @@ void main() {
     final dataTable = tester.widget<DataTable>(find.byType(DataTable).first);
     expect(dataTable.columns.length, 6);
   });
+
+  testWidgets('設定メニューが表示される', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(home: PriceListPage()));
+    await tester.pumpAndSettle();
+    expect(find.byIcon(Icons.more_vert), findsOneWidget);
+  });
 }
