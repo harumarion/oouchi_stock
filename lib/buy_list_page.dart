@@ -70,7 +70,7 @@ class _BuyListPageState extends State<BuyListPage> {
     // 条件に合致した在庫が通知された際に買い物リストへ追加する
     _invSub = strategy.watch(repo).listen((list) {
       for (final inv in list) {
-        _addUsecase(BuyItem(inv.itemName, inv.category));
+        _addUsecase(BuyItem(inv.itemName, inv.category, inv.id));
       }
     });
   }
@@ -96,15 +96,15 @@ class _BuyListPageState extends State<BuyListPage> {
         }
         final list = snapshot.data!;
         final map = {for (final c in _categories) c.name: <BuyItem>[]};
-        map['その他'] = [];
+        final manual = <BuyItem>[];
         for (final item in list) {
           if (map.containsKey(item.category)) {
             map[item.category]!.add(item);
           } else {
-            map['その他']!.add(item);
+            manual.add(item);
           }
         }
-        final tabs = ['その他', ..._categories.map((e) => e.name)];
+        final tabs = ['手動', ..._categories.map((e) => e.name)];
         return DefaultTabController(
           length: tabs.length,
           child: Scaffold(
@@ -117,7 +117,7 @@ class _BuyListPageState extends State<BuyListPage> {
             ),
             body: TabBarView(
               children: [
-                _manualTab(map['その他']!, loc),
+                _manualTab(manual, loc),
                 for (final c in _categories)
                   _categoryTab(map[c.name]!, loc),
               ],
@@ -158,7 +158,7 @@ class _BuyListPageState extends State<BuyListPage> {
                 onPressed: () async {
                   final text = _itemController.text.trim();
                   if (text.isEmpty) return;
-                  await _addUsecase(BuyItem(text, 'その他'));
+                  await _addUsecase(BuyItem(text, ''));
                   _itemController.clear();
                   if (!mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -205,7 +205,25 @@ class _BuyListPageState extends State<BuyListPage> {
       ),
       child: Card(
         margin: const EdgeInsets.only(bottom: 12),
-        child: ListTile(title: Text(item.name)),
+        child: ListTile(
+          title: Text(item.name),
+          trailing: item.inventoryId == null
+              ? null
+              : IconButton(
+                  icon: const Icon(Icons.info_outline),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => InventoryDetailPage(
+                          inventoryId: item.inventoryId!,
+                          categories: _categories,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+        ),
       ),
     );
   }

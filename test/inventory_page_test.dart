@@ -10,5 +10,7 @@ void main() {
     // タブが描画されるまで待機
     await tester.pumpAndSettle();
     expect(find.byType(TextField), findsWidgets);
+    // 買い物リスト追加ボタンが存在するか確認
+    expect(find.byIcon(Icons.playlist_add), findsWidgets);
   });
 }

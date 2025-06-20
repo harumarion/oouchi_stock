@@ -11,5 +11,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(home: BuyListPage(categories: categories)));
     await tester.pump();
     expect(find.byType(TextField), findsOneWidget);
+    // 手動タブが表示されているか確認
+    expect(find.text('手動'), findsOneWidget);
   });
 }

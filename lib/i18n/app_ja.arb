@@ -94,5 +94,6 @@
   "addBuyItem": "商品を追加",
   "enterItemName": "商品名を入力",
   "addedBuyItem": "買い物リストに追加しました",
+  "addToBuyList": "買い物リストに追加",
   "confirmDelete": "削除しますか?"
 }

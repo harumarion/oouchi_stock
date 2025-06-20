@@ -228,6 +228,14 @@ class _HomePageState extends State<HomePage> {
                                       ),
                                     );
                                   },
+                                  onAddToList: () async {
+                                    await _addBuyItem(BuyItem(inv.itemName, inv.category, inv.id));
+                                    if (context.mounted) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(content: Text(AppLocalizations.of(context)!.addedBuyItem)),
+                                      );
+                                    }
+                                  },
                                 ),
                             ],
                           ),
