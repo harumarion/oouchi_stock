@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../domain/entities/inventory.dart';
+import '../i18n/app_localizations.dart';
 
 /// ホーム画面のダッシュボードで使用するタイル
 class DashboardTile extends StatelessWidget {
@@ -42,13 +43,14 @@ class DashboardTile extends StatelessWidget {
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 4),
-          Text('残り $daysLeft 日'),
+          // 残り日数をローカライズして表示
+          Text(AppLocalizations.of(context)!.daysLeft(daysLeft.toString())),
           const SizedBox(height: 4),
           Text('${inventory.quantity.toStringAsFixed(1)}${inventory.unit}'),
           const SizedBox(height: 8),
           ElevatedButton(
             onPressed: onAdd,
-            child: const Text('買い物リストに追加'),
+            child: Text(AppLocalizations.of(context)!.addToBuyList),
           ),
         ],
       ),
