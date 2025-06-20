@@ -15,6 +15,8 @@ import 'domain/entities/category.dart';
 import 'domain/entities/inventory.dart';
 import 'domain/entities/category_order.dart';
 import 'domain/services/purchase_prediction_strategy.dart';
+import 'domain/usecases/calculate_days_left.dart';
+import 'domain/usecases/fetch_all_inventory.dart';
 import 'domain/entities/buy_list_condition_settings.dart';
 
 /// ホーム画面。起動時に表示され、買い物リストを管理する。
@@ -37,6 +39,14 @@ class _HomePageState extends State<HomePage> {
   /// 買い物予報の条件設定
   BuyListConditionSettings? _conditionSettings;
 
+  /// 在庫の残り日数計算用ユースケース
+  final CalculateDaysLeft _calcUsecase =
+      CalculateDaysLeft(InventoryRepositoryImpl(), const DummyPredictionStrategy());
+
+  /// 在庫一覧取得用ユースケース
+  final FetchAllInventory _fetchAllUsecase =
+      FetchAllInventory(InventoryRepositoryImpl());
+
   /// 設定画面から戻った際にカテゴリリストを更新する
   void _updateCategories(List<Category> list) {
     setState(() {
@@ -51,22 +61,10 @@ class _HomePageState extends State<HomePage> {
     setState(() => _conditionSettings = s);
   }
 
-  /// 履歴から残り日数を計算する
+  /// ホーム画面の在庫カード表示時に履歴から残り日数を計算する
   Future<int> _calcDaysLeft(Inventory inv) async {
-    final history = await InventoryRepositoryImpl().watchHistory(inv.id).first;
-    double quantity = 0;
-    for (final h in history.reversed) {
-      if (h.type == 'stocktake') {
-        quantity = h.after;
-      } else if (h.type == 'add' || h.type == 'bought') {
-        quantity += h.quantity;
-      } else if (h.type == 'used') {
-        quantity -= h.quantity;
-      }
-    }
-    const strategy = DummyPredictionStrategy();
-    final predicted = strategy.predict(DateTime.now(), history, quantity);
-    return predicted.difference(DateTime.now()).inDays;
+    // 新設したユースケースに処理を委譲する
+    return _calcUsecase(inv);
   }
 
   @override
@@ -142,7 +140,7 @@ class _HomePageState extends State<HomePage> {
     if (_conditionSettings == null) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
-    final repo = InventoryRepositoryImpl();
+    // 画面表示時に在庫一覧を取得
     return Scaffold(
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.buyListTitle),
@@ -209,7 +207,7 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
       body: FutureBuilder<List<Inventory>>(
-        future: repo.fetchAll(),
+        future: _fetchAllUsecase(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             final err = snapshot.error?.toString() ?? 'unknown';
@@ -233,6 +231,7 @@ class _HomePageState extends State<HomePage> {
             itemCount: list.length,
             itemBuilder: (context, index) {
               final inv = list[index];
+              // 各在庫カード表示時に残り日数を計算
               return FutureBuilder<int>(
                 future: _calcDaysLeft(inv),
                 builder: (context, daySnap) {
