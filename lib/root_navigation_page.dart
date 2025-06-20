@@ -19,6 +19,13 @@ class RootNavigationPage extends StatefulWidget {
 class _RootNavigationPageState extends State<RootNavigationPage> {
   int _index = 0; // 選択中のメニュー
 
+  // 各インデックスに対応する画面のリスト
+  // 0: ホーム画面
+  // 1: 在庫一覧画面
+  // 2: セール情報管理画面
+  // 3: セール速報画面
+  // 4: 商品追加画面
+  // 5: 設定画面
   late final List<Widget> _pages = [
     const HomePage(),
     const InventoryPage(),
@@ -44,26 +51,32 @@ class _RootNavigationPageState extends State<RootNavigationPage> {
         currentIndex: _index,
         onTap: (i) => setState(() => _index = i),
         items: [
+          // ホーム
           BottomNavigationBarItem(
             icon: const Icon(Icons.list_alt),
             label: AppLocalizations.of(context)!.buyList,
           ),
+          // 在庫一覧
           BottomNavigationBarItem(
             icon: const Icon(Icons.inventory_2),
             label: AppLocalizations.of(context)!.inventoryList,
           ),
+          // セール管理
           BottomNavigationBarItem(
             icon: const Icon(Icons.price_change),
             label: AppLocalizations.of(context)!.priceManagementTitle,
           ),
+          // セール速報
           BottomNavigationBarItem(
             icon: const Icon(Icons.local_offer),
             label: AppLocalizations.of(context)!.saleList,
           ),
+          // 商品追加
           BottomNavigationBarItem(
             icon: const Icon(Icons.add_box),
             label: AppLocalizations.of(context)!.addItem,
           ),
+          // 設定
           BottomNavigationBarItem(
             icon: const Icon(Icons.settings),
             label: AppLocalizations.of(context)!.settings,
