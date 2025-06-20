@@ -96,6 +96,8 @@
   "backupDoneWithTime": "Backup completed at {time}",
   "restoreDoneWithTime": "Restored data from {time}",
   "noBackupData": "No backup data",
+  "noBackupYet": "No backup yet",
+  "noRestoreYet": "No restore yet",
   "addBuyItem": "Add Item",
   "enterItemName": "Enter item name",
   "addedBuyItem": "Added to buy list",
