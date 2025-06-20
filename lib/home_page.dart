@@ -63,13 +63,14 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _loadCondition() async {
-    // 設定画面から戻った際にも呼ばれ、買い物リスト条件を再読込する
+    // 設定画面から戻った際にも呼ばれ、買い物予報条件を再読み込みする
     final s = await loadBuyListConditionSettings();
     setState(() => _conditionSettings = s);
   }
 
   /// ホーム画面の在庫カード表示時に履歴から残り日数を計算する
   Future<int> _calcDaysLeft(Inventory inv) async {
+    // インベントリカード描画時に呼び出される
     // 新設したユースケースに処理を委譲する
     return _calcUsecase(inv);
   }
@@ -88,6 +89,7 @@ class _HomePageState extends State<HomePage> {
       });
     } else {
       // Firestore からカテゴリ一覧を取得して監視
+      // カテゴリに変更があったときに実行される
       _catSub = userCollection('categories')
           .orderBy('createdAt')
           .snapshots()
@@ -144,75 +146,91 @@ class _HomePageState extends State<HomePage> {
     }
 
     // 買い物予報条件が未読込の場合はローディングを表示
+    // 設定変更後の復帰直後などに発生する
     if (_conditionSettings == null) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
     // 画面表示時に在庫一覧を取得
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.buyListTitle),
-        actions: [
-          // 各画面共通の設定メニューボタンを表示
-          SettingsMenuButton(
-            categories: _categories,
-            onCategoriesChanged: _updateCategories,
-            onLocaleChanged: (l) =>
-                context.findAncestorStateOfType<MyAppState>()?.updateLocale(l),
-            onConditionChanged: _loadCondition,
-          )
-        ],
-      ),
-      body: FutureBuilder<List<Inventory>>(
-        future: _fetchAllUsecase(),
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            final err = snapshot.error?.toString() ?? 'unknown';
-            return Center(child: Text(AppLocalizations.of(context)!.loadError(err)));
+    // 画面描画時に在庫一覧を取得する
+    return FutureBuilder<List<Inventory>>(
+      future: _fetchAllUsecase(),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          final err = snapshot.error?.toString() ?? 'unknown';
+          return Center(child: Text(AppLocalizations.of(context)!.loadError(err)));
+        }
+        if (!snapshot.hasData) {
+          return const Scaffold(body: Center(child: CircularProgressIndicator()));
+        }
+        final list = snapshot.data!;
+        if (list.isEmpty) {
+          return Scaffold(
+            appBar: AppBar(title: Text(AppLocalizations.of(context)!.buyListTitle)),
+            body: Center(child: Text(AppLocalizations.of(context)!.noBuyItems)),
+          );
+        }
+          // カテゴリごとに在庫を振り分ける
+          final map = {for (final c in _categories) c.name: <Inventory>[]};
+          for (final inv in list) {
+            map[inv.category]?.add(inv);
           }
-          if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          final list = snapshot.data!;
-          if (list.isEmpty) {
-            return Center(child: Text(AppLocalizations.of(context)!.noBuyItems));
-          }
-          return GridView.builder(
-            padding: const EdgeInsets.all(8),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              childAspectRatio: 1,
-              mainAxisSpacing: 8,
-              crossAxisSpacing: 8,
+          return DefaultTabController(
+            length: _categories.length,
+            child: Scaffold(
+              appBar: AppBar(
+                title: Text(AppLocalizations.of(context)!.buyListTitle),
+                actions: [
+                  SettingsMenuButton(
+                    categories: _categories,
+                    onCategoriesChanged: _updateCategories,
+                    onLocaleChanged: (l) => context.findAncestorStateOfType<MyAppState>()?.updateLocale(l),
+                    onConditionChanged: _loadCondition,
+                  )
+                ],
+                // カテゴリ別にタブを生成
+                bottom: TabBar(
+                  isScrollable: true,
+                  tabs: [
+                    for (final c in _categories) Tab(text: c.name),
+                  ],
+                ),
+              ),
+              // 各タブに対応する在庫リストを表示
+              body: TabBarView(
+                children: [
+                  for (final c in _categories)
+                    map[c.name]!.isEmpty
+                        ? Center(
+                            child: Text(
+                              AppLocalizations.of(context)!.noBuyItems,
+                            ),
+                          )
+                        : ListView(
+                            padding: const EdgeInsets.all(16),
+                            children: [
+                              for (final inv in map[c.name]!)
+                                InventoryCard(
+                                  inventory: inv,
+                                  // カードタップで在庫詳細画面へ遷移
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => InventoryDetailPage(
+                                          inventoryId: inv.id,
+                                          categories: _categories,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                            ],
+                          ),
+                ],
+              ),
             ),
-            itemCount: list.length,
-            itemBuilder: (context, index) {
-              final inv = list[index];
-              // 各在庫カード表示時に残り日数を計算
-              return FutureBuilder<int>(
-                future: _calcDaysLeft(inv),
-                builder: (context, daySnap) {
-                  final days = daySnap.data ?? 0;
-                  return DashboardTile(
-                    inventory: inv,
-                    daysLeft: days,
-                    onSale: false,
-                    // 買い物リストに追加ボタンが押されたときの処理
-                    onAdd: () async {
-                      await _addBuyItem(BuyItem(inv.itemName, inv.category));
-                      if (!mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(AppLocalizations.of(context)!.addedBuyItem),
-                        ),
-                      );
-                    },
-                  );
-                },
-              );
-            },
           );
         },
-      ),
-    );
+      );
   }
 }
