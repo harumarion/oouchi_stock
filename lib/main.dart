@@ -119,18 +119,24 @@ class MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     _loadLocale();
-    // 接続状態が変わった際にオンライン/オフラインのメッセージを表示
-    // onConnectivityChanged は複数の接続結果を返すようになったため
-    // すべて none であればオフラインと判断する
-    _connSub = Connectivity().onConnectivityChanged.listen((results) {
-      final offline =
-          results.every((r) => r == ConnectivityResult.none);
-      final text = offline
-          ? AppLocalizations.of(context)!.offline
-          : AppLocalizations.of(context)!.online;
-      _messengerKey.currentState?.showSnackBar(
-        SnackBar(content: Text(text)),
-      );
+    // 初期フレーム描画後に接続監視を開始する
+    // initState 内では Localizations がまだ取得できない場合があるため
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // 接続状態が変わった際にオンライン/オフラインのメッセージを表示
+      // onConnectivityChanged は複数の接続結果を返すようになったため
+      // すべて none であればオフラインと判断する
+      _connSub = Connectivity().onConnectivityChanged.listen((results) {
+        final offline =
+            results.every((r) => r == ConnectivityResult.none);
+        final contextForLocale = _messengerKey.currentContext;
+        if (contextForLocale == null) return;
+        final text = offline
+            ? AppLocalizations.of(contextForLocale)!.offline
+            : AppLocalizations.of(contextForLocale)!.online;
+        _messengerKey.currentState?.showSnackBar(
+          SnackBar(content: Text(text)),
+        );
+      });
     });
   }
 
