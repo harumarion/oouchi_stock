@@ -57,6 +57,10 @@ flutter {
 dependencies {
     // Ensure ProviderInstaller is available at runtime
     implementation("com.google.android.gms:play-services-base:18.4.0")
+    // 折りたたみ端末などのウィンドウ情報取得に必要なライブラリ
+    // FlutterView が WindowInfoTracker を利用する際に参照され、
+    // 画面が表示されるタイミングでロードされる
+    implementation("androidx.window:window:1.2.0")
     // Desugaring library required when using Java 8+ APIs on lower API levels
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
 }

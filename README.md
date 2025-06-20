@@ -24,6 +24,9 @@ samples, guidance on mobile development, and a full API reference.
 Android ビルドを行う場合は JDK 17 が必要です。`JAVA_HOME` が JDK 17 を指してい
 ることを確認してください。
 
+折りたたみ端末などの最新機種に対応するため、AndroidX Window ライブラリを利用しています。
+ビルド時にエラーが発生する場合は `androidx.window:window` が取得できているか確認してください。
+
 ## Firebase の設定
 
 [FlutterFire CLI](https://firebase.flutter.dev/docs/cli) を使って Firebase プロジェクトを構成します。初回セットアップや設定を変更したい場合は次のコマンドを実行します。
