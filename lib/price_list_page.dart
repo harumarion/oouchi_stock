@@ -3,6 +3,7 @@ import 'package:oouchi_stock/i18n/app_localizations.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'util/firestore_refs.dart';
+import 'util/date_time_parser.dart';
 
 import 'add_price_page.dart';
 import 'add_inventory_page.dart';
@@ -41,7 +42,7 @@ class _PriceListPageState extends State<PriceListPage> {
         return Category(
           id: data['id'] ?? 0,
           name: data['name'] ?? '',
-          createdAt: (data['createdAt'] as Timestamp).toDate(),
+          createdAt: parseDateTime(data['createdAt']),
         );
       }).toList();
       list = await applyCategoryOrder(list);

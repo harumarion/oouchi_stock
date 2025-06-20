@@ -4,6 +4,7 @@ import 'package:oouchi_stock/i18n/app_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'util/firestore_refs.dart';
+import 'util/date_time_parser.dart';
 import 'domain/entities/inventory.dart';
 import 'domain/entities/category.dart';
 import 'default_item_types.dart';
@@ -82,7 +83,7 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
             return Category(
               id: data['id'] ?? 0,
               name: data['name'] ?? '',
-              createdAt: (data['createdAt'] as Timestamp).toDate(),
+              createdAt: parseDateTime(data['createdAt']),
               color: data['color'],
             );
           }).toList();
