@@ -104,8 +104,9 @@ class AppTheme {
           textStyle: baseTextTheme.labelLarge,
         ),
       ),
-      // タブバーの選択時に文字が見えなくならないよう色を調整
-      tabBarTheme: const TabBarTheme(
+      // ホーム画面や在庫一覧画面で利用するタブバーの配色設定
+      // 選択時も非選択時も文字が読みやすいように白系の色を使用
+      tabBarTheme: const TabBarThemeData(
         labelColor: Colors.white,
         unselectedLabelColor: Colors.white70,
         indicatorColor: Colors.white,
