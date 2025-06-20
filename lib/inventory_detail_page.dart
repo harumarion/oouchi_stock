@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:oouchi_stock/i18n/app_localizations.dart';
 import 'data/repositories/inventory_repository_impl.dart';
+import 'domain/repositories/inventory_repository.dart';
 import 'domain/entities/history_entry.dart';
 import 'domain/entities/inventory.dart';
 import 'domain/entities/category.dart';
@@ -13,14 +14,15 @@ class InventoryDetailPage extends StatelessWidget {
   final String inventoryId;
   final List<Category> categories;
   final PurchasePredictionStrategy strategy;
-  final InventoryRepositoryImpl repository = InventoryRepositoryImpl();
+  final InventoryRepository repository;
 
   InventoryDetailPage({
     super.key,
     required this.inventoryId,
     required this.categories,
     this.strategy = const DummyPredictionStrategy(),
-  });
+    InventoryRepository? repository,
+  }) : repository = repository ?? InventoryRepositoryImpl();
 
   Stream<Inventory?> inventoryStream() {
     return repository.watchInventory(inventoryId);
@@ -35,12 +37,23 @@ class InventoryDetailPage extends StatelessWidget {
     return StreamBuilder<Inventory?>(
       stream: inventoryStream(),
       builder: (context, invSnapshot) {
-        if (!invSnapshot.hasData) {
+        if (invSnapshot.hasError) {
+          final err = invSnapshot.error?.toString() ?? 'unknown';
           return Scaffold(
-            body: const Center(child: CircularProgressIndicator()),
+            body: Center(child: Text(AppLocalizations.of(context)!.loadError(err))),
           );
         }
-        final inv = invSnapshot.data!;
+        if (!invSnapshot.hasData) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+        final inv = invSnapshot.data;
+        if (inv == null) {
+          return Scaffold(
+            body: Center(child: Text(AppLocalizations.of(context)!.loadError('not found'))),
+          );
+        }
         return Scaffold(
           appBar: AppBar(title: Text(inv.itemName), actions: [
             IconButton(
