@@ -31,6 +31,31 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
+  /// 最後にバックアップした日時
+  DateTime? _backupTime;
+
+  /// 最後に復元したバックアップデータの日時
+  DateTime? _restoredTime;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTimes();
+  }
+
+  /// 端末に保存されたバックアップ日時を読み込む
+  Future<void> _loadTimes() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+    final prefs = await SharedPreferences.getInstance();
+    final backupStr = prefs.getString('backup_time_\$uid');
+    final restoreStr = prefs.getString('restore_time_\$uid');
+    if (!mounted) return;
+    setState(() {
+      _backupTime = backupStr != null ? DateTime.parse(backupStr) : null;
+      _restoredTime = restoreStr != null ? DateTime.parse(restoreStr) : null;
+    });
+  }
   /// バックアップ実行前に確認ダイアログを表示する
   Future<void> _backup() async {
     final loc = AppLocalizations.of(context)!;
@@ -59,6 +84,9 @@ class _SettingsPageState extends State<SettingsPage> {
     await prefs.setString('backup_time_$uid', now.toIso8601String());
     if (mounted) {
       final time = DateFormat('yyyy/MM/dd HH:mm').format(now);
+      setState(() {
+        _backupTime = now;
+      });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(loc.backupDoneWithTime(time))),
       );
@@ -117,7 +145,11 @@ class _SettingsPageState extends State<SettingsPage> {
       batch.set(invRef.doc(), Map<String, dynamic>.from(i));
     }
     await batch.commit();
+    await prefs.setString('restore_time_$uid', backupTime.toIso8601String());
     if (mounted) {
+      setState(() {
+        _restoredTime = backupTime;
+      });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(AppLocalizations.of(context)!.restoreDoneWithTime(formatted))),
       );
@@ -182,11 +214,19 @@ class _SettingsPageState extends State<SettingsPage> {
           },
         ),
         ListTile(
+          key: const Key('backupTile'),
           title: Text(AppLocalizations.of(context)!.backup),
+          trailing: _backupTime != null
+              ? Text(DateFormat('yyyy/MM/dd HH:mm').format(_backupTime!))
+              : null,
           onTap: _backup,
         ),
         ListTile(
+          key: const Key('restoreTile'),
           title: Text(AppLocalizations.of(context)!.restore),
+          trailing: _restoredTime != null
+              ? Text(DateFormat('yyyy/MM/dd HH:mm').format(_restoredTime!))
+              : null,
           onTap: _restore,
         ),
       ],
