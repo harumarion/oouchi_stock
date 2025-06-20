@@ -6,6 +6,7 @@ import 'language_settings_page.dart';
 import 'buy_list_condition_settings_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:intl/intl.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'util/firestore_refs.dart';
@@ -30,8 +31,21 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  /// Firestore データを SharedPreferences に保存する簡易バックアップ
+  /// バックアップ実行前に確認ダイアログを表示する
   Future<void> _backup() async {
+    final loc = AppLocalizations.of(context)!;
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        content: Text(loc.backupConfirm),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: Text(loc.cancel)),
+          TextButton(onPressed: () => Navigator.pop(context, true), child: Text(loc.ok)),
+        ],
+      ),
+    );
+    if (result != true) return;
+
     final uid = FirebaseAuth.instance.currentUser!.uid;
     final prefs = await SharedPreferences.getInstance();
     final catSnap = await userCollection('categories').get();
@@ -40,10 +54,14 @@ class _SettingsPageState extends State<SettingsPage> {
       'categories': catSnap.docs.map((d) => d.data()).toList(),
       'inventory': invSnap.docs.map((d) => d.data()).toList(),
     };
+    final now = DateTime.now();
     await prefs.setString('backup_$uid', jsonEncode(data));
+    await prefs.setString('backup_time_$uid', now.toIso8601String());
     if (mounted) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.backupDone)));
+      final time = DateFormat('yyyy/MM/dd HH:mm').format(now);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(loc.backupDoneWithTime(time))),
+      );
     }
   }
 
@@ -52,7 +70,34 @@ class _SettingsPageState extends State<SettingsPage> {
     final uid = FirebaseAuth.instance.currentUser!.uid;
     final prefs = await SharedPreferences.getInstance();
     final text = prefs.getString('backup_$uid');
-    if (text == null) return;
+    final timeStr = prefs.getString('backup_time_$uid');
+    if (text == null || timeStr == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AppLocalizations.of(context)!.noBackupData)),
+        );
+      }
+      return;
+    }
+    final backupTime = DateTime.parse(timeStr);
+    final formatted = DateFormat('yyyy/MM/dd HH:mm').format(backupTime);
+
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        content: Text(AppLocalizations.of(context)!.restoreConfirm(formatted)),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text(AppLocalizations.of(context)!.cancel)),
+          TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: Text(AppLocalizations.of(context)!.ok)),
+        ],
+      ),
+    );
+    if (confirm != true) return;
+
     final data = jsonDecode(text);
     final batch = FirebaseFirestore.instance.batch();
     final catRef = userCollection('categories');
@@ -73,8 +118,9 @@ class _SettingsPageState extends State<SettingsPage> {
     }
     await batch.commit();
     if (mounted) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.restoreDone)));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppLocalizations.of(context)!.restoreDoneWithTime(formatted))),
+      );
     }
   }
   @override

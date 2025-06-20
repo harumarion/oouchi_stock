@@ -91,6 +91,11 @@
   ,"restore": "Restore"
   ,"backupDone": "Backup completed"
   ,"restoreDone": "Restore completed",
+  "backupConfirm": "Create backup?",
+  "restoreConfirm": "Restore data from {time}?",
+  "backupDoneWithTime": "Backup completed at {time}",
+  "restoreDoneWithTime": "Restored data from {time}",
+  "noBackupData": "No backup data",
   "addBuyItem": "Add Item",
   "enterItemName": "Enter item name",
   "addedBuyItem": "Added to buy list",

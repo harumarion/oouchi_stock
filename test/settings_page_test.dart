@@ -20,4 +20,19 @@ void main() {
     expect(find.text('バックアップ'), findsOneWidget);
     expect(find.text('復元'), findsOneWidget);
   });
+
+  testWidgets('バックアップ確認ダイアログ表示', (WidgetTester tester) async {
+    final categories = [Category(id: 1, name: '日用品', createdAt: DateTime.now())];
+    await tester.pumpWidget(MaterialApp(
+      home: SettingsPage(
+        categories: categories,
+        onChanged: (_) {},
+        onLocaleChanged: (_) {},
+        onConditionChanged: () {},
+      ),
+    ));
+    await tester.tap(find.text('バックアップ'));
+    await tester.pumpAndSettle();
+    expect(find.text('バックアップを作成しますか?'), findsOneWidget);
+  });
 }

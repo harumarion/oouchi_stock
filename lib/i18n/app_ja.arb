@@ -91,6 +91,11 @@
   ,"restore": "復元"
   ,"backupDone": "バックアップしました"
   ,"restoreDone": "復元しました",
+  "backupConfirm": "バックアップを作成しますか?",
+  "restoreConfirm": "{time} のデータを復元しますか?",
+  "backupDoneWithTime": "{time} にバックアップしました",
+  "restoreDoneWithTime": "{time} のデータを復元しました",
+  "noBackupData": "バックアップデータがありません",
   "addBuyItem": "商品を追加",
   "enterItemName": "商品名を入力",
   "addedBuyItem": "買い物リストに追加しました",
