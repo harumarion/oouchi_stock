@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'util/firestore_refs.dart';
@@ -35,6 +36,7 @@ class _BuyListPageState extends State<BuyListPage> {
   late final RemoveBuyItem _removeUsecase = RemoveBuyItem(_buyRepo);
   late final WatchBuyItems _watchUsecase = WatchBuyItems(_buyRepo);
   late final TextEditingController _itemController;
+  // 在庫一覧のストリームを購読し、買い物予報に反映する
   StreamSubscription<List<Inventory>>? _invSub;
 
   @override
@@ -44,7 +46,7 @@ class _BuyListPageState extends State<BuyListPage> {
     _load();
   }
 
-  // 画面起動時に呼び出し、カテゴリ一覧と条件設定を読み込む
+  // BuyListPage 起動時に呼び出し、カテゴリ一覧と条件設定を読み込む
   Future<void> _load() async {
     if (widget.categories != null) {
       _categories = List.from(widget.categories!);
@@ -65,6 +67,7 @@ class _BuyListPageState extends State<BuyListPage> {
     setState(() => _loaded = true);
     final strategy = createStrategy(_condition!);
     final repo = InventoryRepositoryImpl();
+    // 条件に合致した在庫が通知された際に買い物リストへ追加する
     _invSub = strategy.watch(repo).listen((list) {
       for (final inv in list) {
         _addUsecase(BuyItem(inv.itemName, inv.category));
