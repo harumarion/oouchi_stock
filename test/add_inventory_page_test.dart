@@ -29,4 +29,24 @@ void main() {
     await tester.pump();
     expect(find.text('1.0'), findsOneWidget);
   });
+
+  // Navigator.canPop が false の場合でも画面が消えないことを確認するテスト
+  testWidgets('保存後も画面が残る', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: AddInventoryPage(
+          categories: [Category(id: 1, name: '日用品', createdAt: DateTime.now())],
+        ),
+      ),
+    );
+
+    // 商品名を入力してフォームを有効にする
+    await tester.enterText(find.byType(TextFormField).first, 'シャンプー');
+    // 保存ボタンをタップ
+    await tester.tap(find.widgetWithIcon(ElevatedButton, Icons.save));
+    await tester.pumpAndSettle();
+
+    // Navigator.pop が呼ばれないため画面は残っているはず
+    expect(find.byType(AddInventoryPage), findsOneWidget);
+  });
 }
