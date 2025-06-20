@@ -178,8 +178,9 @@ class InventoryCard extends StatelessWidget {
                       '${inventory.quantity.toStringAsFixed(1)}${inventory.unit}',
                       style: const TextStyle(color: Colors.black87),
                     ),
+                    // 予測ラベルを削除し、残り日数のみ表示する
                     Text(
-                      '${AppLocalizations.of(context)!.predictLabel} $dateText',
+                      dateText,
                       style: const TextStyle(color: Colors.black87),
                     ),
                   ],
@@ -199,7 +200,8 @@ class InventoryCard extends StatelessWidget {
                       ),
                     ],
                     IconButton(
-                      icon: const Text('🛒', style: TextStyle(fontSize: 20)),
+                      // 買い物を意味するカートアイコン
+                      icon: const Icon(Icons.shopping_cart),
                       onPressed: () => onBought(context),
                     ),
                     if (onAddToList != null)
