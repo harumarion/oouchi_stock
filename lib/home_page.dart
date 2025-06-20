@@ -19,6 +19,9 @@ import 'domain/services/purchase_prediction_strategy.dart';
 import 'domain/usecases/calculate_days_left.dart';
 import 'domain/usecases/fetch_all_inventory.dart';
 import 'domain/entities/buy_list_condition_settings.dart';
+import 'data/repositories/buy_list_repository_impl.dart';
+import 'domain/entities/buy_item.dart';
+import 'domain/usecases/add_buy_item.dart';
 
 /// ホーム画面。起動時に表示され、買い物リストを管理する。
 class HomePage extends StatefulWidget {
@@ -47,6 +50,9 @@ class _HomePageState extends State<HomePage> {
   /// 在庫一覧取得用ユースケース
   final FetchAllInventory _fetchAllUsecase =
       FetchAllInventory(InventoryRepositoryImpl());
+
+  // 買い物リストへ商品を追加するユースケース
+  final AddBuyItem _addBuyItem = AddBuyItem(BuyListRepositoryImpl());
 
   /// 設定画面から戻った際にカテゴリリストを更新する
   void _updateCategories(List<Category> list) {

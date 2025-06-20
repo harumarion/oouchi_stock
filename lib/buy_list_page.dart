@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'util/firestore_refs.dart';
 import 'package:oouchi_stock/i18n/app_localizations.dart';
+import 'data/repositories/buy_list_repository_impl.dart';
+import 'domain/entities/buy_item.dart';
+import 'domain/usecases/add_buy_item.dart';
+import 'domain/usecases/remove_buy_item.dart';
+import 'domain/usecases/watch_buy_items.dart';
 
 import 'data/repositories/inventory_repository_impl.dart';
 import 'domain/entities/category.dart';
@@ -25,10 +30,17 @@ class _BuyListPageState extends State<BuyListPage> {
   List<Category> _categories = [];
   bool _loaded = false;
   BuyListConditionSettings? _condition;
+  final BuyListRepositoryImpl _buyRepo = BuyListRepositoryImpl();
+  late final AddBuyItem _addUsecase = AddBuyItem(_buyRepo);
+  late final RemoveBuyItem _removeUsecase = RemoveBuyItem(_buyRepo);
+  late final WatchBuyItems _watchUsecase = WatchBuyItems(_buyRepo);
+  late final TextEditingController _itemController;
+  StreamSubscription<List<Inventory>>? _invSub;
 
   @override
   void initState() {
     super.initState();
+    _itemController = TextEditingController();
     _load();
   }
 
@@ -51,6 +63,20 @@ class _BuyListPageState extends State<BuyListPage> {
     }
     _condition = await loadBuyListConditionSettings();
     setState(() => _loaded = true);
+    final strategy = createStrategy(_condition!);
+    final repo = InventoryRepositoryImpl();
+    _invSub = strategy.watch(repo).listen((list) {
+      for (final inv in list) {
+        _addUsecase(BuyItem(inv.itemName, inv.category));
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _invSub?.cancel();
+    _itemController.dispose();
+    super.dispose();
   }
 
   @override
@@ -58,76 +84,126 @@ class _BuyListPageState extends State<BuyListPage> {
     if (!_loaded || _condition == null) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
-    final strategy = createStrategy(_condition!);
-    final repo = InventoryRepositoryImpl();
-    return StreamBuilder<List<Inventory>>(
-        stream: strategy.watch(repo),
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            final err = snapshot.error?.toString() ?? 'unknown';
-            return Scaffold(
-              appBar: AppBar(title: Text(AppLocalizations.of(context)!.buyListTitle)),
-              body: Center(child: Text(AppLocalizations.of(context)!.loadError(err))),
-            );
+    return StreamBuilder<List<BuyItem>>(
+      stream: _watchUsecase(),
+      builder: (context, snapshot) {
+        final loc = AppLocalizations.of(context)!;
+        if (!snapshot.hasData) {
+          return const Scaffold(body: Center(child: CircularProgressIndicator()));
+        }
+        final list = snapshot.data!;
+        final map = {for (final c in _categories) c.name: <BuyItem>[]};
+        map['その他'] = [];
+        for (final item in list) {
+          if (map.containsKey(item.category)) {
+            map[item.category]!.add(item);
+          } else {
+            map['その他']!.add(item);
           }
-          if (!snapshot.hasData) {
-            return const Scaffold(body: Center(child: CircularProgressIndicator()));
-          }
-          final list = snapshot.data!;
-          if (list.isEmpty) {
-            return Scaffold(
-              appBar: AppBar(title: Text(AppLocalizations.of(context)!.buyListTitle)),
-              body: Center(child: Text(AppLocalizations.of(context)!.noBuyItems)),
-            );
-          }
-          final map = {for (final c in _categories) c.name: <Inventory>[]};
-          for (final inv in list) {
-            map[inv.category]?.add(inv);
-          }
-          return DefaultTabController(
-            length: _categories.length,
-            child: Scaffold(
-              appBar: AppBar(
-                title: Text(AppLocalizations.of(context)!.buyListTitle),
-                bottom: TabBar(
-                  isScrollable: true,
-                  tabs: [
-                    for (final c in _categories)
-                      Tab(text: map[c.name]!.isNotEmpty ? '${c.name}❗' : c.name),
-                  ],
-                ),
-              ),
-              body: TabBarView(
-                children: [
-                  for (final c in _categories)
-                    map[c.name]!.isEmpty
-                        ? Center(child: Text(AppLocalizations.of(context)!.noBuyItems))
-                        : ListView(
-                            padding: const EdgeInsets.all(16),
-                            children: [
-                              for (final inv in map[c.name]!)
-                                InventoryCard(
-                                  inventory: inv,
-                                  buyOnly: true,
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => InventoryDetailPage(
-                                          inventoryId: inv.id,
-                                          categories: _categories,
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                            ],
-                          ),
-                ],
+        }
+        final tabs = ['その他', ..._categories.map((e) => e.name)];
+        return DefaultTabController(
+          length: tabs.length,
+          child: Scaffold(
+            appBar: AppBar(
+              title: Text(loc.buyList),
+              bottom: TabBar(
+                isScrollable: true,
+                tabs: [for (final t in tabs) Tab(text: t)],
               ),
             ),
-          );
-        },
-      );
+            body: TabBarView(
+              children: [
+                _manualTab(map['その他']!, loc),
+                for (final c in _categories)
+                  _categoryTab(map[c.name]!, loc),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _categoryTab(List<BuyItem> items, AppLocalizations loc) {
+    if (items.isEmpty) {
+      return Center(child: Text(loc.noBuyItems));
+    }
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        for (final item in items)
+          _dismissibleCard(item, loc),
+      ],
+    );
+  }
+
+  Widget _manualTab(List<BuyItem> items, AppLocalizations loc) {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _itemController,
+                  decoration: InputDecoration(labelText: loc.enterItemName),
+                ),
+              ),
+              IconButton(
+                onPressed: () async {
+                  final text = _itemController.text.trim();
+                  if (text.isEmpty) return;
+                  await _addUsecase(BuyItem(text, 'その他'));
+                  _itemController.clear();
+                  if (!mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(loc.addedBuyItem)),
+                  );
+                },
+                icon: const Icon(Icons.add),
+              ),
+            ],
+          ),
+        ),
+        Expanded(child: _categoryTab(items, loc)),
+      ],
+    );
+  }
+
+  Widget _dismissibleCard(BuyItem item, AppLocalizations loc) {
+    return Dismissible(
+      key: ValueKey(item.key),
+      direction: DismissDirection.startToEnd,
+      confirmDismiss: (_) async {
+        return await showDialog<bool>(
+              context: context,
+              builder: (_) => AlertDialog(
+                content: Text(loc.confirmDelete),
+                actions: [
+                  TextButton(
+                      onPressed: () => Navigator.pop(context, false),
+                      child: Text(loc.cancel)),
+                  TextButton(
+                      onPressed: () => Navigator.pop(context, true),
+                      child: Text(loc.delete)),
+                ],
+              ),
+            ) ??
+            false;
+      },
+      onDismissed: (_) => _removeUsecase(item),
+      background: Container(
+        color: Colors.red,
+        alignment: Alignment.centerLeft,
+        padding: const EdgeInsets.only(left: 16),
+        child: const Icon(Icons.delete, color: Colors.white),
+      ),
+      child: Card(
+        margin: const EdgeInsets.only(bottom: 12),
+        child: ListTile(title: Text(item.name)),
+      ),
+    );
   }
 }

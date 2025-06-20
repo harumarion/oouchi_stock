@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'i18n/app_localizations.dart';
+import 'data/repositories/buy_list_repository_impl.dart';
+import 'domain/entities/buy_item.dart';
+import 'domain/usecases/add_buy_item.dart';
 
 /// セール情報1件分のデータモデル
 class SaleItem {
@@ -73,6 +76,9 @@ class _SaleListPageState extends State<SaleListPage> {
   // 並び替え方法。"end"=終了日近い順、"discount"=割引率順、
   // "unit"=単価安い順、"recommend"=おすすめ順
   String _sort = 'end';
+
+  // 買い物リストへ追加するユースケース
+  final AddBuyItem _addBuyItem = AddBuyItem(BuyListRepositoryImpl());
 
   @override
   Widget build(BuildContext context) {
@@ -208,8 +214,17 @@ class _SaleListPageState extends State<SaleListPage> {
                           Align(
                             alignment: Alignment.centerRight,
                             child: ElevatedButton(
-                              onPressed: () {},
                               // 商品を買い物リストへ追加するボタン
+                              onPressed: () async {
+                                await _addBuyItem(BuyItem(item.name, ''));
+                                if (!mounted) return;
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content:
+                                        Text(AppLocalizations.of(context)!.addedBuyItem),
+                                  ),
+                                );
+                              },
                               child: Text(loc.addToList()),
                             ),
                           ),
