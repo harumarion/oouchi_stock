@@ -7,15 +7,17 @@ import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.security.ProviderInstaller
 import io.flutter.embedding.android.FlutterActivity
 
+/// アプリ起動時に最初に表示される画面をホストする Activity
+/// 各 Flutter 画面 (ホーム、在庫一覧など) はここから生成される
+
 class MainActivity : FlutterActivity(), ProviderInstaller.ProviderInstallListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Ensure Google Play services' security provider is installed when
-        // Google Play services is available on the device. Some emulator
-        // images do not include Play services and calling
-        // ProviderInstaller without this check results in a
-        // SecurityException.
+        // アプリ起動直後に呼ばれ、ホーム画面などの Flutter 画面を表示する前に
+        // Google Play 開発者サービスのセキュリティプロバイダーを確認する
+        // 一部のエミュレーターには Play services が含まれていないため
+        // ProviderInstaller 呼び出し前にチェックしないと SecurityException が発生する
         val availability = GoogleApiAvailability.getInstance()
         val result = availability.isGooglePlayServicesAvailable(this)
         if (result == ConnectionResult.SUCCESS) {
