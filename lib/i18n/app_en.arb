@@ -65,7 +65,7 @@
   "priceSummary": "Count:{count} {unit} Volume:{volume} Total:{total} Price:{price} Shop:{shop} Unit price:{unitPrice}",
   "totalVolumeLabel": "Total",
   "unitPriceLabel": "Unit price",
-  "sortUnitPrice": "Unit price",
+  "sortUnitPrice": "Low unit price",
   "inventoryList": "Inventory List",
   "buyList": "Buy List",
   "buyListTitle": "Shopping Forecast",

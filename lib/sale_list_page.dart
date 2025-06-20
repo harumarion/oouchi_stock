@@ -70,11 +70,13 @@ class _SaleListPageState extends State<SaleListPage> {
 
   bool _notify = true; // 通知設定
 
-  // 並び替えの種類
+  // 並び替え方法。"end"=終了日近い順、"discount"=割引率順、
+  // "unit"=単価安い順、"recommend"=おすすめ順
   String _sort = 'end';
 
   @override
   Widget build(BuildContext context) {
+    // 買い得リスト画面のビルド。並び替えや通知設定の状態を反映する
     final loc = AppLocalizations.of(context)!;
     // 並び替え
     final sorted = List<SaleItem>.from(_items);
@@ -132,7 +134,7 @@ class _SaleListPageState extends State<SaleListPage> {
                 ),
                 ChoiceChip(
                   // 単価が安い順に並び替え
-                  label: Text(loc.sortUnitPrice()),
+                  label: Text(loc.sortUnitPrice),
                   selected: _sort == 'unit',
                   onSelected: (_) => setState(() => _sort = 'unit'),
                 ),
@@ -225,6 +227,7 @@ class _SaleListPageState extends State<SaleListPage> {
   }
 }
 
+// この画面専用の簡易ローカライズ用拡張
 extension _LocExt on AppLocalizations {
   String salePeriod(String period) => '期間: $period';
   String stockInfo(int count) => '在庫 $count個';
@@ -233,6 +236,5 @@ extension _LocExt on AppLocalizations {
   String saleNotify() => 'セール通知';
   String sortEndDate() => '終了日が近い順';
   String sortDiscount() => '割引率順';
-  String sortUnitPrice() => '単価安い順';
   String sortRecommend() => 'おすすめ順';
 }

@@ -65,7 +65,7 @@
   "priceSummary": "数:{count} {unit} 容量:{volume} 合計:{total} 値段:{price} 購入元:{shop} 単価:{unitPrice}",
   "totalVolumeLabel": "合計",
   "unitPriceLabel": "単価",
-  "sortUnitPrice": "単価順",
+  "sortUnitPrice": "単価安い順",
   "inventoryList": "在庫一覧",
   "buyList": "買い物リスト",
   "buyListTitle": "買い物予報",
