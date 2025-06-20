@@ -10,6 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:oouchi_stock/main.dart';
 import 'package:oouchi_stock/add_category_page.dart';
 import 'package:oouchi_stock/domain/entities/category.dart';
+import 'package:oouchi_stock/theme.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -30,5 +31,10 @@ void main() {
     await tester.tap(find.text('保存'));
     await tester.pump();
     expect(find.text('必須項目です'), findsOneWidget);
+  });
+
+  test('AppTheme のプライマリカラーが設定されている', () {
+    final theme = AppTheme.lightTheme;
+    expect(theme.colorScheme.primary, AppTheme.primaryColor);
   });
 }

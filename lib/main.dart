@@ -13,6 +13,7 @@ import 'notification_service.dart';
 import 'home_page.dart';
 import 'login_page.dart';
 import 'root_navigation_page.dart';
+import 'theme.dart';
 
 // アプリのエントリーポイント。初期化処理中はローディング画面を表示する。
 
@@ -87,10 +88,8 @@ class _AppLoaderState extends State<AppLoader> {
           GlobalCupertinoLocalizations.delegate,
         ],
         supportedLocales: AppLocalizations.supportedLocales,
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
-          useMaterial3: true,
-        ),
+        // 共通のテーマ設定を適用
+        theme: AppTheme.lightTheme,
         home: LoginPage(onLoggedIn: () async {
           await _setupNotification();
           setState(() => _loggedIn = true);
@@ -178,10 +177,8 @@ class MyAppState extends State<MyApp> {
       ],
       supportedLocales: AppLocalizations.supportedLocales,
       locale: _locale,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
-        useMaterial3: true,
-      ),
+      // 共通のテーマ設定を適用
+      theme: AppTheme.lightTheme,
       // 画面下部のメニューで各機能へ移動できる RootNavigationPage を表示
       home: const RootNavigationPage(),
     );
