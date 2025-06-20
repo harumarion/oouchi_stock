@@ -109,7 +109,6 @@ class _BuyListPageState extends State<BuyListPage> {
           return const Scaffold(body: Center(child: CircularProgressIndicator()));
         }
         final list = snapshot.data!;
-        final catMap = {for (final c in _categories) c.name: c};
         return Scaffold(
           appBar: AppBar(
             title: Text(loc.buyList),
@@ -158,7 +157,8 @@ class _BuyListPageState extends State<BuyListPage> {
                         padding: const EdgeInsets.all(16),
                         children: [
                           for (final item in list)
-                            _dismissibleCard(item, loc, catMap[item.category]?.color),
+                            // カテゴリに関係なく全てのアイテムを表示
+                            _dismissibleCard(item, loc),
                         ],
                       ),
               ),
@@ -171,7 +171,8 @@ class _BuyListPageState extends State<BuyListPage> {
 
   // _categoryTab と _manualTab はタブ廃止に伴い未使用となった
 
-  Widget _dismissibleCard(BuyItem item, AppLocalizations loc, String? color) {
+  /// 買い物リストのアイテムカード。スワイプで削除できる
+  Widget _dismissibleCard(BuyItem item, AppLocalizations loc) {
     return Dismissible(
       key: ValueKey(item.key),
       direction: DismissDirection.startToEnd,
@@ -202,16 +203,6 @@ class _BuyListPageState extends State<BuyListPage> {
       child: Card(
         margin: const EdgeInsets.only(bottom: 12),
         child: ListTile(
-          leading: color == null
-              ? null
-              : Container(
-                  width: 12,
-                  height: 12,
-                  decoration: BoxDecoration(
-                    color: Color(int.parse('ff${color.replaceFirst('#', '')}', radix: 16)),
-                    shape: BoxShape.circle,
-                  ),
-                ),
           title: Text(item.name),
           trailing: item.inventoryId == null
               ? null
