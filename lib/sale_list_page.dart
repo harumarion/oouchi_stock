@@ -96,11 +96,13 @@ class _SaleListPageState extends State<SaleListPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(loc.saleListTitle),
+        // 画面タイトル
+        title: Text(loc.saleListTitle()),
         actions: [
           Row(
             children: [
-              Text(loc.saleNotify),
+              // セール通知設定スイッチのラベル
+              Text(loc.saleNotify()),
               Switch(
                 value: _notify,
                 onChanged: (v) => setState(() => _notify = v),
@@ -117,22 +119,26 @@ class _SaleListPageState extends State<SaleListPage> {
               spacing: 8,
               children: [
                 ChoiceChip(
-                  label: Text(loc.sortEndDate),
+                  // セール終了日が近い順に並び替え
+                  label: Text(loc.sortEndDate()),
                   selected: _sort == 'end',
                   onSelected: (_) => setState(() => _sort = 'end'),
                 ),
                 ChoiceChip(
-                  label: Text(loc.sortDiscount),
+                  // 割引率の高い順に並び替え
+                  label: Text(loc.sortDiscount()),
                   selected: _sort == 'discount',
                   onSelected: (_) => setState(() => _sort = 'discount'),
                 ),
                 ChoiceChip(
-                  label: Text(loc.sortUnitPrice),
+                  // 単価が安い順に並び替え
+                  label: Text(loc.sortUnitPrice()),
                   selected: _sort == 'unit',
                   onSelected: (_) => setState(() => _sort = 'unit'),
                 ),
                 ChoiceChip(
-                  label: Text(loc.sortRecommend),
+                  // おすすめ度順に並び替え
+                  label: Text(loc.sortRecommend()),
                   selected: _sort == 'recommend',
                   onSelected: (_) => setState(() => _sort = 'recommend'),
                 ),
@@ -140,6 +146,7 @@ class _SaleListPageState extends State<SaleListPage> {
             ),
           ),
           Expanded(
+            // セール情報をリスト表示
             child: ListView.builder(
               padding: const EdgeInsets.all(16),
               itemCount: sorted.length,
@@ -200,7 +207,8 @@ class _SaleListPageState extends State<SaleListPage> {
                             alignment: Alignment.centerRight,
                             child: ElevatedButton(
                               onPressed: () {},
-                              child: Text(loc.addToList),
+                              // 商品を買い物リストへ追加するボタン
+                              child: Text(loc.addToList()),
                             ),
                           ),
                         ],
