@@ -18,23 +18,25 @@ class AppTheme {
 
   /// ライトテーマの定義
   static ThemeData get lightTheme {
+    // アプリ全体で使用するテキストスタイルを定義
+    // 画面読み込み時に ThemeData として読み込まれます
     final baseTextTheme = TextTheme(
-      titleLarge: GoogleFonts.notoSansJp(
+      titleLarge: GoogleFonts.notoSansJP(
         fontSize: 20,
         fontWeight: FontWeight.bold,
         color: textColor,
       ),
-      bodyLarge: GoogleFonts.notoSansJp(
+      bodyLarge: GoogleFonts.notoSansJP(
         fontSize: 16,
         fontWeight: FontWeight.normal,
         color: textColor,
       ),
-      labelLarge: GoogleFonts.notoSansJp(
+      labelLarge: GoogleFonts.notoSansJP(
         fontSize: 14,
         fontWeight: FontWeight.w500,
         color: textColor,
       ),
-      bodySmall: GoogleFonts.notoSansJp(
+      bodySmall: GoogleFonts.notoSansJP(
         fontSize: 12,
         fontWeight: FontWeight.w400,
         color: subTextColor,
