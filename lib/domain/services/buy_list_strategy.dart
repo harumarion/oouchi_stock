@@ -27,7 +27,9 @@ abstract class BuyListStrategy {
 
 /// 在庫数がしきい値以下の場合に表示するストラテジー
 class ThresholdStrategy implements BuyListStrategy {
+  /// 在庫数のしきい値
   final double threshold;
+
   ThresholdStrategy(this.threshold);
   @override
   Stream<List<Inventory>> watch(InventoryRepository repository) {
@@ -37,8 +39,12 @@ class ThresholdStrategy implements BuyListStrategy {
 
 /// 予測日が指定日数以内の場合に表示するストラテジー
 class PredictionDaysStrategy implements BuyListStrategy {
+  /// 予測日数の上限
   final int days;
+
+  /// 予測アルゴリズム
   final PurchasePredictionStrategy prediction;
+
   PredictionDaysStrategy(this.days, this.prediction);
   @override
   Stream<List<Inventory>> watch(InventoryRepository repository) async* {
@@ -58,9 +64,15 @@ class PredictionDaysStrategy implements BuyListStrategy {
 
 /// しきい値条件または日数条件のどちらかを満たすストラテジー
 class OrStrategy implements BuyListStrategy {
+  /// 在庫数のしきい値
   final double threshold;
+
+  /// 予測日数の上限
   final int days;
+
+  /// 予測アルゴリズム
   final PurchasePredictionStrategy prediction;
+
   OrStrategy(this.threshold, this.days, this.prediction);
   @override
   Stream<List<Inventory>> watch(InventoryRepository repository) async* {
@@ -79,7 +91,7 @@ class OrStrategy implements BuyListStrategy {
   }
 }
 
-/// 設定から適切なストラテジーを生成する
+/// 設定内容に応じたストラテジーを生成する
 BuyListStrategy createStrategy(BuyListConditionSettings settings) {
   const prediction = DummyPredictionStrategy();
   switch (settings.type) {
