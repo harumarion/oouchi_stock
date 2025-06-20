@@ -18,6 +18,8 @@ import 'inventory_detail_page.dart';
 import 'widgets/inventory_card.dart';
 import 'domain/entities/category_order.dart';
 import 'widgets/settings_menu_button.dart';
+// 言語変更時にアプリ全体のロケールを更新するため MyAppState を参照
+import 'main.dart';
 
 /// 買い物予報画面
 /// ホーム画面のメニューから遷移し、今買っておいた方が良い商品を表示する
@@ -126,7 +128,9 @@ class _BuyListPageState extends State<BuyListPage> {
                 SettingsMenuButton(
                   categories: _categories,
                   onCategoriesChanged: _updateCategories,
-                  onLocaleChanged: (l) => context.findAncestorStateOfType<MyAppState>()?.updateLocale(l),
+                  // 設定画面で言語を変更したときにアプリ全体のロケールを更新する
+                  onLocaleChanged: (l) =>
+                      context.findAncestorStateOfType<MyAppState>()?.updateLocale(l),
                   onConditionChanged: _load,
                 )
               ],
