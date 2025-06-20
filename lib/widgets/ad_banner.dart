@@ -59,10 +59,17 @@ class _AdBannerState extends State<AdBanner> {
   @override
   Widget build(BuildContext context) {
     if (!_enabled || _ad == null) return const SizedBox.shrink();
+    // 底部メニューと同じ高さに広告を表示する
     return SizedBox(
-      width: _ad!.size.width.toDouble(),
-      height: _ad!.size.height.toDouble(),
-      child: AdWidget(ad: _ad!),
+      width: double.infinity,
+      height: kBottomNavigationBarHeight,
+      child: Center(
+        child: SizedBox(
+          width: _ad!.size.width.toDouble(),
+          height: _ad!.size.height.toDouble(),
+          child: AdWidget(ad: _ad!),
+        ),
+      ),
     );
   }
 
