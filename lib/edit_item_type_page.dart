@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'util/firestore_refs.dart';
 
 import 'domain/entities/item_type.dart';
 import 'domain/entities/category.dart';
 import 'package:oouchi_stock/i18n/app_localizations.dart';
+
+/// アイテム種別を編集する画面
 
 class EditItemTypePage extends StatefulWidget {
   final ItemType itemType;
@@ -82,6 +83,7 @@ class _EditItemTypePageState extends State<EditItemTypePage> {
                 onChanged: (v) => setState(() => _category = v),
               ),
               const SizedBox(height: 24),
+              // 保存ボタンをタップしたときにアイテム種別を更新
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {

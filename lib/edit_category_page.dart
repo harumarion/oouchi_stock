@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:oouchi_stock/i18n/app_localizations.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'util/firestore_refs.dart';
 
 import 'domain/entities/category.dart';
@@ -63,6 +62,7 @@ class _EditCategoryPageState extends State<EditCategoryPage> {
                 validator: (v) => v == null || v.isEmpty ? AppLocalizations.of(context)!.required : null,
               ),
               const SizedBox(height: 24),
+              // 保存ボタンをタップしたときにカテゴリ名を更新
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
