@@ -14,7 +14,6 @@ import 'data/repositories/inventory_repository_impl.dart';
 import 'domain/entities/category.dart';
 import 'domain/entities/inventory.dart';
 import 'domain/entities/category_order.dart';
-import 'domain/services/buy_list_strategy.dart';
 import 'domain/services/purchase_prediction_strategy.dart';
 import 'domain/entities/buy_list_condition_settings.dart';
 
@@ -139,11 +138,10 @@ class _HomePageState extends State<HomePage> {
       );
     }
 
-    // 買い物予報を生成するストラテジーを作成
+    // 買い物予報条件が未読込の場合はローディングを表示
     if (_conditionSettings == null) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
-    final strategy = createStrategy(_conditionSettings!);
     final repo = InventoryRepositoryImpl();
     return Scaffold(
       appBar: AppBar(
