@@ -18,6 +18,9 @@ import 'domain/entities/inventory.dart';
 import 'domain/entities/category_order.dart';
 import 'domain/usecases/watch_inventories.dart';
 import 'domain/usecases/delete_inventory.dart';
+import 'data/repositories/buy_list_repository_impl.dart';
+import 'domain/usecases/add_buy_item.dart';
+import 'domain/entities/buy_item.dart';
 
 /// 在庫一覧画面。カテゴリごとの在庫をタブ形式で表示する。
 class InventoryPage extends StatefulWidget {
@@ -166,6 +169,8 @@ class _InventoryListState extends State<InventoryList> {
   String _search = '';
   String _sort = 'updated';
   final TextEditingController _controller = TextEditingController();
+  // 買い物リストへ商品を追加するユースケース
+  final AddBuyItem _addBuyItem = AddBuyItem(BuyListRepositoryImpl());
 
   @override
   void dispose() {
@@ -306,7 +311,17 @@ class _InventoryListState extends State<InventoryList> {
                         );
                       }
                     },
-                    child: InventoryCard(inventory: inv),
+                    child: InventoryCard(
+                      inventory: inv,
+                      onAddToList: () async {
+                        await _addBuyItem(BuyItem(inv.itemName, inv.category, inv.id));
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(AppLocalizations.of(context)!.addedBuyItem)),
+                          );
+                        }
+                      },
+                    ),
                   );
                 }).toList(),
               );

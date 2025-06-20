@@ -17,12 +17,15 @@ class InventoryCard extends StatelessWidget {
   final VoidCallback? onTap;
   // 購入ボタンのみ表示するかどうか
   final bool buyOnly;
+  // 買い物リストへ追加するときのコールバック
+  final VoidCallback? onAddToList;
 
   InventoryCard({
     super.key,
     required this.inventory,
     this.onTap,
     this.buyOnly = false,
+    this.onAddToList,
   });
 
   /// 履歴を読み込み購入予測日を計算する。
@@ -199,6 +202,11 @@ class InventoryCard extends StatelessWidget {
                       icon: const Text('🛒', style: TextStyle(fontSize: 20)),
                       onPressed: () => onBought(context),
                     ),
+                    if (onAddToList != null)
+                      IconButton(
+                        icon: const Icon(Icons.playlist_add),
+                        onPressed: onAddToList,
+                      ),
                   ],
                 ),
               ],
