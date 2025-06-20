@@ -13,4 +13,12 @@ void main() {
     // 買い物リスト追加ボタンが存在するか確認
     expect(find.byIcon(Icons.playlist_add), findsWidgets);
   });
+
+  testWidgets('タイトルが左寄せになっている', (WidgetTester tester) async {
+    final categories = [Category(id: 1, name: 'A', createdAt: DateTime.now())];
+    await tester.pumpWidget(MaterialApp(home: InventoryPage(categories: categories)));
+    await tester.pumpAndSettle();
+    final appBar = tester.widget<AppBar>(find.byType(AppBar).first);
+    expect(appBar.centerTitle, isFalse);
+  });
 }

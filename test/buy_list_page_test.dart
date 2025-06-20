@@ -31,4 +31,12 @@ void main() {
     final labels = tabs.map((t) => t.text).toList();
     expect(labels, ['手動', 'B', 'A']);
   });
+
+  testWidgets('設定メニューボタンが表示される', (WidgetTester tester) async {
+    SharedPreferences.setMockInitialValues({});
+    final categories = [Category(id: 1, name: 'X', createdAt: DateTime.now())];
+    await tester.pumpWidget(MaterialApp(home: BuyListPage(categories: categories)));
+    await tester.pumpAndSettle();
+    expect(find.byIcon(Icons.more_vert), findsOneWidget);
+  });
 }
