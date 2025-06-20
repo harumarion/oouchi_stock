@@ -9,6 +9,8 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: ItemTypeSettingsPage(categories: [cat]),
     ));
+    // タブと FAB が表示されていることを確認
+    expect(find.byType(TabBar), findsOneWidget);
     expect(find.byType(FloatingActionButton), findsOneWidget);
   });
 }
