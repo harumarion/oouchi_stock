@@ -4,7 +4,10 @@ import '../repositories/inventory_repository.dart';
 
 /// 在庫履歴から残り日数を計算するユースケース
 class CalculateDaysLeft {
+  /// 在庫データ取得用リポジトリ
   final InventoryRepository repository;
+
+  /// 購入予測アルゴリズム
   final PurchasePredictionStrategy strategy;
 
   CalculateDaysLeft(this.repository, this.strategy);

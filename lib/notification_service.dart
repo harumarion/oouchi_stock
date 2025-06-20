@@ -2,9 +2,12 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
+/// ローカル通知を管理するサービス
 class NotificationService {
+  /// 通知プラグイン
   final FlutterLocalNotificationsPlugin _plugin = FlutterLocalNotificationsPlugin();
 
+  /// プラグインを初期化する
   Future<void> init() async {
     const android = AndroidInitializationSettings('@mipmap/ic_launcher');
     const ios = DarwinInitializationSettings();
@@ -13,6 +16,7 @@ class NotificationService {
     tz.initializeTimeZones();
   }
 
+  /// 次回通知時刻を計算する
   tz.TZDateTime _nextInstance(int weekday, int hour, int minute) {
     final now = tz.TZDateTime.now(tz.local);
     var scheduled = tz.TZDateTime(tz.local, now.year, now.month, now.day, hour, minute);
@@ -22,6 +26,7 @@ class NotificationService {
     return scheduled;
   }
 
+  /// 毎週決まった時間に通知をスケジュールする
   Future<void> scheduleWeekly({
     required int id,
     required String title,

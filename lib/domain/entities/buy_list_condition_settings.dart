@@ -1,10 +1,17 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
+/// 買い物予報の抽出条件の種類
 enum BuyListConditionType { threshold, days, or }
 
+/// 買い物予報の条件設定を保持するエンティティ
 class BuyListConditionSettings {
+  /// 条件タイプ
   final BuyListConditionType type;
+
+  /// しきい値
   final double threshold;
+
+  /// 日数条件
   final int days;
   const BuyListConditionSettings({
     required this.type,

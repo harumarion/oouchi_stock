@@ -1,23 +1,51 @@
+/// セール情報を表すエンティティ
 class PriceInfo {
+  /// ドキュメントID
   final String id;
+
+  /// ひも付く在庫ID
   final String inventoryId;
+
+  /// 調査日
   final DateTime checkedAt;
+
+  /// カテゴリ名
   final String category;
+
+  /// 品種名
   final String itemType;
+
+  /// 商品名
   final String itemName;
+
+  /// 購入数
   final double count;
+
+  /// 単位
   final String unit;
+
+  /// 1個あたり容量
   final double volume;
+
+  /// 総容量
   final double totalVolume;
-  // 通常価格
+
+  /// 通常価格
   final double regularPrice;
-  // セール価格
+
+  /// セール価格
   final double salePrice;
+
+  /// 購入店舗
   final String shop;
-  // 承認ページURL
+
+  /// 承認ページURL
   final String approvalUrl;
-  // メモ
+
+  /// メモ
   final String memo;
+
+  /// 単価
   final double unitPrice;
 
   PriceInfo({
