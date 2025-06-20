@@ -7,6 +7,7 @@ import 'util/date_time_parser.dart';
 
 import 'add_price_page.dart';
 import 'add_inventory_page.dart';
+import 'add_category_page.dart';
 import 'settings_page.dart';
 import 'widgets/settings_menu_button.dart';
 import 'data/repositories/price_repository_impl.dart';
@@ -65,6 +66,23 @@ class _PriceListPageState extends State<PriceListPage> {
       return Scaffold(
         appBar: AppBar(title: Text(AppLocalizations.of(context)!.priceManagementTitle)),
         body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+    // カテゴリが存在しない場合は追加を促す画面を表示
+    if (_categories.isEmpty) {
+      return Scaffold(
+        appBar: AppBar(title: Text(AppLocalizations.of(context)!.priceManagementTitle)),
+        body: Center(
+          child: ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const AddCategoryPage()),
+              );
+            },
+            child: Text(AppLocalizations.of(context)!.addCategory),
+          ),
+        ),
       );
     }
     return DefaultTabController(

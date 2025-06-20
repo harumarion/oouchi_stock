@@ -29,10 +29,13 @@ class _EditItemTypePageState extends State<EditItemTypePage> {
   void initState() {
     super.initState();
     _name = widget.itemType.name;
-    _category = widget.categories.firstWhere(
-      (c) => c.name == widget.itemType.category,
-      orElse: () => widget.categories.first,
-    );
+    // 画面初期化時に現在のカテゴリを設定
+    if (widget.categories.isNotEmpty) {
+      _category = widget.categories.firstWhere(
+        (c) => c.name == widget.itemType.category,
+        orElse: () => widget.categories.first,
+      );
+    }
   }
 
   Future<void> _save() async {

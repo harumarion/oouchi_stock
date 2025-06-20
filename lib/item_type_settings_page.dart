@@ -76,7 +76,9 @@ class _ItemTypeSettingsPageState extends State<ItemTypeSettingsPage> {
           SnackBar(content: Text(AppLocalizations.of(context)!.deleted)),
         );
       }
-    } catch (_) {
+    } catch (e) {
+      // 例外内容をログに出力
+      debugPrint('品種削除失敗: $e');
       if (mounted) {
         // 削除失敗を通知
         ScaffoldMessenger.of(context).showSnackBar(
@@ -137,6 +139,13 @@ class _ItemTypeSettingsPageState extends State<ItemTypeSettingsPage> {
 
   @override
   Widget build(BuildContext context) {
+    // カテゴリが存在しない場合は登録を促す画面を表示
+    if (widget.categories.isEmpty) {
+      return Scaffold(
+        appBar: AppBar(title: Text(AppLocalizations.of(context)!.itemTypeSettingsTitle)),
+        body: Center(child: Text(AppLocalizations.of(context)!.addCategory)),
+      );
+    }
     return DefaultTabController(
       // カテゴリ数だけタブを生成
       length: widget.categories.length,
