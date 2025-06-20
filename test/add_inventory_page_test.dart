@@ -16,18 +16,18 @@ void main() {
       ),
     );
 
-    // 初期状態では数量 1.0 が表示されているはず
-    expect(find.text('1.0'), findsOneWidget);
+    // 初期状態では数量 1 が表示されているはず
+    expect(find.text('1'), findsOneWidget);
 
-    // プラスボタンをタップして 1.1 になるか確認
+    // プラスボタンをタップして 2 になるか確認
     await tester.tap(find.widgetWithIcon(IconButton, Icons.add));
     await tester.pump();
-    expect(find.text('1.1'), findsOneWidget);
+    expect(find.text('2'), findsOneWidget);
 
-    // マイナスボタンをタップして 1.0 に戻るか確認
+    // マイナスボタンをタップして 1 に戻るか確認
     await tester.tap(find.widgetWithIcon(IconButton, Icons.remove));
     await tester.pump();
-    expect(find.text('1.0'), findsOneWidget);
+    expect(find.text('1'), findsOneWidget);
   });
 
   // Navigator.canPop が false の場合でも画面が消えないことを確認するテスト

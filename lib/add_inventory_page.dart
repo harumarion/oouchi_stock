@@ -29,7 +29,7 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
   Category? _category;
   // 品種
   String _itemType = '柔軟剤';
-  // 数量（小数点第一位まで扱う）
+  // 数量（整数で管理）
   double _quantity = 1.0;
   // 単位
   String _unit = '個';
@@ -200,18 +200,18 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
                   IconButton(
                     icon: const Icon(Icons.remove),
                     onPressed: () => setState(() {
-                      // 数量を0.1単位で減らす
-                      if (_quantity > 0.1) _quantity -= 0.1;
-                      _quantity = double.parse(_quantity.toStringAsFixed(1));
+                      // 商品追加画面: 数量を1単位で減らす
+                      if (_quantity > 1.0) _quantity -= 1.0;
+                      _quantity = double.parse(_quantity.toStringAsFixed(0));
                     }),
                   ),
-                  Text(_quantity.toStringAsFixed(1)),
+                  Text(_quantity.toStringAsFixed(0)),
                   IconButton(
                     icon: const Icon(Icons.add),
                     onPressed: () => setState(() {
-                      // 数量を0.1単位で増やす
-                      _quantity += 0.1;
-                      _quantity = double.parse(_quantity.toStringAsFixed(1));
+                      // 商品追加画面: 数量を1単位で増やす
+                      _quantity += 1.0;
+                      _quantity = double.parse(_quantity.toStringAsFixed(0));
                     }),
                   ),
                 ],
