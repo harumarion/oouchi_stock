@@ -112,7 +112,14 @@ class _BuyListPageState extends State<BuyListPage> {
               title: Text(loc.buyList),
               bottom: TabBar(
                 isScrollable: true,
-                tabs: [for (final t in tabs) Tab(text: t)],
+                tabs: [
+                  for (final t in tabs)
+                    // 最大3件まで画面幅いっぱいに表示し、それ以上はスクロール
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width / 3,
+                      child: Tab(text: t),
+                    )
+                ],
               ),
             ),
             body: TabBarView(

@@ -93,14 +93,16 @@ class _InventoryPageState extends State<InventoryPage> {
     // 画面描画。カテゴリが読み込まれるまではローディングを表示
     if (!_categoriesLoaded) {
       return Scaffold(
-        appBar: AppBar(title: Text(AppLocalizations.of(context)!.appTitle)),
+        // 画面名を在庫一覧に固定
+        appBar: AppBar(title: Text(AppLocalizations.of(context)!.inventoryList)),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
     // カテゴリがまだ存在しない場合は追加を促す画面を表示
     if (_categories.isEmpty) {
       return Scaffold(
-        appBar: AppBar(title: Text(AppLocalizations.of(context)!.appTitle)),
+        // 画面名を在庫一覧に固定
+        appBar: AppBar(title: Text(AppLocalizations.of(context)!.inventoryList)),
         body: Center(
           child: ElevatedButton(
             onPressed: () {
@@ -119,7 +121,8 @@ class _InventoryPageState extends State<InventoryPage> {
       length: _categories.length,
       child: Scaffold(
           appBar: AppBar(
-            title: Text(AppLocalizations.of(context)!.appTitle),
+            // 上部タイトルを在庫一覧にする
+            title: Text(AppLocalizations.of(context)!.inventoryList),
             centerTitle: true,
             bottom: TabBar(
               isScrollable: true,

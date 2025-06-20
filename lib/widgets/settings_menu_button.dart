@@ -3,6 +3,7 @@ import '../settings_page.dart';
 import '../domain/entities/category.dart';
 import '../main.dart';
 import '../i18n/app_localizations.dart';
+import '../price_list_page.dart';
 
 /// 設定画面のみを表示する共通メニューボタン。
 class SettingsMenuButton extends StatelessWidget {
@@ -36,6 +37,12 @@ class SettingsMenuButton extends StatelessWidget {
               ),
             ),
           );
+        } else if (value == 'price') {
+          // セール情報管理画面を開く
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const PriceListPage()),
+          );
         }
       },
       itemBuilder: (context) => [
@@ -43,6 +50,13 @@ class SettingsMenuButton extends StatelessWidget {
           value: 'settings',
           child: Text(
             AppLocalizations.of(context)!.settings,
+            style: const TextStyle(fontSize: 18),
+          ),
+        ),
+        PopupMenuItem(
+          value: 'price',
+          child: Text(
+            AppLocalizations.of(context)!.priceManagementTitle,
             style: const TextStyle(fontSize: 18),
           ),
         ),

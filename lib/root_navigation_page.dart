@@ -4,6 +4,7 @@ import 'inventory_page.dart';
 import 'home_page.dart';
 import 'add_inventory_page.dart';
 import 'price_list_page.dart';
+import 'add_price_page.dart';
 import 'main.dart';
 import 'i18n/app_localizations.dart';
 
@@ -23,13 +24,13 @@ class _RootNavigationPageState extends State<RootNavigationPage> {
   // 1: 在庫一覧画面
   // 2: 買い物予報画面
   // 3: 商品追加画面
-  // 4: セール情報管理画面
+  // 4: セール情報追加画面
   late final List<Widget> _pages = [
     const BuyListPage(),
     const InventoryPage(),
     const HomePage(),
     const AddInventoryPage(),
-    const PriceListPage(),
+    const AddPricePage(),
   ];
 
   @override
@@ -62,10 +63,10 @@ class _RootNavigationPageState extends State<RootNavigationPage> {
             icon: const Icon(Icons.add_box),
             label: AppLocalizations.of(context)!.addItem,
           ),
-          // セール情報
+          // セール情報追加
           BottomNavigationBarItem(
             icon: const Icon(Icons.price_change),
-            label: AppLocalizations.of(context)!.priceManagementTitle,
+            label: AppLocalizations.of(context)!.priceAddTitle,
           ),
         ],
       ),
