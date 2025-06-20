@@ -10,6 +10,10 @@ import 'inventory_page.dart';
 import 'settings_page.dart';
 import 'widgets/dashboard_tile.dart';
 import 'widgets/settings_menu_button.dart';
+// 在庫カードウィジェット
+import 'widgets/inventory_card.dart';
+// 在庫詳細画面
+import 'inventory_detail_page.dart';
 import 'main.dart';
 import 'data/repositories/inventory_repository_impl.dart';
 import 'domain/entities/category.dart';
@@ -209,6 +213,7 @@ class _HomePageState extends State<HomePage> {
                             padding: const EdgeInsets.all(16),
                             children: [
                               for (final inv in map[c.name]!)
+                                // ホーム画面で表示する在庫カード
                                 InventoryCard(
                                   inventory: inv,
                                   // カードタップで在庫詳細画面へ遷移
