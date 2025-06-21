@@ -14,6 +14,14 @@ import 'notification_service.dart';
 import 'login_page.dart';
 import 'root_navigation_page.dart';
 import 'theme.dart';
+import 'data/repositories/inventory_repository_impl.dart';
+import 'data/repositories/price_repository_impl.dart';
+import 'data/repositories/buy_list_repository_impl.dart';
+import 'domain/services/auto_buy_list_service.dart';
+import 'domain/services/purchase_decision_service.dart';
+import 'domain/usecases/add_buy_item.dart';
+import 'domain/usecases/auto_add_buy_list.dart';
+import 'domain/entities/buy_list_condition_settings.dart';
 
 // アプリのエントリーポイント。初期化処理中はローディング画面を表示する。
 
@@ -53,6 +61,17 @@ class _AppLoaderState extends State<AppLoader> {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       await _setupNotification();
+      // 起動時に在庫と価格から買い物リストを自動更新
+      final settings = await loadBuyListConditionSettings();
+      final auto = AutoAddBuyList(
+        InventoryRepositoryImpl(),
+        PriceRepositoryImpl(),
+        AutoBuyListService(
+          AddBuyItem(BuyListRepositoryImpl()),
+          PurchaseDecisionService(settings.threshold),
+        ),
+      );
+      await auto();
       _loggedIn = true;
     }
     setState(() => _initialized = true);
