@@ -11,7 +11,6 @@ import 'domain/usecases/watch_buy_items.dart';
 
 import 'data/repositories/inventory_repository_impl.dart';
 import 'domain/repositories/inventory_repository.dart';
-import 'domain/services/purchase_prediction_strategy.dart';
 import 'domain/usecases/calculate_days_left.dart';
 import 'domain/usecases/update_quantity.dart';
 import 'domain/entities/category.dart';
@@ -311,7 +310,6 @@ class _BuyListPageState extends State<BuyListPage> {
                   return FutureBuilder<int>(
                     future: CalculateDaysLeft(
                       widget.repository,
-                      const DummyPredictionStrategy(),
                     )(inv),
                     builder: (context, daysSnapshot) {
                       final daysText = daysSnapshot.hasData

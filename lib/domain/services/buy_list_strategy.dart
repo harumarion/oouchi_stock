@@ -1,23 +1,11 @@
 import '../entities/inventory.dart';
 import '../repositories/inventory_repository.dart';
-import '../entities/history_entry.dart';
-import '../services/purchase_prediction_strategy.dart';
 import '../entities/buy_list_condition_settings.dart';
 
-/// 履歴から現在の在庫数量を計算するヘルパー
-double _currentQuantity(List<HistoryEntry> history) {
-  if (history.isEmpty) return 0;
-  double total = 0;
-  for (final h in history.reversed) {
-    if (h.type == 'stocktake') {
-      total = h.after;
-    } else if (h.type == 'add' || h.type == 'bought') {
-      total += h.quantity;
-    } else if (h.type == 'used') {
-      total -= h.quantity;
-    }
-  }
-  return total;
+/// 在庫から残り日数を計算するヘルパー
+int _daysLeftFromInventory(Inventory inv) {
+  if (inv.monthlyConsumption <= 0) return 9999;
+  return (inv.quantity / inv.monthlyConsumption * 30).ceil();
 }
 
 /// 買い物予報抽出用ストラテジー
@@ -42,19 +30,14 @@ class PredictionDaysStrategy implements BuyListStrategy {
   /// 予測日数の上限
   final int days;
 
-  /// 予測アルゴリズム
-  final PurchasePredictionStrategy prediction;
-
-  PredictionDaysStrategy(this.days, this.prediction);
+  PredictionDaysStrategy(this.days);
   @override
   Stream<List<Inventory>> watch(InventoryRepository repository) async* {
     final list = await repository.fetchAll();
     final result = <Inventory>[];
     for (final inv in list) {
-      final history = await repository.watchHistory(inv.id).first;
-      final predicted =
-          prediction.predict(DateTime.now(), history, _currentQuantity(history));
-      if (predicted.difference(DateTime.now()).inDays <= days) {
+      final d = _daysLeftFromInventory(inv);
+      if (d <= days) {
         result.add(inv);
       }
     }
@@ -70,20 +53,14 @@ class OrStrategy implements BuyListStrategy {
   /// 予測日数の上限
   final int days;
 
-  /// 予測アルゴリズム
-  final PurchasePredictionStrategy prediction;
-
-  OrStrategy(this.threshold, this.days, this.prediction);
+  OrStrategy(this.threshold, this.days);
   @override
   Stream<List<Inventory>> watch(InventoryRepository repository) async* {
     final list = await repository.fetchAll();
     final result = <Inventory>[];
     for (final inv in list) {
-      final history = await repository.watchHistory(inv.id).first;
-      final predicted =
-          prediction.predict(DateTime.now(), history, _currentQuantity(history));
-      if (inv.quantity <= threshold ||
-          predicted.difference(DateTime.now()).inDays <= days) {
+      final d = _daysLeftFromInventory(inv);
+      if (inv.quantity <= threshold || d <= days) {
         result.add(inv);
       }
     }
@@ -93,13 +70,12 @@ class OrStrategy implements BuyListStrategy {
 
 /// 設定内容に応じたストラテジーを生成する
 BuyListStrategy createStrategy(BuyListConditionSettings settings) {
-  const prediction = DummyPredictionStrategy();
   switch (settings.type) {
     case BuyListConditionType.threshold:
       return ThresholdStrategy(settings.threshold);
     case BuyListConditionType.days:
-      return PredictionDaysStrategy(settings.days, prediction);
+      return PredictionDaysStrategy(settings.days);
     case BuyListConditionType.or:
-      return OrStrategy(settings.threshold, settings.days, prediction);
+      return OrStrategy(settings.threshold, settings.days);
   }
 }

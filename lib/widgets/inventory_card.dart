@@ -2,8 +2,6 @@ import "package:flutter/material.dart";
 import "../i18n/app_localizations.dart";
 import "scrolling_text.dart"; // 長いテキストを流すウィジェット
 import "../domain/entities/inventory.dart";
-import "../domain/entities/history_entry.dart";
-import "../domain/services/purchase_prediction_strategy.dart";
 import "../domain/usecases/update_quantity.dart";
 import "../domain/usecases/stocktake.dart";
 import "../data/repositories/inventory_repository_impl.dart";
@@ -12,7 +10,6 @@ import "../data/repositories/inventory_repository_impl.dart";
 class InventoryCard extends StatelessWidget {
   final Inventory inventory;
   final UpdateQuantity _update = UpdateQuantity(InventoryRepositoryImpl());
-  final InventoryRepositoryImpl _repository = InventoryRepositoryImpl();
   final Stocktake _stocktake = Stocktake(InventoryRepositoryImpl());
   final VoidCallback? onTap;
   // 購入ボタンのみ表示するかどうか
@@ -28,28 +25,14 @@ class InventoryCard extends StatelessWidget {
     this.onAddToList,
   });
 
-  /// 履歴を読み込み購入予測日を計算する。
-  Future<DateTime> _loadPrediction() async {
-    final list = await _repository.watchHistory(inventory.id).first;
-    final strategy = const DummyPredictionStrategy();
-    final predicted = strategy.predict(
-        DateTime.now(), list, _currentQuantity(list));
-    return predicted;
-  }
-
-  double _currentQuantity(List<HistoryEntry> history) {
-    if (history.isEmpty) return 0;
-    double total = 0;
-    for (final h in history.reversed) {
-      if (h.type == 'stocktake') {
-        total = h.after;
-      } else if (h.type == 'add' || h.type == 'bought') {
-        total += h.quantity;
-      } else if (h.type == 'used') {
-        total -= h.quantity;
-      }
+  /// 在庫データから購入予測日を計算する
+  DateTime _predictFromInventory() {
+    if (inventory.monthlyConsumption <= 0) {
+      return DateTime.now();
     }
-    return total;
+    final days =
+        (inventory.quantity / inventory.monthlyConsumption * 30).ceil();
+    return DateTime.now().add(Duration(days: days));
   }
 
   /// 予測日までの残り日数を計算する
@@ -147,21 +130,16 @@ class InventoryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // ホーム画面や在庫一覧で表示される1商品のカードUI
-    return FutureBuilder<DateTime>(
-      future: _loadPrediction(),
-      builder: (context, snapshot) {
-        final predicted = snapshot.data;
-        final dateText = predicted != null
-            ? AppLocalizations.of(context)!
-                .daysLeft(_daysLeft(predicted).toString())
-            : AppLocalizations.of(context)!.calculating;
-        return InkWell(
-          onTap: onTap,
-          child: Card(
-            margin: const EdgeInsets.only(bottom: 12),
-            child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
+    final predicted = _predictFromInventory();
+    final dateText =
+        AppLocalizations.of(context)!.daysLeft(_daysLeft(predicted).toString());
+    return InkWell(
+      onTap: onTap,
+      child: Card(
+        margin: const EdgeInsets.only(bottom: 12),
+        child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 // 商品情報表示エリア。長すぎる文字列は ScrollingText で横に流す
@@ -216,7 +194,5 @@ class InventoryCard extends StatelessWidget {
           ),
         ),
       );
-      },
-    );
   }
 }

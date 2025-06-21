@@ -49,6 +49,7 @@ class _DataRepository extends _FakeRepository {
         itemType: '一般',
         quantity: 1.0,
         unit: '個',
+        monthlyConsumption: 0,
         createdAt: DateTime.now(),
       ));
 
