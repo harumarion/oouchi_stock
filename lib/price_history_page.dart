@@ -9,16 +9,19 @@ import 'domain/usecases/watch_price_by_type.dart';
 // セール情報履歴画面
 
 class PriceHistoryPage extends StatelessWidget {
-  final String category;
-  final String itemType;
-  const PriceHistoryPage({super.key, required this.category, required this.itemType});
+  final String category; // カテゴリ名
+  final String itemType; // 品種名
+  final String itemName; // 商品名
+
+  const PriceHistoryPage({super.key, required this.category, required this.itemType, required this.itemName});
 
   @override
   Widget build(BuildContext context) {
     final watch = WatchPriceByType(PriceRepositoryImpl());
     final deleter = DeletePriceInfo(PriceRepositoryImpl());
     return Scaffold(
-      appBar: AppBar(title: Text(itemType)),
+      // 商品名をタイトルに表示
+      appBar: AppBar(title: Text(itemName)),
       body: StreamBuilder<List<PriceInfo>>(
         stream: watch(category, itemType),
         builder: (context, snapshot) {
@@ -37,7 +40,7 @@ class PriceHistoryPage extends StatelessWidget {
                 Card(
                   margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: InkWell(
-                    // 長押しで削除メニューを表示
+                    // 長押しで削除メニューを表示するイベント
                     onLongPress: () async {
                       final res = await showModalBottomSheet<String>(
                         context: context,
@@ -57,8 +60,10 @@ class PriceHistoryPage extends StatelessWidget {
                       padding: const EdgeInsets.all(16),
                       child: Column(
                         children: [
-                          _buildRow(loc.itemName, p.itemName),
+                          _buildRow(loc.category, p.category),
+                          _buildRow(loc.itemType, p.itemType),
                           _buildRow(loc.checkedDate(_formatDate(p.checkedAt)), ''),
+                          _buildRow(loc.expiry(_formatDate(p.expiry)), ''),
                           _buildRow(loc.count, '${p.count} ${p.unit}'),
                           _buildRow(loc.volume, p.volume.toString()),
                           _buildRow(loc.totalVolumeLabel, p.totalVolume.toString()),
@@ -96,7 +101,7 @@ class PriceHistoryPage extends StatelessWidget {
           Expanded(
             child: Text(
               label,
-              style: const TextStyle(fontSize: 16),
+              style: const TextStyle(fontSize: 18),
             ),
           ),
           const SizedBox(width: 8),
@@ -104,7 +109,7 @@ class PriceHistoryPage extends StatelessWidget {
             child: Text(
               value,
               textAlign: TextAlign.right,
-              style: const TextStyle(fontSize: 16),
+              style: const TextStyle(fontSize: 18),
             ),
           ),
         ],

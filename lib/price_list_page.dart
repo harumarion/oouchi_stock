@@ -281,13 +281,14 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
                             DataCell(Text(_formatDate(p.expiry), style: const TextStyle(fontSize: 16))),
                           ],
                           onSelectChanged: (_) {
-                            // 履歴画面へ遷移
+                            // タップでセール情報履歴画面へ遷移
                             Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (_) => PriceHistoryPage(
                                   category: widget.category,
                                   itemType: p.itemType,
+                                  itemName: p.itemName,
                                 ),
                               ),
                             );
