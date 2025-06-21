@@ -9,18 +9,33 @@ import 'domain/usecases/watch_price_by_type.dart';
 // セール情報履歴画面
 
 class PriceHistoryPage extends StatelessWidget {
+  /// カテゴリ名
   final String category;
+  /// 品種名
   final String itemType;
-  const PriceHistoryPage({super.key, required this.category, required this.itemType});
+  /// セール情報取得ユースケース
+  final WatchPriceByType _watch;
+  /// セール情報削除ユースケース
+  final DeletePriceInfo _deleter;
+
+  /// テスト時にユースケースを差し替えられるようにしている
+  PriceHistoryPage({
+    super.key,
+    required this.category,
+    required this.itemType,
+    WatchPriceByType? watch,
+    DeletePriceInfo? deleter,
+  })  : _watch = watch ?? WatchPriceByType(PriceRepositoryImpl()),
+        _deleter = deleter ?? DeletePriceInfo(PriceRepositoryImpl());
 
   @override
   Widget build(BuildContext context) {
-    final watch = WatchPriceByType(PriceRepositoryImpl());
-    final deleter = DeletePriceInfo(PriceRepositoryImpl());
+    final textStyle =
+        Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 18);
     return Scaffold(
       appBar: AppBar(title: Text(itemType)),
       body: StreamBuilder<List<PriceInfo>>(
-        stream: watch(category, itemType),
+        stream: _watch(category, itemType),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             final err = snapshot.error?.toString() ?? 'unknown';
@@ -50,26 +65,26 @@ class PriceHistoryPage extends StatelessWidget {
                         ),
                       );
                       if (res == 'delete') {
-                        await deleter(p.id);
+                        await _deleter(p.id);
                       }
                     },
                     child: Padding(
                       padding: const EdgeInsets.all(16),
                       child: Column(
                         children: [
-                          _buildRow(loc.itemName, p.itemName),
-                          _buildRow(loc.checkedDate(_formatDate(p.checkedAt)), ''),
-                          _buildRow(loc.count, '${p.count} ${p.unit}'),
-                          _buildRow(loc.volume, p.volume.toString()),
-                          _buildRow(loc.totalVolumeLabel, p.totalVolume.toString()),
-                          _buildRow(loc.regularPrice, p.regularPrice.toString()),
-                          _buildRow(loc.salePrice, p.salePrice.toString()),
-                          _buildRow(loc.unitPriceLabel, p.unitPrice.toStringAsFixed(2)),
-                          _buildRow(loc.shop, p.shop),
+                          _buildRow(loc.itemName, p.itemName, textStyle),
+                          _buildRow(loc.checkedDate(_formatDate(p.checkedAt)), '', textStyle),
+                          _buildRow(loc.count, '${p.count} ${p.unit}', textStyle),
+                          _buildRow(loc.volume, p.volume.toString(), textStyle),
+                          _buildRow(loc.totalVolumeLabel, p.totalVolume.toString(), textStyle),
+                          _buildRow(loc.regularPrice, p.regularPrice.toString(), textStyle),
+                          _buildRow(loc.salePrice, p.salePrice.toString(), textStyle),
+                          _buildRow(loc.unitPriceLabel, p.unitPrice.toStringAsFixed(2), textStyle),
+                          _buildRow(loc.shop, p.shop, textStyle),
                           if (p.approvalUrl.isNotEmpty)
-                            _buildRow(loc.approvalUrl, p.approvalUrl),
+                            _buildRow(loc.approvalUrl, p.approvalUrl, textStyle),
                           if (p.memo.isNotEmpty)
-                            _buildRow(loc.memo, p.memo),
+                            _buildRow(loc.memo, p.memo, textStyle),
                         ],
                       ),
                     ),
@@ -87,7 +102,7 @@ class PriceHistoryPage extends StatelessWidget {
   }
 
   /// 項目名と値を左右に表示する行を作成する
-  Widget _buildRow(String label, String value) {
+  Widget _buildRow(String label, String value, TextStyle? style) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
@@ -96,7 +111,7 @@ class PriceHistoryPage extends StatelessWidget {
           Expanded(
             child: Text(
               label,
-              style: const TextStyle(fontSize: 16),
+              style: style,
             ),
           ),
           const SizedBox(width: 8),
@@ -104,7 +119,7 @@ class PriceHistoryPage extends StatelessWidget {
             child: Text(
               value,
               textAlign: TextAlign.right,
-              style: const TextStyle(fontSize: 16),
+              style: style,
             ),
           ),
         ],
