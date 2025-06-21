@@ -9,21 +9,34 @@ import 'domain/usecases/watch_price_by_type.dart';
 // セール情報履歴画面
 
 class PriceHistoryPage extends StatelessWidget {
-  final String category; // カテゴリ名
-  final String itemType; // 品種名
-  final String itemName; // 商品名
+  /// カテゴリ名
+  final String category;
+  /// 品種名
+  final String itemType;
+  /// セール情報取得ユースケース
+  final WatchPriceByType _watch;
+  /// セール情報削除ユースケース
+  final DeletePriceInfo _deleter;
 
-  const PriceHistoryPage({super.key, required this.category, required this.itemType, required this.itemName});
+  /// テスト時にユースケースを差し替えられるようにしている
+  PriceHistoryPage({
+    super.key,
+    required this.category,
+    required this.itemType,
+    WatchPriceByType? watch,
+    DeletePriceInfo? deleter,
+  })  : _watch = watch ?? WatchPriceByType(PriceRepositoryImpl()),
+        _deleter = deleter ?? DeletePriceInfo(PriceRepositoryImpl());
 
   @override
   Widget build(BuildContext context) {
-    final watch = WatchPriceByType(PriceRepositoryImpl());
-    final deleter = DeletePriceInfo(PriceRepositoryImpl());
+    final textStyle =
+        Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 18);
     return Scaffold(
       // 商品名をタイトルに表示
       appBar: AppBar(title: Text(itemName)),
       body: StreamBuilder<List<PriceInfo>>(
-        stream: watch(category, itemType),
+        stream: _watch(category, itemType),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             final err = snapshot.error?.toString() ?? 'unknown';
@@ -53,7 +66,7 @@ class PriceHistoryPage extends StatelessWidget {
                         ),
                       );
                       if (res == 'delete') {
-                        await deleter(p.id);
+                        await _deleter(p.id);
                       }
                     },
                     child: Padding(
@@ -72,9 +85,9 @@ class PriceHistoryPage extends StatelessWidget {
                           _buildRow(loc.unitPriceLabel, p.unitPrice.toStringAsFixed(2)),
                           _buildRow(loc.shop, p.shop),
                           if (p.approvalUrl.isNotEmpty)
-                            _buildRow(loc.approvalUrl, p.approvalUrl),
+                            _buildRow(loc.approvalUrl, p.approvalUrl, textStyle),
                           if (p.memo.isNotEmpty)
-                            _buildRow(loc.memo, p.memo),
+                            _buildRow(loc.memo, p.memo, textStyle),
                         ],
                       ),
                     ),
@@ -92,7 +105,7 @@ class PriceHistoryPage extends StatelessWidget {
   }
 
   /// 項目名と値を左右に表示する行を作成する
-  Widget _buildRow(String label, String value) {
+  Widget _buildRow(String label, String value, TextStyle? style) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
