@@ -71,4 +71,12 @@ void main() {
     await service.process(inv(5), price(80, 100));
     expect(repo.items.isEmpty, true);
   });
+
+  test('在庫少でセール中は自動追加される', () async {
+    final repo = _FakeRepo();
+    final service = AutoBuyListService(
+        AddBuyItem(repo), PurchaseDecisionService(2));
+    await service.process(inv(1), price(80, 100));
+    expect(repo.items.length, 1);
+  });
 }
