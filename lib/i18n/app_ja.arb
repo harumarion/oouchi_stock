@@ -60,6 +60,7 @@
   "memoLabel": "メモ: {value}",
   "shop": "購入元",
   "expiry": "期限: {date}",
+  "expiryLabel": "期限",
   "showExpired": "期限切れも表示",
   "totalVolume": "合計容量: {value}",
   "unitPrice": "単価: {value}",

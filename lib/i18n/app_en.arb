@@ -60,6 +60,7 @@
   "memoLabel": "Memo: {value}",
   "shop": "Shop",
   "expiry": "Expiration: {date}",
+  "expiryLabel": "Expiration",
   "showExpired": "Show expired",
   "totalVolume": "Total volume: {value}",
   "unitPrice": "Unit price: {value}",

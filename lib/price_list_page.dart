@@ -28,7 +28,9 @@ class PriceListPage extends StatefulWidget {
 }
 
 class _PriceListPageState extends State<PriceListPage> {
+  // カテゴリ一覧を保持する _categories
   List<Category> _categories = [];
+  // Firestore からの読み込み完了状態を示す _loaded
   bool _loaded = false;
 
   @override
@@ -141,10 +143,14 @@ class PriceCategoryList extends StatefulWidget {
 }
 
 class _PriceCategoryListState extends State<PriceCategoryList> {
+  // 検索文字列を保持する _search
   String _search = '';
-  String _sort = 'updated'; // デフォルトは最終更新順
+  // 並び替え条件を表す _sort。デフォルトは最終更新順
+  String _sort = 'updated';
+  // 検索欄のテキストコントローラー _controller
   final TextEditingController _controller = TextEditingController();
-  bool _showExpired = false; // 期限切れも表示するか
+  // 期限切れも表示するかどうかを示す _showExpired
+  bool _showExpired = false;
 
   @override
   void dispose() {
@@ -257,7 +263,8 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
                       DataColumn(label: Text(AppLocalizations.of(context)!.regularPrice, style: const TextStyle(fontSize: 16))),
                       DataColumn(label: Text(AppLocalizations.of(context)!.salePrice, style: const TextStyle(fontSize: 16))),
                       DataColumn(label: Text(AppLocalizations.of(context)!.shop, style: const TextStyle(fontSize: 16))),
-                      DataColumn(label: Text(AppLocalizations.of(context)!.expiry, style: const TextStyle(fontSize: 16))),
+                      // 期限列のヘッダ
+                      DataColumn(label: Text(AppLocalizations.of(context)!.expiryLabel, style: const TextStyle(fontSize: 16))),
                     ],
                     rows: [
                       for (final p in items)
@@ -270,7 +277,8 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
                             DataCell(Text(p.regularPrice.toString(), style: const TextStyle(fontSize: 16))),
                             DataCell(Text(p.salePrice.toString(), style: const TextStyle(fontSize: 16))),
                             DataCell(Text(p.shop, style: const TextStyle(fontSize: 16))),
-                            DataCell(Text(_formatDate(p.checkedAt), style: const TextStyle(fontSize: 16))),
+                            // セール期限日を表示
+                            DataCell(Text(_formatDate(p.expiry), style: const TextStyle(fontSize: 16))),
                           ],
                           onSelectChanged: (_) {
                             // 履歴画面へ遷移
