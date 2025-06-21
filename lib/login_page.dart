@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'i18n/app_localizations.dart';
 
 /// ログイン画面。匿名ログインと Google ログインを選択できる
@@ -18,6 +19,14 @@ class LoginPage extends StatelessWidget {
   /// ログイン画面で「Googleでログイン」を選択すると実行される
   Future<void> _signInWithGoogle(BuildContext context) async {
     try {
+      // オフライン時は認証処理を行わず警告を表示
+      final conn = await Connectivity().checkConnectivity();
+      if (conn == ConnectivityResult.none) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AppLocalizations.of(context)!.offline)),
+        );
+        return;
+      }
       final user = FirebaseAuth.instance.currentUser;
       final googleUser = await GoogleSignIn().signIn();
       if (googleUser == null) return;
@@ -34,7 +43,7 @@ class LoginPage extends StatelessWidget {
       onLoggedIn();
     } on FirebaseAuthException catch (e) {
       // 認証エラーの詳細を表示して原因特定を容易にする
-      final msg = '${AppLocalizations.of(context)!.saveFailed}: '
+      final msg = '${AppLocalizations.of(context)!.loginFailed}: '
           '${e.message ?? e.code}';
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(msg)),
@@ -51,11 +60,19 @@ class LoginPage extends StatelessWidget {
   /// Sign-in を有効にする必要がある。
   Future<void> _signInAnonymously(BuildContext context) async {
     try {
+      // オフラインの場合はまず接続を促す
+      final conn = await Connectivity().checkConnectivity();
+      if (conn == ConnectivityResult.none) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AppLocalizations.of(context)!.offline)),
+        );
+        return;
+      }
       await FirebaseAuth.instance.signInAnonymously();
       onLoggedIn();
     } on FirebaseAuthException catch (e) {
       // Firebase の設定不足や Play サービスの問題などで失敗した場合
-      final msg = '${AppLocalizations.of(context)!.saveFailed}: '
+      final msg = '${AppLocalizations.of(context)!.loginFailed}: '
           '${e.message ?? e.code}';
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(msg)),
