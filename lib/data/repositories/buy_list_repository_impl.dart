@@ -3,15 +3,18 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../domain/entities/buy_item.dart';
 import '../../domain/repositories/buy_list_repository.dart';
 
+/// SharedPreferences を用いて買い物リストを保存するリポジトリ実装
 class BuyListRepositoryImpl implements BuyListRepository {
   static const _key = 'buy_list_items';
   final StreamController<List<BuyItem>> _controller =
       StreamController<List<BuyItem>>.broadcast();
   bool _initialized = false;
 
+  /// SharedPreferences の取得
   Future<SharedPreferences> get _prefs async =>
       await SharedPreferences.getInstance();
 
+  /// 初回のみストレージからリストを読み込む
   Future<void> _init() async {
     if (_initialized) return;
     final prefs = await _prefs;
@@ -21,18 +24,14 @@ class BuyListRepositoryImpl implements BuyListRepository {
   }
 
   @override
+  /// 買い物リストの変更を監視する
   Stream<List<BuyItem>> watchItems() {
     _init();
     return _controller.stream;
   }
 
-  Future<void> _save(List<BuyItem> items) async {
-    final prefs = await _prefs;
-    await prefs.setStringList(_key, items.map((e) => e.key).toList());
-    _controller.add(List.from(items));
-  }
-
   @override
+  /// アイテムを追加して保存
   Future<void> addItem(BuyItem item) async {
     await _init();
     final prefs = await _prefs;
@@ -45,6 +44,7 @@ class BuyListRepositoryImpl implements BuyListRepository {
   }
 
   @override
+  /// アイテムを削除して保存
   Future<void> removeItem(BuyItem item) async {
     await _init();
     final prefs = await _prefs;

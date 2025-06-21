@@ -6,14 +6,13 @@ import '../../domain/entities/inventory.dart';
 import '../../domain/entities/history_entry.dart';
 import '../../domain/repositories/inventory_repository.dart';
 
-// InventoryRepositoryImpl: Firestore を利用した在庫リポジトリ実装
+/// Firestore を利用した在庫リポジトリ実装
 class InventoryRepositoryImpl implements InventoryRepository {
-  // Firestore インスタンス
-  final FirebaseFirestore _firestore;
-  InventoryRepositoryImpl({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
+  /// デフォルトコンストラクタ
+  InventoryRepositoryImpl();
 
   @override
+  /// カテゴリごとの在庫を監視する
   Stream<List<Inventory>> watchByCategory(String category) {
     return userCollection('inventory')
         .where('category', isEqualTo: category)
@@ -37,6 +36,7 @@ class InventoryRepositoryImpl implements InventoryRepository {
   }
 
   @override
+  /// 全在庫を取得する
   Future<List<Inventory>> fetchAll() async {
     final snapshot = await userCollection('inventory')
         .orderBy('createdAt')
@@ -58,6 +58,7 @@ class InventoryRepositoryImpl implements InventoryRepository {
   }
 
   @override
+  /// 在庫を追加してIDを返す
   Future<String> addInventory(Inventory inventory) async {
     final doc = await userCollection('inventory').add({
       'itemName': inventory.itemName,
@@ -77,8 +78,8 @@ class InventoryRepositoryImpl implements InventoryRepository {
     return doc.id;
   }
 
-  // 数量変更履歴を保存し在庫数量を更新する
   @override
+  /// 数量変更履歴を保存し在庫数量を更新する
   Future<void> updateQuantity(String id, double amount, String type) async {
     final doc = userCollection('inventory').doc(id);
     try {
@@ -104,6 +105,7 @@ class InventoryRepositoryImpl implements InventoryRepository {
   }
 
   @override
+  /// 在庫情報を更新する
   Future<void> updateInventory(Inventory inventory) async {
     await userCollection('inventory').doc(inventory.id).update({
       'itemName': inventory.itemName,
@@ -115,6 +117,7 @@ class InventoryRepositoryImpl implements InventoryRepository {
   }
 
   @override
+  /// 指定IDの在庫情報を監視する
   Stream<Inventory?> watchInventory(String inventoryId) {
     return userCollection('inventory')
         .doc(inventoryId)
@@ -137,6 +140,7 @@ class InventoryRepositoryImpl implements InventoryRepository {
   }
 
   @override
+  /// 指定在庫の履歴を監視する
   Stream<List<HistoryEntry>> watchHistory(String inventoryId) {
     return userCollection('inventory')
         .doc(inventoryId)
@@ -158,6 +162,7 @@ class InventoryRepositoryImpl implements InventoryRepository {
   }
 
   @override
+  /// 棚卸し結果を記録する
   Future<void> stocktake(
       String id, double before, double after, double diff) async {
     final doc = userCollection('inventory').doc(id);
@@ -173,11 +178,13 @@ class InventoryRepositoryImpl implements InventoryRepository {
   }
 
   @override
+  /// 在庫を削除する
   Future<void> deleteInventory(String id) async {
     await userCollection('inventory').doc(id).delete();
   }
 
   @override
+  /// 残量が一定以下の在庫を監視する
   Stream<List<Inventory>> watchNeedsBuy(double threshold) {
     return userCollection('inventory')
         .where('quantity', isLessThanOrEqualTo: threshold)
