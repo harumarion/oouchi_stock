@@ -77,22 +77,25 @@ class InventoryRepositoryImpl implements InventoryRepository {
   @override
   Future<void> updateQuantity(String id, double amount, String type) async {
     final doc = userCollection('inventory').doc(id);
-    await _firestore.runTransaction((tx) async {
-      final snapshot = await tx.get(doc);
+    try {
+      final snapshot = await doc.get();
       final data = snapshot.data() as Map<String, dynamic>?;
       final before = (data?['quantity'] ?? 0).toDouble();
       final after = before + amount;
-      final diff = amount;
-      tx.update(doc, {'quantity': after});
-      tx.set(doc.collection('history').doc(), {
+
+      await doc.update({'quantity': FieldValue.increment(amount)});
+      await doc.collection('history').add({
         'type': type,
         'quantity': amount.abs(),
         'before': before,
         'after': after,
-        'diff': diff,
+        'diff': amount,
         'timestamp': Timestamp.now(),
       });
-    });
+    } catch (e) {
+      // オフライン時や取得失敗時は例外を投げて上位でハンドリングする
+      rethrow;
+    }
   }
 
   @override
