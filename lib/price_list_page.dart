@@ -144,6 +144,7 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
   String _search = '';
   String _sort = 'updated'; // デフォルトは最終更新順
   final TextEditingController _controller = TextEditingController();
+  bool _showExpired = false; // 期限切れも表示するか
 
   @override
   void dispose() {
@@ -191,6 +192,16 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
                   ),
                 ],
               ),
+              const SizedBox(width: 8),
+              Row(
+                children: [
+                  Text(AppLocalizations.of(context)!.showExpired),
+                  Switch(
+                    value: _showExpired,
+                    onChanged: (v) => setState(() => _showExpired = v),
+                  ),
+                ],
+              ),
             ],
           ),
         ),
@@ -220,6 +231,8 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
                       e.itemName.contains(_search) ||
                       e.category.contains(_search) ||
                       e.itemType.contains(_search))
+                  .where((e) => _showExpired ||
+                      e.expiry.isAfter(DateTime.now().subtract(const Duration(days: 1))))
                   .toList();
               // 選択された並び替え順に従ってソート
               // 並び替えの条件に応じてソートを実行
