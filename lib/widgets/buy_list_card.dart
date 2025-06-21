@@ -1,0 +1,183 @@
+import 'package:flutter/material.dart';
+import '../domain/entities/buy_item.dart';
+import '../domain/entities/category.dart';
+import '../domain/entities/inventory.dart';
+import '../domain/usecases/calculate_days_left.dart';
+import '../domain/usecases/update_quantity.dart';
+import '../domain/repositories/inventory_repository.dart';
+import '../i18n/app_localizations.dart';
+import '../inventory_detail_page.dart';
+
+/// 買い物リストで表示するカードウィジェット
+class BuyListCard extends StatelessWidget {
+  /// 表示する買い物データ
+  final BuyItem item;
+  /// カテゴリ一覧。詳細画面遷移に利用する
+  final List<Category> categories;
+  /// 在庫リポジトリ
+  final InventoryRepository repository;
+  /// 削除処理を実行するユースケース
+  final void Function(BuyItem item) onRemove;
+
+  const BuyListCard({
+    super.key,
+    required this.item,
+    required this.categories,
+    required this.repository,
+    required this.onRemove,
+  });
+
+  /// 削除時の数量入力ダイアログを表示
+  Future<double?> _inputAmountDialog(BuildContext context) async {
+    final controller = TextEditingController(text: '1');
+    return showDialog<double>(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(builder: (context, setState) {
+          void add() {
+            final v = double.tryParse(controller.text) ?? 0;
+            controller.text = (v + 1).toStringAsFixed(0);
+            setState(() {});
+          }
+
+          void remove() {
+            final v = double.tryParse(controller.text) ?? 0;
+            if (v > 0) controller.text = (v - 1).toStringAsFixed(0);
+            setState(() {});
+          }
+
+          return AlertDialog(
+            title: Text(AppLocalizations.of(context)!.boughtAmount),
+            content: Row(
+              children: [
+                IconButton(onPressed: remove, icon: const Icon(Icons.remove)),
+                Expanded(
+                  child: TextField(
+                    controller: controller,
+                    keyboardType:
+                        const TextInputType.numberWithOptions(decimal: true),
+                  ),
+                ),
+                IconButton(onPressed: add, icon: const Icon(Icons.add)),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(AppLocalizations.of(context)!.cancel),
+              ),
+              TextButton(
+                onPressed: () {
+                  final v = double.tryParse(controller.text);
+                  Navigator.pop(context, v);
+                },
+                child: Text(AppLocalizations.of(context)!.ok),
+              ),
+            ],
+          );
+        });
+      },
+    );
+  }
+
+  /// カードを右スワイプしたときに呼ばれる削除確認処理
+  Future<bool> _confirmDismiss(BuildContext context) async {
+    final loc = AppLocalizations.of(context)!;
+    if (item.inventoryId != null) {
+      // 在庫と紐づく場合、購入数を入力してから削除
+      final v = await _inputAmountDialog(context);
+      if (v == null) return false;
+      try {
+        await UpdateQuantity(repository)(item.inventoryId!, v, 'bought');
+      } catch (_) {
+        // 更新失敗時はスナックバーで通知
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(loc.updateFailed)));
+        return false;
+      }
+      return true;
+    }
+    return await showDialog<bool>(
+          context: context,
+          builder: (_) => AlertDialog(
+            content: Text(loc.confirmDelete),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: Text(loc.cancel),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: Text(loc.delete),
+              ),
+            ],
+          ),
+        ) ??
+        false;
+  }
+
+  /// 在庫詳細画面へ遷移する処理
+  void _openDetail(BuildContext context) {
+    if (item.inventoryId == null) return;
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => InventoryDetailPage(
+          inventoryId: item.inventoryId!,
+          categories: categories,
+          repository: repository,
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
+    return Dismissible(
+      key: ValueKey(item.key),
+      direction: DismissDirection.startToEnd,
+      confirmDismiss: (_) => _confirmDismiss(context),
+      onDismissed: (_) => onRemove(item),
+      background: Container(
+        color: Colors.red,
+        alignment: Alignment.centerLeft,
+        padding: const EdgeInsets.only(left: 16),
+        child: const Icon(Icons.delete, color: Colors.white),
+      ),
+      child: Card(
+        margin: const EdgeInsets.only(bottom: 12),
+        child: item.inventoryId == null
+            ? ListTile(title: Text(item.name))
+            : StreamBuilder<Inventory?>(
+                stream: repository.watchInventory(item.inventoryId!),
+                builder: (context, snapshot) {
+                  final trailingButton = IconButton(
+                    icon: const Icon(Icons.info_outline),
+                    onPressed: () => _openDetail(context),
+                  );
+                  if (!snapshot.hasData) {
+                    return ListTile(title: Text(item.name), trailing: trailingButton);
+                  }
+                  final inv = snapshot.data!;
+                  return FutureBuilder<int>(
+                    future: CalculateDaysLeft(repository)(inv),
+                    builder: (context, daysSnapshot) {
+                      final daysText = daysSnapshot.hasData
+                          ? ' ・ ${loc.daysLeft(daysSnapshot.data!.toString())}'
+                          : '';
+                      final subtitle =
+                          '${inv.quantity.toStringAsFixed(1)}${inv.unit}$daysText';
+                      return ListTile(
+                        title: Text(item.name),
+                        subtitle: Text(subtitle),
+                        trailing: trailingButton,
+                      );
+                    },
+                  );
+                },
+              ),
+      ),
+    );
+  }
+}

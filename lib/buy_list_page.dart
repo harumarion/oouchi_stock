@@ -11,15 +11,13 @@ import 'domain/usecases/watch_buy_items.dart';
 
 import 'data/repositories/inventory_repository_impl.dart';
 import 'domain/repositories/inventory_repository.dart';
-import 'domain/usecases/calculate_days_left.dart';
-import 'domain/usecases/update_quantity.dart';
 import 'domain/entities/category.dart';
 import 'domain/entities/inventory.dart';
 import 'domain/entities/buy_list_condition_settings.dart';
 import 'domain/services/buy_list_strategy.dart';
-import 'inventory_detail_page.dart';
 import 'domain/entities/category_order.dart';
 import 'widgets/settings_menu_button.dart';
+import 'widgets/buy_list_card.dart';
 // 言語変更時にアプリ全体のロケールを更新するため MyAppState を参照
 import 'main.dart';
 
@@ -59,59 +57,6 @@ class BuyListPageState extends State<BuyListPage> {
     setState(() => _categories = List.from(list));
   }
 
-  /// 数量入力ダイアログを表示し、プラスマイナスボタンで1ずつ増減できるようにする
-  Future<double?> _inputAmountDialog(BuildContext context) async {
-    final controller = TextEditingController(text: '1');
-    return showDialog<double>(
-      context: context,
-      builder: (context) {
-        return StatefulBuilder(builder: (context, setState) {
-          // ダイアログ内で状態を更新するため StatefulBuilder を使用
-          void add() {
-            final v = double.tryParse(controller.text) ?? 0;
-            controller.text = (v + 1).toStringAsFixed(0);
-            setState(() {});
-          }
-
-          void remove() {
-            final v = double.tryParse(controller.text) ?? 0;
-            if (v > 0) controller.text = (v - 1).toStringAsFixed(0);
-            setState(() {});
-          }
-
-          return AlertDialog(
-            title: Text(AppLocalizations.of(context)!.boughtAmount),
-            content: Row(
-              children: [
-                IconButton(onPressed: remove, icon: const Icon(Icons.remove)),
-                Expanded(
-                  child: TextField(
-                    controller: controller,
-                    keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
-                  ),
-                ),
-                IconButton(onPressed: add, icon: const Icon(Icons.add)),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text(AppLocalizations.of(context)!.cancel),
-              ),
-              TextButton(
-                onPressed: () {
-                  final v = double.tryParse(controller.text);
-                  Navigator.pop(context, v);
-                },
-                child: Text(AppLocalizations.of(context)!.ok),
-              ),
-            ],
-          );
-        });
-      },
-    );
-  }
 
   @override
   void initState() {
@@ -230,8 +175,13 @@ class BuyListPageState extends State<BuyListPage> {
                         padding: const EdgeInsets.all(16),
                         children: [
                           for (final item in list)
-                            // カテゴリに関係なく全てのアイテムを表示
-                            _dismissibleCard(item, loc),
+                            // 買い物カードをリスト表示
+                            BuyListCard(
+                              item: item,
+                              categories: _categories,
+                              repository: widget.repository,
+                              onRemove: _removeUsecase,
+                            ),
                         ],
                       ),
               ),
@@ -242,99 +192,4 @@ class BuyListPageState extends State<BuyListPage> {
     );
   }
 
-  // _categoryTab と _manualTab はタブ廃止に伴い未使用となった
-
-  /// 買い物リストのアイテムカード。スワイプで削除できる
-  Widget _dismissibleCard(BuyItem item, AppLocalizations loc) {
-    return Dismissible(
-      key: ValueKey(item.key),
-      direction: DismissDirection.startToEnd,
-      confirmDismiss: (_) async {
-        if (item.inventoryId != null) {
-          // 在庫数を入力してから削除する。
-          // 入力値は在庫一覧の数量に加算される
-          final v = await _inputAmountDialog(context);
-          if (v == null) return false;
-          try {
-            await UpdateQuantity(widget.repository)(
-              item.inventoryId!,
-              v,
-              'bought',
-            );
-          } catch (_) {}
-          return true;
-        }
-        return await showDialog<bool>(
-              context: context,
-              builder: (_) => AlertDialog(
-                content: Text(loc.confirmDelete),
-                actions: [
-                  TextButton(
-                      onPressed: () => Navigator.pop(context, false),
-                      child: Text(loc.cancel)),
-                  TextButton(
-                      onPressed: () => Navigator.pop(context, true),
-                      child: Text(loc.delete)),
-                ],
-              ),
-            ) ??
-            false;
-      },
-      onDismissed: (_) => _removeUsecase(item),
-      background: Container(
-        color: Colors.red,
-        alignment: Alignment.centerLeft,
-        padding: const EdgeInsets.only(left: 16),
-        child: const Icon(Icons.delete, color: Colors.white),
-      ),
-      child: Card(
-        margin: const EdgeInsets.only(bottom: 12),
-        child: item.inventoryId == null
-            // 在庫IDがない場合は名前のみ表示
-            ? ListTile(title: Text(item.name))
-            // 在庫IDがある場合は数量と残り日数も表示
-            : StreamBuilder<Inventory?>(
-                stream: widget.repository.watchInventory(item.inventoryId!),
-                builder: (context, invSnapshot) {
-                  final trailingButton = IconButton(
-                    icon: const Icon(Icons.info_outline),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => InventoryDetailPage(
-                            inventoryId: item.inventoryId!,
-                            categories: _categories,
-                            repository: widget.repository,
-                          ),
-                        ),
-                      );
-                    },
-                  );
-                  if (!invSnapshot.hasData) {
-                    return ListTile(title: Text(item.name), trailing: trailingButton);
-                  }
-                  final inv = invSnapshot.data!;
-                  return FutureBuilder<int>(
-                    future: CalculateDaysLeft(
-                      widget.repository,
-                    )(inv),
-                    builder: (context, daysSnapshot) {
-                      final daysText = daysSnapshot.hasData
-                          ? ' ・ ${loc.daysLeft(daysSnapshot.data!.toString())}'
-                          : '';
-                      final subtitle =
-                          '${inv.quantity.toStringAsFixed(1)}${inv.unit}$daysText';
-                      return ListTile(
-                        title: Text(item.name),
-                        subtitle: Text(subtitle),
-                        trailing: trailingButton,
-                      );
-                    },
-                  );
-                },
-              ),
-      ),
-    );
-  }
 }

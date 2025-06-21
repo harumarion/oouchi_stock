@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:oouchi_stock/buy_list_page.dart';
+import 'package:oouchi_stock/widgets/buy_list_card.dart';
 import 'package:oouchi_stock/domain/entities/category.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:oouchi_stock/domain/entities/history_entry.dart';
@@ -90,5 +91,20 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.textContaining('1.0個'), findsOneWidget);
     expect(find.textContaining('あと7日'), findsOneWidget);
+  });
+
+  testWidgets('BuyListCard ウィジェットが表示される', (WidgetTester tester) async {
+    SharedPreferences.setMockInitialValues({
+      'buy_list_items': ['|テスト|inv1']
+    });
+    final categories = [Category(id: 1, name: '日用品', createdAt: DateTime.now())];
+    await tester.pumpWidget(MaterialApp(
+      home: BuyListPage(
+        categories: categories,
+        repository: _FakeRepository(),
+      ),
+    ));
+    await tester.pumpAndSettle();
+    expect(find.byType(BuyListCard), findsOneWidget);
   });
 }
