@@ -3,31 +3,9 @@ import 'i18n/app_localizations.dart';
 import 'data/repositories/buy_list_repository_impl.dart';
 import 'domain/entities/buy_item.dart';
 import 'domain/usecases/add_buy_item.dart';
-
-/// セール情報1件分のデータモデル
-class SaleItem {
-  final String name; // 商品名
-  final String shop; // 店舗名
-  final double regularPrice; // 通常価格
-  final double salePrice; // セール価格
-  final DateTime start; // セール開始日
-  final DateTime end; // セール終了日
-  final int stock; // 在庫数
-  final bool recommended; // おすすめフラグ
-  final bool lowest; // 最安値フラグ
-
-  SaleItem({
-    required this.name,
-    required this.shop,
-    required this.regularPrice,
-    required this.salePrice,
-    required this.start,
-    required this.end,
-    required this.stock,
-    this.recommended = false,
-    this.lowest = false,
-  });
-}
+import 'models/sale_item.dart';
+import 'util/localization_extensions.dart';
+import 'widgets/sale_item_card.dart';
 
 /// 買い得リスト画面
 class SaleListPage extends StatefulWidget {
@@ -160,78 +138,9 @@ class _SaleListPageState extends State<SaleListPage> {
               itemCount: sorted.length,
               itemBuilder: (context, index) {
                 final item = sorted[index];
-                final daysLeft = item.end.difference(DateTime.now()).inDays;
-                final expired = daysLeft <= 1;
-                final period =
-                    '${item.start.month}/${item.start.day}〜${item.end.month}/${item.end.day}';
-                return Dismissible(
-                  key: ValueKey(item.name + item.shop),
-                  background: Container(color: Colors.green),
-                  secondaryBackground: Container(color: Colors.red),
-                  onDismissed: (_) {},
-                  child: Card(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  item.name,
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                              if (item.recommended)
-                                const Icon(Icons.notifications_active,
-                                    color: Colors.orange),
-                              if (item.lowest)
-                                const Icon(Icons.price_check, color: Colors.red),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                          Text(item.shop),
-                          const SizedBox(height: 4),
-                          Text(
-                            '${loc.salePriceLabel(item.salePrice.toStringAsFixed(0))}  '
-                            '${loc.regularPriceLabel(item.regularPrice.toStringAsFixed(0))}',
-                          ),
-                          const SizedBox(height: 4),
-                          Text(loc.salePeriod(period)),
-                          const SizedBox(height: 4),
-                          Text(
-                            loc.daysLeft(daysLeft.toString()),
-                            style: TextStyle(color: expired ? Colors.red : null),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(loc.stockInfo(item.stock)),
-                          const SizedBox(height: 8),
-                          Align(
-                            alignment: Alignment.centerRight,
-                            child: ElevatedButton(
-                              // 商品を買い物リストへ追加するボタン
-                              onPressed: () async {
-                                await _addBuyItem(BuyItem(item.name, ''));
-                                if (!mounted) return;
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content:
-                                        Text(AppLocalizations.of(context)!.addedBuyItem),
-                                  ),
-                                );
-                              },
-                              child: Text(loc.addToList()),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                return SaleItemCard(
+                  item: item,
+                  addUsecase: _addBuyItem,
                 );
               },
             ),
@@ -240,16 +149,4 @@ class _SaleListPageState extends State<SaleListPage> {
       ),
     );
   }
-}
-
-// この画面専用の簡易ローカライズ用拡張
-extension _LocExt on AppLocalizations {
-  String salePeriod(String period) => '期間: $period';
-  String stockInfo(int count) => '在庫 $count個';
-  String addToList() => '買い物リストに追加';
-  String saleListTitle() => '買い得リスト';
-  String saleNotify() => 'セール通知';
-  String sortEndDate() => '終了日が近い順';
-  String sortDiscount() => '割引率順';
-  String sortRecommend() => 'おすすめ順';
 }
