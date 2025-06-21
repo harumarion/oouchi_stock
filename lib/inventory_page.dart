@@ -5,6 +5,7 @@ import 'util/firestore_refs.dart';
 import 'util/date_time_parser.dart';
 import 'package:oouchi_stock/i18n/app_localizations.dart';
 import 'add_category_page.dart';
+import 'add_inventory_page.dart';
 import 'inventory_detail_page.dart';
 import 'edit_inventory_page.dart';
 import 'widgets/inventory_card.dart';
@@ -173,8 +174,18 @@ class InventoryPageState extends State<InventoryPage> {
                 InventoryList(category: c.name, categories: _categories)
             ],
           ),
-          // 在庫一覧から商品を追加する機能はメニューからのみ利用するため
-          // ここで表示していた追加用の FAB は削除する。
+          // 画面右下のプラスボタンを押すと商品追加画面を開く
+          floatingActionButton: FloatingActionButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => AddInventoryPage(categories: _categories),
+                ),
+              );
+            },
+            child: const Icon(Icons.add),
+          ),
         ),
     );
   }
