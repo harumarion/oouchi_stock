@@ -176,6 +176,8 @@ class InventoryPageState extends State<InventoryPage> {
           ),
           // 画面右下のプラスボタンを押すと商品追加画面を開く
           floatingActionButton: FloatingActionButton(
+            // 在庫一覧画面専用のヒーロータグ
+            heroTag: 'inventoryFab',
             onPressed: () {
               Navigator.push(
                 context,

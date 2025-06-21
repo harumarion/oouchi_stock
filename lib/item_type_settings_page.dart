@@ -169,6 +169,8 @@ class _ItemTypeSettingsPageState extends State<ItemTypeSettingsPage> {
           ],
         ),
         floatingActionButton: FloatingActionButton(
+          // 品種設定画面専用のヒーロータグ
+          heroTag: 'itemTypeFab',
           onPressed: () async {
             await Navigator.push(
               context,
