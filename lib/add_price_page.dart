@@ -44,9 +44,10 @@ class _AddPricePageState extends State<AddPricePage> {
   @override
   void initState() {
     super.initState();
+    // 初期表示時にセール終了日のデフォルトを設定
     _expiry = _checkedAt.add(const Duration(days: 7));
     final repo = InventoryRepositoryImpl();
-    // fetch all inventories once
+    // 在庫一覧を一度だけ取得
     FetchAllInventory(repo)().then((list) {
       setState(() {
         _inventories = list;
@@ -60,10 +61,12 @@ class _AddPricePageState extends State<AddPricePage> {
     super.dispose();
   }
 
+  // 入力された数量と容量から合計容量を計算
   double get _totalVolume => _count * _volume;
   // 単価はセール価格から計算
   double get _unitPrice => _totalVolume == 0 ? 0 : _salePrice / _totalVolume;
 
+  // 保存ボタンを押したときに呼び出される処理
   Future<void> _save() async {
     if (_inventory == null) return;
     final info = PriceInfo(
@@ -88,6 +91,8 @@ class _AddPricePageState extends State<AddPricePage> {
     await _usecase(info);
   }
 
+  // 画面のウィジェットツリーを組み立てる
+  // ユーザーが入力値を変更するたびに計算結果を表示
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -185,8 +190,18 @@ class _AddPricePageState extends State<AddPricePage> {
                       onChanged: (v) => _memo = v,
                     ),
                     const SizedBox(height: 12),
-                    Text(AppLocalizations.of(context)!.totalVolume(_totalVolume.toStringAsFixed(2))),
-                    Text(AppLocalizations.of(context)!.unitPrice(_unitPrice.toStringAsFixed(2))),
+                    // 合計容量を大きめの文字で表示
+                    Text(
+                      AppLocalizations.of(context)!
+                          .totalVolume(_totalVolume.toStringAsFixed(2)),
+                      style: const TextStyle(fontSize: 20),
+                    ),
+                    // 単価を大きめの文字で表示
+                    Text(
+                      AppLocalizations.of(context)!
+                          .unitPrice(_unitPrice.toStringAsFixed(2)),
+                      style: const TextStyle(fontSize: 20),
+                    ),
                     const SizedBox(height: 24),
                     ElevatedButton(
                       onPressed: () async {
