@@ -3,6 +3,44 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:oouchi_stock/buy_list_page.dart';
 import 'package:oouchi_stock/domain/entities/category.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:oouchi_stock/domain/entities/history_entry.dart';
+import 'package:oouchi_stock/domain/entities/inventory.dart';
+import 'package:oouchi_stock/domain/repositories/inventory_repository.dart';
+
+class _FakeRepository implements InventoryRepository {
+  @override
+  Stream<Inventory?> watchInventory(String inventoryId) => Stream.value(Inventory(
+        id: 'inv1',
+        itemName: 'テスト',
+        category: '日用品',
+        itemType: '一般',
+        quantity: 1.0,
+        unit: '個',
+        createdAt: DateTime.now(),
+      ));
+
+  @override
+  Stream<List<HistoryEntry>> watchHistory(String inventoryId) =>
+      Stream.value([HistoryEntry('add', 1.0, DateTime.now())]);
+
+  // 以下のメソッドはテストでは使用しない
+  @override
+  Future<List<Inventory>> fetchAll() async => [];
+  @override
+  Future<String> addInventory(Inventory inventory) async => '';
+  @override
+  Future<void> updateQuantity(String id, double amount, String type) async {}
+  @override
+  Future<void> updateInventory(Inventory inventory) async {}
+  @override
+  Future<void> stocktake(String id, double before, double after, double diff) async {}
+  @override
+  Future<void> deleteInventory(String id) async {}
+  @override
+  Stream<List<Inventory>> watchByCategory(String category) => const Stream.empty();
+  @override
+  Stream<List<Inventory>> watchNeedsBuy(double threshold) => const Stream.empty();
+}
 
 void main() {
   testWidgets('BuyListPage 追加入力欄表示', (WidgetTester tester) async {
@@ -35,5 +73,21 @@ void main() {
     await tester.drag(find.text('テスト'), const Offset(300, 0));
     await tester.pumpAndSettle();
     expect(find.byType(AlertDialog), findsOneWidget);
+  });
+
+  testWidgets('在庫数と残り日数が表示される', (WidgetTester tester) async {
+    SharedPreferences.setMockInitialValues({
+      'buy_list_items': ['|テスト|inv1']
+    });
+    final categories = [Category(id: 1, name: '日用品', createdAt: DateTime.now())];
+    await tester.pumpWidget(MaterialApp(
+      home: BuyListPage(
+        categories: categories,
+        repository: _FakeRepository(),
+      ),
+    ));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('1.0個'), findsOneWidget);
+    expect(find.textContaining('あと7日'), findsOneWidget);
   });
 }
