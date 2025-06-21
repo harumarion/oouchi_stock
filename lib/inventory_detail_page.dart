@@ -196,8 +196,7 @@ class InventoryDetailPage extends StatelessWidget {
     final quantityText =
         '${e.before.toStringAsFixed(1)} -> ${e.after.toStringAsFixed(1)} ($diffSign${e.diff.abs().toStringAsFixed(1)}$unit)';
     final color = e.diff >= 0 ? Colors.green : Colors.red;
-    // 履歴の表示文字サイズをカテゴリ表示と合わせる
-    const style = TextStyle(fontSize: 18);
+    final style = const TextStyle(fontSize: 18);
 
     return Column(
       children: [
@@ -214,7 +213,7 @@ class InventoryDetailPage extends StatelessWidget {
             ),
           ],
         ),
-        Divider(height: 1, color: Colors.grey.shade300),
+        Divider(height: 1, color: Colors.grey[300]),
       ],
     );
   }
