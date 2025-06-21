@@ -7,8 +7,8 @@ void main() {
     await tester.pumpWidget(const MaterialApp(home: RootNavigationPage()));
     expect(find.byType(BottomNavigationBar), findsOneWidget);
     final bar = tester.widget<BottomNavigationBar>(find.byType(BottomNavigationBar));
-    expect(bar.items.length, 4);
-    // 最後のメニューラベルがセール情報追加か確認
-    expect(bar.items.last.label, 'セール情報追加');
+    expect(bar.items.length, 5);
+    // 最後のメニューラベルがセール情報か確認
+    expect(bar.items.last.label, 'セール情報');
   });
 }
