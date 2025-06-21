@@ -17,6 +17,10 @@ class RootNavigationPage extends StatefulWidget {
 
 class _RootNavigationPageState extends State<RootNavigationPage> {
   int _index = 0; // 選択中のメニュー
+  // 買い物リスト画面の状態を取得するためのキー
+  final GlobalKey<BuyListPageState> _buyListKey = GlobalKey();
+  // 在庫一覧画面の状態を取得するためのキー
+  final GlobalKey<InventoryPageState> _inventoryKey = GlobalKey();
 
   // 各インデックスに対応する画面のリスト
   // 0: 買い物リスト画面
@@ -26,8 +30,8 @@ class _RootNavigationPageState extends State<RootNavigationPage> {
   // 4: セール情報追加画面
   late final List<Widget> _pages = [
     // 非 const コンストラクタのため const を付けない
-    BuyListPage(),
-    const InventoryPage(),
+    BuyListPage(key: _buyListKey),
+    InventoryPage(key: _inventoryKey),
     const HomePage(),
     const AddInventoryPage(),
     const AddPricePage(),
@@ -48,7 +52,15 @@ class _RootNavigationPageState extends State<RootNavigationPage> {
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: _index,
-        onTap: (i) => setState(() => _index = i),
+        onTap: (i) {
+          setState(() => _index = i);
+          // タブ切り替え時に各画面を最新状態へ更新
+          if (i == 0) {
+            _buyListKey.currentState?.refresh();
+          } else if (i == 1) {
+            _inventoryKey.currentState?.refresh();
+          }
+        },
         items: [
           // 買い物リスト
           BottomNavigationBarItem(
