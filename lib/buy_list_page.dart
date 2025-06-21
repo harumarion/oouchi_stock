@@ -39,10 +39,11 @@ class BuyListPage extends StatefulWidget {
   }) : repository = repository ?? InventoryRepositoryImpl();
 
   @override
-  State<BuyListPage> createState() => _BuyListPageState();
+  State<BuyListPage> createState() => BuyListPageState();
 }
 
-class _BuyListPageState extends State<BuyListPage> {
+/// BuyListPage の状態クラス。画面表示時や更新時の処理を行う
+class BuyListPageState extends State<BuyListPage> {
   List<Category> _categories = [];
   bool _loaded = false;
   BuyListConditionSettings? _condition;
@@ -122,6 +123,8 @@ class _BuyListPageState extends State<BuyListPage> {
 
   // BuyListPage 起動時に呼び出し、カテゴリ一覧と条件設定を読み込む
   Future<void> _load() async {
+    // 既存の購読がある場合は一度キャンセルする
+    await _invSub?.cancel();
     // カテゴリが渡されており、件数が 1 件以上の場合のみそのまま使用
     if (widget.categories != null && widget.categories!.isNotEmpty) {
       // 設定画面から受け取ったカテゴリを並び順付きで保持
@@ -153,6 +156,11 @@ class _BuyListPageState extends State<BuyListPage> {
         _addUsecase(BuyItem(inv.itemName, inv.category, inv.id));
       }
     });
+  }
+
+  /// 画面が再表示されたときに最新情報を取得する
+  Future<void> refresh() async {
+    await _load();
   }
 
   @override

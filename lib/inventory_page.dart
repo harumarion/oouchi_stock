@@ -27,10 +27,11 @@ class InventoryPage extends StatefulWidget {
   const InventoryPage({super.key, this.categories});
 
   @override
-  State<InventoryPage> createState() => _InventoryPageState();
+  State<InventoryPage> createState() => InventoryPageState();
 }
 
-class _InventoryPageState extends State<InventoryPage> {
+/// InventoryPage の状態クラス。タブ表示やリスト更新を制御する
+class InventoryPageState extends State<InventoryPage> {
   /// Firestore から取得したカテゴリ一覧
   List<Category> _categories = [];
   /// カテゴリが読み込み済みかどうかのフラグ
@@ -46,10 +47,9 @@ class _InventoryPageState extends State<InventoryPage> {
     });
   }
 
-  @override
-  void initState() {
-    super.initState();
-    // 引数のカテゴリが存在し、件数が 1 件以上の場合のみ使用する
+  /// Firestore からカテゴリ一覧を読み込み、購読を開始する
+  void _initCategories() {
+    // 引数のカテゴリが存在し、件数が 1 件以上の場合のみ使用
     if (widget.categories != null && widget.categories!.isNotEmpty) {
       _categories = List.from(widget.categories!);
       applyCategoryOrder(_categories).then((list) {
@@ -59,8 +59,7 @@ class _InventoryPageState extends State<InventoryPage> {
         });
       });
     } else {
-      // カテゴリが空の場合は Firestore を監視して更新を待つ
-      // Firestore からカテゴリ一覧を取得して監視
+      // Firestore を監視して常に最新のカテゴリを保持する
       _catSub = userCollection('categories')
           .orderBy('createdAt')
           .snapshots()
@@ -81,6 +80,19 @@ class _InventoryPageState extends State<InventoryPage> {
         });
       });
     }
+  }
+
+  /// 画面が再表示された際にカテゴリを最新化する
+  Future<void> refresh() async {
+    await _catSub?.cancel();
+    _categoriesLoaded = false;
+    _initCategories();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _initCategories();
   }
 
   @override
