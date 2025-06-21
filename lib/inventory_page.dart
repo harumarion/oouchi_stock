@@ -49,7 +49,8 @@ class _InventoryPageState extends State<InventoryPage> {
   @override
   void initState() {
     super.initState();
-    if (widget.categories != null) {
+    // 引数のカテゴリが存在し、件数が 1 件以上の場合のみ使用する
+    if (widget.categories != null && widget.categories!.isNotEmpty) {
       _categories = List.from(widget.categories!);
       applyCategoryOrder(_categories).then((list) {
         setState(() {
@@ -58,6 +59,7 @@ class _InventoryPageState extends State<InventoryPage> {
         });
       });
     } else {
+      // カテゴリが空の場合は Firestore を監視して更新を待つ
       // Firestore からカテゴリ一覧を取得して監視
       _catSub = userCollection('categories')
           .orderBy('createdAt')

@@ -79,7 +79,8 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _loadCondition();
-    if (widget.categories != null) {
+    // 引数でカテゴリが渡され、1件以上存在する場合のみ利用する
+    if (widget.categories != null && widget.categories!.isNotEmpty) {
       _categories = List.from(widget.categories!);
       applyCategoryOrder(_categories).then((list) {
         setState(() {
@@ -88,6 +89,7 @@ class _HomePageState extends State<HomePage> {
         });
       });
     } else {
+      // カテゴリが空の場合は Firestore を監視して更新を待つ
       // Firestore からカテゴリ一覧を取得して監視
       // カテゴリに変更があったときに実行される
       _catSub = userCollection('categories')

@@ -72,13 +72,14 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
   @override
   void initState() {
     super.initState();
-    if (widget.categories != null) {
+    // 引数にカテゴリが渡されており、かつ件数が1件以上ある場合のみ
+    if (widget.categories != null && widget.categories!.isNotEmpty) {
+      // 画面初期化時にカテゴリリストを設定
       _categories = List.from(widget.categories!);
-      if (_categories.isNotEmpty) {
-        _category = _categories.first;
-      }
+      _category = _categories.first;
       _categoriesLoaded = true;
     } else {
+      // カテゴリが無い場合は Firestore を監視して更新を待つ
       _catSub = userCollection('categories')
           .orderBy('createdAt')
           .snapshots()
