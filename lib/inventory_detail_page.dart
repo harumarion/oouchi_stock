@@ -12,9 +12,13 @@ import 'edit_inventory_page.dart';
 
 // 商品詳細画面。履歴と予測日を表示する
 class InventoryDetailPage extends StatelessWidget {
+  /// 表示対象の在庫ID
   final String inventoryId;
+  /// カテゴリ一覧
   final List<Category> categories;
+  /// 購入予測計算用ストラテジー
   final PurchasePredictionStrategy strategy;
+  /// 在庫リポジトリ
   final InventoryRepository repository;
 
   InventoryDetailPage({
@@ -25,10 +29,12 @@ class InventoryDetailPage extends StatelessWidget {
     InventoryRepository? repository,
   }) : repository = repository ?? InventoryRepositoryImpl();
 
+  /// 指定IDの在庫を監視するストリームを返す
   Stream<Inventory?> inventoryStream() {
     return repository.watchInventory(inventoryId);
   }
 
+  /// 在庫履歴を監視するストリームを返す
   Stream<List<HistoryEntry>> historyStream() {
     return repository.watchHistory(inventoryId);
   }
@@ -57,6 +63,7 @@ class InventoryDetailPage extends StatelessWidget {
         }
         return Scaffold(
           appBar: AppBar(title: Text(inv.itemName), actions: [
+            // 編集ボタン。押すと編集画面へ遷移する
             IconButton(
               icon: const Icon(Icons.edit),
               onPressed: () {
@@ -141,6 +148,7 @@ class InventoryDetailPage extends StatelessWidget {
     );
   }
 
+  /// 履歴から現在の在庫数を計算する
   double _currentQuantity(List<HistoryEntry> history) {
     if (history.isEmpty) return 0;
     double total = 0;
@@ -188,23 +196,24 @@ class InventoryDetailPage extends StatelessWidget {
     final quantityText =
         '${e.before.toStringAsFixed(1)} -> ${e.after.toStringAsFixed(1)} ($diffSign${e.diff.abs().toStringAsFixed(1)}$unit)';
     final color = e.diff >= 0 ? Colors.green : Colors.red;
+    final style = const TextStyle(fontSize: 18);
 
     return Column(
       children: [
         Row(
           children: [
-            Expanded(child: Text(_formatDate(e.timestamp))),
-            Expanded(child: Center(child: Text(_typeLabel(e.type)))),
+            Expanded(child: Text(_formatDate(e.timestamp), style: style)),
+            Expanded(child: Center(child: Text(_typeLabel(e.type), style: style))),
             Expanded(
               child: Text(
                 quantityText,
                 textAlign: TextAlign.right,
-                style: TextStyle(color: color),
+                style: style.copyWith(color: color),
               ),
             ),
           ],
         ),
-        const Divider(height: 1),
+        Divider(height: 1, color: Colors.grey[300]),
       ],
     );
   }

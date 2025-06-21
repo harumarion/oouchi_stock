@@ -33,7 +33,8 @@ class PriceHistoryPage extends StatelessWidget {
     final textStyle =
         Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 18);
     return Scaffold(
-      appBar: AppBar(title: Text(itemType)),
+      // 商品名をタイトルに表示
+      appBar: AppBar(title: Text(itemName)),
       body: StreamBuilder<List<PriceInfo>>(
         stream: _watch(category, itemType),
         builder: (context, snapshot) {
@@ -52,7 +53,7 @@ class PriceHistoryPage extends StatelessWidget {
                 Card(
                   margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: InkWell(
-                    // 長押しで削除メニューを表示
+                    // 長押しで削除メニューを表示するイベント
                     onLongPress: () async {
                       final res = await showModalBottomSheet<String>(
                         context: context,
@@ -72,15 +73,17 @@ class PriceHistoryPage extends StatelessWidget {
                       padding: const EdgeInsets.all(16),
                       child: Column(
                         children: [
-                          _buildRow(loc.itemName, p.itemName, textStyle),
-                          _buildRow(loc.checkedDate(_formatDate(p.checkedAt)), '', textStyle),
-                          _buildRow(loc.count, '${p.count} ${p.unit}', textStyle),
-                          _buildRow(loc.volume, p.volume.toString(), textStyle),
-                          _buildRow(loc.totalVolumeLabel, p.totalVolume.toString(), textStyle),
-                          _buildRow(loc.regularPrice, p.regularPrice.toString(), textStyle),
-                          _buildRow(loc.salePrice, p.salePrice.toString(), textStyle),
-                          _buildRow(loc.unitPriceLabel, p.unitPrice.toStringAsFixed(2), textStyle),
-                          _buildRow(loc.shop, p.shop, textStyle),
+                          _buildRow(loc.category, p.category),
+                          _buildRow(loc.itemType, p.itemType),
+                          _buildRow(loc.checkedDate(_formatDate(p.checkedAt)), ''),
+                          _buildRow(loc.expiry(_formatDate(p.expiry)), ''),
+                          _buildRow(loc.count, '${p.count} ${p.unit}'),
+                          _buildRow(loc.volume, p.volume.toString()),
+                          _buildRow(loc.totalVolumeLabel, p.totalVolume.toString()),
+                          _buildRow(loc.regularPrice, p.regularPrice.toString()),
+                          _buildRow(loc.salePrice, p.salePrice.toString()),
+                          _buildRow(loc.unitPriceLabel, p.unitPrice.toStringAsFixed(2)),
+                          _buildRow(loc.shop, p.shop),
                           if (p.approvalUrl.isNotEmpty)
                             _buildRow(loc.approvalUrl, p.approvalUrl, textStyle),
                           if (p.memo.isNotEmpty)
@@ -111,7 +114,7 @@ class PriceHistoryPage extends StatelessWidget {
           Expanded(
             child: Text(
               label,
-              style: style,
+              style: const TextStyle(fontSize: 18),
             ),
           ),
           const SizedBox(width: 8),
@@ -119,7 +122,7 @@ class PriceHistoryPage extends StatelessWidget {
             child: Text(
               value,
               textAlign: TextAlign.right,
-              style: style,
+              style: const TextStyle(fontSize: 18),
             ),
           ),
         ],
