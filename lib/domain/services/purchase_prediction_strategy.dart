@@ -14,3 +14,21 @@ class DummyPredictionStrategy implements PurchasePredictionStrategy {
     return now.add(const Duration(days: 7));
   }
 }
+
+/// 履歴から月あたりの消費量を計算し、予測日を返すストラテジー
+class MonthlyConsumptionStrategy implements PurchasePredictionStrategy {
+  const MonthlyConsumptionStrategy();
+  @override
+  DateTime predict(DateTime now, List<HistoryEntry> history, double quantity) {
+    final monthAgo = now.subtract(const Duration(days: 30));
+    double used = 0;
+    for (final h in history) {
+      if (h.type == 'used' && h.timestamp.isAfter(monthAgo)) {
+        used += h.quantity;
+      }
+    }
+    if (used == 0) return now;
+    final months = quantity / used;
+    return now.add(Duration(days: (months * 30).ceil()));
+  }
+}

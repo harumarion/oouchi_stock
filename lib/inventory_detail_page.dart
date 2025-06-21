@@ -6,7 +6,6 @@ import 'domain/repositories/inventory_repository.dart';
 import 'domain/entities/history_entry.dart';
 import 'domain/entities/inventory.dart';
 import 'domain/entities/category.dart';
-import 'domain/services/purchase_prediction_strategy.dart';
 import 'edit_inventory_page.dart';
 
 
@@ -16,8 +15,6 @@ class InventoryDetailPage extends StatelessWidget {
   final String inventoryId;
   /// カテゴリ一覧
   final List<Category> categories;
-  /// 購入予測計算用ストラテジー
-  final PurchasePredictionStrategy strategy;
   /// 在庫リポジトリ
   final InventoryRepository repository;
 
@@ -25,7 +22,6 @@ class InventoryDetailPage extends StatelessWidget {
     super.key,
     required this.inventoryId,
     required this.categories,
-    this.strategy = const DummyPredictionStrategy(),
     InventoryRepository? repository,
   }) : repository = repository ?? InventoryRepositoryImpl();
 
@@ -98,8 +94,14 @@ class InventoryDetailPage extends StatelessWidget {
                 return const Center(child: CircularProgressIndicator());
               }
               final list = snapshot.data!;
-              final predicted =
-                  strategy.predict(DateTime.now(), list, _currentQuantity(list));
+              DateTime predicted;
+              if (inv.monthlyConsumption <= 0) {
+                predicted = DateTime.now();
+              } else {
+                final days =
+                    (inv.quantity / inv.monthlyConsumption * 30).ceil();
+                predicted = DateTime.now().add(Duration(days: days));
+              }
               final textStyle = Theme.of(context)
                   .textTheme
                   .bodyLarge
@@ -148,21 +150,6 @@ class InventoryDetailPage extends StatelessWidget {
     );
   }
 
-  /// 履歴から現在の在庫数を計算する
-  double _currentQuantity(List<HistoryEntry> history) {
-    if (history.isEmpty) return 0;
-    double total = 0;
-    for (final h in history.reversed) {
-      if (h.type == 'stocktake') {
-        total = h.after;
-      } else if (h.type == 'add' || h.type == 'bought') {
-        total += h.quantity;
-      } else if (h.type == 'used') {
-        total -= h.quantity;
-      }
-    }
-    return total;
-  }
 
   /// 項目名と値を左右に表示する行を生成
   Widget _buildDetailRow(String label, String value, TextStyle? style) {

@@ -21,6 +21,9 @@ class Inventory {
   /// 任意のメモ
   final String note;
 
+  /// 月あたりの消費量
+  final double monthlyConsumption;
+
   /// 作成日時
   final DateTime createdAt;
 
@@ -32,6 +35,7 @@ class Inventory {
     required this.quantity,
     required this.unit,
     this.note = '',
+    this.monthlyConsumption = 0,
     required this.createdAt,
   });
 }

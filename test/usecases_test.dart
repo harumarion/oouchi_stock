@@ -71,6 +71,7 @@ void main() {
       itemType: 'type',
       quantity: 1,
       unit: '個',
+      monthlyConsumption: 0,
       createdAt: DateTime.now(),
     );
 

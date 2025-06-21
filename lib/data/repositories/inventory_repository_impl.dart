@@ -29,6 +29,8 @@ class InventoryRepositoryImpl implements InventoryRepository {
                 quantity: (data['quantity'] ?? 0).toDouble(),
                 unit: data['unit'] ?? '',
                 note: data['note'] ?? '',
+                monthlyConsumption:
+                    (data['monthlyConsumption'] ?? 0).toDouble(),
                 createdAt: parseDateTime(data['createdAt']),
               );
             }).toList());
@@ -49,6 +51,7 @@ class InventoryRepositoryImpl implements InventoryRepository {
         quantity: (data['quantity'] ?? 0).toDouble(),
         unit: data['unit'] ?? '',
         note: data['note'] ?? '',
+        monthlyConsumption: (data['monthlyConsumption'] ?? 0).toDouble(),
         createdAt: parseDateTime(data['createdAt']),
       );
     }).toList();
@@ -63,6 +66,7 @@ class InventoryRepositoryImpl implements InventoryRepository {
       'quantity': inventory.quantity,
       'unit': inventory.unit,
       'note': inventory.note,
+      'monthlyConsumption': inventory.monthlyConsumption,
       'createdAt': Timestamp.fromDate(inventory.createdAt),
     });
     await doc.collection('history').add({
@@ -92,6 +96,7 @@ class InventoryRepositoryImpl implements InventoryRepository {
         'diff': amount,
         'timestamp': Timestamp.now(),
       });
+      await _recalculateMonthlyConsumption(id);
     } catch (e) {
       // オフライン時や取得失敗時は例外を投げて上位でハンドリングする
       rethrow;
@@ -125,6 +130,7 @@ class InventoryRepositoryImpl implements InventoryRepository {
         quantity: (data['quantity'] ?? 0).toDouble(),
         unit: data['unit'] ?? '',
         note: data['note'] ?? '',
+        monthlyConsumption: (data['monthlyConsumption'] ?? 0).toDouble(),
         createdAt: parseDateTime(data['createdAt']),
       );
     });
@@ -163,6 +169,7 @@ class InventoryRepositoryImpl implements InventoryRepository {
       'diff': diff,
       'timestamp': Timestamp.now(),
     });
+    await _recalculateMonthlyConsumption(id);
   }
 
   @override
@@ -186,8 +193,30 @@ class InventoryRepositoryImpl implements InventoryRepository {
                 quantity: (data['quantity'] ?? 0).toDouble(),
                 unit: data['unit'] ?? '',
                 note: data['note'] ?? '',
+                monthlyConsumption:
+                    (data['monthlyConsumption'] ?? 0).toDouble(),
                 createdAt: parseDateTime(data['createdAt']),
               );
             }).toList());
+  }
+
+  /// 履歴から月あたりの消費量を再計算する
+  Future<void> _recalculateMonthlyConsumption(String id) async {
+    final monthAgo = DateTime.now().subtract(const Duration(days: 30));
+    final history = await userCollection('inventory')
+        .doc(id)
+        .collection('history')
+        .where('timestamp', isGreaterThanOrEqualTo: Timestamp.fromDate(monthAgo))
+        .get();
+    double used = 0;
+    for (final doc in history.docs) {
+      final data = doc.data();
+      if (data['type'] == 'used') {
+        used += (data['quantity'] ?? 0).toDouble();
+      }
+    }
+    await userCollection('inventory')
+        .doc(id)
+        .update({'monthlyConsumption': used});
   }
 }

@@ -3,7 +3,6 @@ import 'package:oouchi_stock/domain/entities/history_entry.dart';
 import 'package:oouchi_stock/domain/entities/inventory.dart';
 import 'package:oouchi_stock/domain/usecases/calculate_days_left.dart';
 import 'package:oouchi_stock/domain/repositories/inventory_repository.dart';
-import 'package:oouchi_stock/domain/services/purchase_prediction_strategy.dart';
 
 class FakeInventoryRepository implements InventoryRepository {
   List<HistoryEntry> history = [];
@@ -34,14 +33,6 @@ class FakeInventoryRepository implements InventoryRepository {
   Stream<List<Inventory>> watchNeedsBuy(double threshold) => throw UnimplementedError();
 }
 
-class FakeStrategy implements PurchasePredictionStrategy {
-  int called = 0;
-  @override
-  DateTime predict(DateTime now, List<HistoryEntry> history, double quantity) {
-    called++;
-    return now.add(Duration(days: quantity.toInt()));
-  }
-}
 
 void main() {
   test('履歴から残り日数を計算する', () async {
@@ -50,8 +41,7 @@ void main() {
       HistoryEntry('add', 2, DateTime(2023,1,1)),
       HistoryEntry('used', 1, DateTime(2023,1,2)),
     ];
-    final strategy = FakeStrategy();
-    final usecase = CalculateDaysLeft(repo, strategy);
+    final usecase = CalculateDaysLeft(repo);
     final inv = Inventory(
         id: '1',
         itemName: 'test',
@@ -59,9 +49,9 @@ void main() {
         itemType: 'type',
         quantity: 1,
         unit: '個',
+        monthlyConsumption: 0.5,
         createdAt: DateTime.now());
     final days = await usecase(inv);
-    expect(days, 1); // FakeStrategy は quantity 分の日数を返す
-    expect(strategy.called, 1);
+    expect(days, 60);
   });
 }

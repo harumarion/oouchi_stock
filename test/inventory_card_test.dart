@@ -12,6 +12,7 @@ void main() {
       itemType: '消耗品',
       quantity: 1.0,
       unit: '個',
+      monthlyConsumption: 0,
       createdAt: DateTime.now(),
     );
     await tester
@@ -28,6 +29,7 @@ void main() {
       itemType: '消耗品',
       quantity: 1.0,
       unit: '個',
+      monthlyConsumption: 0,
       createdAt: DateTime.now(),
     );
     await tester
@@ -43,6 +45,7 @@ void main() {
       itemType: 'ものすごく長い品種名テスト',
       quantity: 1.0,
       unit: '個',
+      monthlyConsumption: 0,
       createdAt: DateTime.now(),
     );
     await tester.pumpWidget(MaterialApp(home: InventoryCard(inventory: inv)));

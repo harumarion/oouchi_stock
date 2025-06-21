@@ -15,7 +15,6 @@ import 'data/repositories/inventory_repository_impl.dart';
 import 'domain/entities/category.dart';
 import 'domain/entities/inventory.dart';
 import 'domain/entities/category_order.dart';
-import 'domain/services/purchase_prediction_strategy.dart';
 import 'domain/usecases/calculate_days_left.dart';
 import 'domain/usecases/fetch_all_inventory.dart';
 import 'domain/entities/buy_list_condition_settings.dart';
@@ -45,7 +44,7 @@ class _HomePageState extends State<HomePage> {
 
   /// 在庫の残り日数計算用ユースケース
   final CalculateDaysLeft _calcUsecase =
-      CalculateDaysLeft(InventoryRepositoryImpl(), const DummyPredictionStrategy());
+      CalculateDaysLeft(InventoryRepositoryImpl());
 
   /// 在庫一覧取得用ユースケース
   final FetchAllInventory _fetchAllUsecase =
