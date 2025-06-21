@@ -12,6 +12,8 @@ void main() {
     expect(find.byType(TextField), findsWidgets);
     // 買い物リスト追加ボタンが存在するか確認
     expect(find.byIcon(Icons.playlist_add), findsWidgets);
+    // 右下の FAB が表示されているか確認
+    expect(find.byType(FloatingActionButton), findsOneWidget);
   });
 
   testWidgets('カテゴリがない場合はメッセージと追加ボタンを表示', (WidgetTester tester) async {
