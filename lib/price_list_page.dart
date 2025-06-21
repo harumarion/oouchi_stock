@@ -240,21 +240,17 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
                 return const Center(child: CircularProgressIndicator());
               }
               final list = snapshot.data!;
-              final Map<String, PriceInfo> map = {};
-              for (final p in list) {
-                final current = map[p.itemType];
-                if (current == null || p.unitPrice < current.unitPrice) {
-                  map[p.itemType] = p;
-                }
-              }
-              // 商品名だけでなくカテゴリ名・品種名も検索対象に含める
-              var items = map.values
+              // 検索条件と期限切れ表示設定を適用
+              // 取得したセール情報から検索条件と期限を適用
+              var items = list
                   .where((e) =>
                       e.itemName.contains(_search) ||
                       e.category.contains(_search) ||
                       e.itemType.contains(_search))
-                  .where((e) => _showExpired ||
-                      e.expiry.isAfter(DateTime.now().subtract(const Duration(days: 1))))
+                  .where((e) =>
+                      _showExpired ||
+                      e.expiry
+                          .isAfter(DateTime.now().subtract(const Duration(days: 1))))
                   .toList();
               // 選択された並び替え順に従ってソート
               // 並び替えの条件に応じてソートを実行

@@ -31,6 +31,19 @@ void main() {
     await tester.pump();
     expect(find.byType(Card), findsWidgets);
   });
+
+  testWidgets('同じ品種が複数登録されても全て表示される',
+      (WidgetTester tester) async {
+    final repo = _FakeRepository();
+    await tester.pumpWidget(MaterialApp(
+      home: PriceCategoryList(
+        category: '日用品',
+        watch: WatchPriceByCategory(repo),
+      ),
+    ));
+    await tester.pump();
+    expect(find.byType(Card), findsNWidgets(2));
+  });
 }
 
 class _FakeRepository implements PriceRepository {
@@ -56,6 +69,25 @@ class _FakeRepository implements PriceRepository {
           approvalUrl: '',
           memo: '',
           unitPrice: 150,
+          expiry: DateTime.now().add(const Duration(days: 1)),
+        ),
+        PriceInfo(
+          id: '2',
+          inventoryId: '1',
+          checkedAt: DateTime.now(),
+          category: category,
+          itemType: '洗剤',
+          itemName: 'テスト商品2',
+          count: 1,
+          unit: '個',
+          volume: 1,
+          totalVolume: 1,
+          regularPrice: 250,
+          salePrice: 230,
+          shop: '店',
+          approvalUrl: '',
+          memo: '',
+          unitPrice: 230,
           expiry: DateTime.now().add(const Duration(days: 1)),
         )
       ]);
