@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:oouchi_stock/inventory_detail_page.dart';
+import 'package:oouchi_stock/i18n/app_localizations.dart';
 import 'package:oouchi_stock/domain/entities/category.dart';
 import 'package:oouchi_stock/domain/entities/inventory.dart';
 import 'package:oouchi_stock/domain/entities/history_entry.dart';
@@ -67,6 +68,9 @@ class _DataRepository extends _FakeRepository {
 void main() {
   testWidgets('InventoryDetailPage ローディング表示', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: const Locale('ja'),
       home: InventoryDetailPage(
         inventoryId: '1',
         categories: [Category(id: 1, name: '日用品', createdAt: DateTime.now())],
@@ -77,6 +81,9 @@ void main() {
 
   testWidgets('データが取得できない場合にエラー表示', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: const Locale('ja'),
       home: InventoryDetailPage(
         inventoryId: '1',
         categories: [Category(id: 1, name: '日用品', createdAt: DateTime.now())],
@@ -89,6 +96,9 @@ void main() {
 
   testWidgets('詳細情報が左右に表示される', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: const Locale('ja'),
       home: InventoryDetailPage(
         inventoryId: '1',
         categories: [Category(id: 1, name: '日用品', createdAt: DateTime.now())],
@@ -100,6 +110,7 @@ void main() {
     expect(find.text('一般'), findsOneWidget);
     expect(find.text('1.0個'), findsOneWidget);
     expect(find.text('追加'), findsOneWidget);
+    expect(find.text('予測'), findsOneWidget);
   });
 
   testWidgets('履歴タイルのスタイルを確認', (WidgetTester tester) async {
