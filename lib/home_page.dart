@@ -8,6 +8,7 @@ import 'add_category_page.dart';
 import 'widgets/settings_menu_button.dart';
 // 在庫カードウィジェット
 import 'widgets/inventory_card.dart';
+import 'widgets/prediction_card.dart';
 // 在庫詳細画面
 import 'inventory_detail_page.dart';
 import 'main.dart';
@@ -217,7 +218,14 @@ class _HomePageState extends State<HomePage> {
                           padding: const EdgeInsets.all(16),
                           children: [
                             for (final item in map[c.name]!)
-                              _predictionCard(item),
+                              PredictionCard(
+                                item: item,
+                                categories: _categories,
+                                repository: InventoryRepositoryImpl(),
+                                addUsecase: _addBuyItem,
+                                removeUsecase: _removePrediction,
+                                calcDaysLeft: _calcDaysLeft,
+                              ),
                           ],
                         ),
               ],
@@ -228,75 +236,4 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  /// 予報リスト用のカード。スワイプで予報リストから削除できる
-  Widget _predictionCard(BuyItem item) {
-    return Dismissible(
-      key: ValueKey(item.key),
-      direction: DismissDirection.startToEnd,
-      onDismissed: (_) => _removePrediction(item),
-      background: Container(
-        color: Colors.red,
-        alignment: Alignment.centerLeft,
-        padding: const EdgeInsets.only(left: 16),
-        child: const Icon(Icons.delete, color: Colors.white),
-      ),
-      child: StreamBuilder<Inventory?>(
-        stream: InventoryRepositoryImpl().watchInventory(item.inventoryId!),
-        builder: (context, invSnapshot) {
-          final trailingButton = IconButton(
-            icon: const Icon(Icons.info_outline),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => InventoryDetailPage(
-                    inventoryId: item.inventoryId!,
-                    categories: _categories,
-                  ),
-                ),
-              );
-            },
-          );
-          if (!invSnapshot.hasData) {
-            return ListTile(title: Text(item.name), trailing: trailingButton);
-          }
-          final inv = invSnapshot.data!;
-          return FutureBuilder<int>(
-            future: _calcDaysLeft(inv),
-            builder: (context, daysSnapshot) {
-              final daysText = daysSnapshot.hasData
-                  ? ' ・ ${AppLocalizations.of(context)!.daysLeft(daysSnapshot.data!.toString())}'
-                  : '';
-              final subtitle =
-                  '${inv.quantity.toStringAsFixed(1)}${inv.unit}$daysText';
-              return ListTile(
-                title: Text(item.name),
-                subtitle: Text(subtitle),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.playlist_add),
-                      onPressed: () async {
-                        await _addBuyItem(
-                            BuyItem(inv.itemName, inv.category, inv.id));
-                        await _removePrediction(item);
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                                content: Text(AppLocalizations.of(context)!.addedBuyItem)),
-                          );
-                        }
-                      },
-                    ),
-                    trailingButton,
-                  ],
-                ),
-              );
-            },
-          );
-        },
-      ),
-    );
-  }
 }
