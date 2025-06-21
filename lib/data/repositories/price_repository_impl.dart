@@ -4,12 +4,13 @@ import '../../util/firestore_refs.dart';
 import '../../domain/entities/price_info.dart';
 import '../../domain/repositories/price_repository.dart';
 
+/// Firestore を利用した価格情報のリポジトリ実装
 class PriceRepositoryImpl implements PriceRepository {
-  final FirebaseFirestore _firestore;
-  PriceRepositoryImpl({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
+  /// デフォルトコンストラクタ
+  PriceRepositoryImpl();
 
   @override
+  /// 価格情報を追加してIDを返す
   Future<String> addPriceInfo(PriceInfo info) async {
     final doc = await userCollection('priceInfos').add({
       'inventoryId': info.inventoryId,
@@ -38,6 +39,7 @@ class PriceRepositoryImpl implements PriceRepository {
   }
 
   @override
+  /// カテゴリ別の価格情報を監視する
   Stream<List<PriceInfo>> watchByCategory(String category) {
     return userCollection('priceInfos')
         .where('category', isEqualTo: category)
@@ -47,6 +49,7 @@ class PriceRepositoryImpl implements PriceRepository {
   }
 
   @override
+  /// カテゴリと品種で価格情報を監視する
   Stream<List<PriceInfo>> watchByType(String category, String itemType) {
     return userCollection('priceInfos')
         .where('category', isEqualTo: category)
@@ -82,6 +85,7 @@ class PriceRepositoryImpl implements PriceRepository {
   }
 
   @override
+  /// 価格情報を削除する
   Future<void> deletePriceInfo(String id) async {
     await userCollection('priceInfos').doc(id).delete();
   }
