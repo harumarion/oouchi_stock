@@ -21,7 +21,7 @@ void main() {
       Category(id: 1, name: '日用品', createdAt: DateTime.now())
     ];
     await tester.pumpWidget(MyApp(initialCategories: categories));
-    expect(find.text('おうちストック'), findsOneWidget);
+    expect(find.text('買い物予報'), findsOneWidget);
   });
 
   // カテゴリ追加画面で名前を空のまま保存した場合にバリデーションエラーが出ることを確認
