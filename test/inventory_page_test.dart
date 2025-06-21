@@ -14,6 +14,13 @@ void main() {
     expect(find.byIcon(Icons.playlist_add), findsWidgets);
   });
 
+  testWidgets('カテゴリがない場合はメッセージと追加ボタンを表示', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(home: InventoryPage()));
+    await tester.pumpAndSettle();
+    expect(find.text('カテゴリが登録されていません'), findsOneWidget);
+    expect(find.byType(ElevatedButton), findsOneWidget);
+  });
+
   testWidgets('タイトルが左寄せになっている', (WidgetTester tester) async {
     final categories = [Category(id: 1, name: 'A', createdAt: DateTime.now())];
     await tester.pumpWidget(MaterialApp(home: InventoryPage(categories: categories)));

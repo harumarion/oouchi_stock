@@ -12,4 +12,11 @@ void main() {
     await tester.pump();
     expect(find.byType(TabBar), findsOneWidget);
   });
+
+  testWidgets('カテゴリがない場合はメッセージと追加ボタンを表示', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(home: HomePage()));
+    await tester.pumpAndSettle();
+    expect(find.text('カテゴリが登録されていません'), findsOneWidget);
+    expect(find.byType(ElevatedButton), findsOneWidget);
+  });
 }
