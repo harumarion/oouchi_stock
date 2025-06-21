@@ -47,3 +47,14 @@ app.*.map.json
 # Generated localization files
 lib/i18n/app_localizations.dart
 
+windows/flutter/generated_plugins.cmake
+windows/flutter/generated_plugin_registrant.h
+windows/flutter/generated_plugin_registrant.cc
+macos/Flutter/GeneratedPluginRegistrant.swift
+linux/flutter/generated_plugins.cmake
+linux/flutter/generated_plugin_registrant.h
+linux/flutter/generated_plugin_registrant.cc
+lib/i18n/app_localizations_ja.dart
+lib/i18n/app_localizations_en.dart
+android/build/reports/problems/problems-report.html
+pubspec.lock
