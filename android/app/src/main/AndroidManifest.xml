@@ -1,6 +1,10 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.oouchi_stock">
+    <!-- アプリケーション定義 -->
+    <!-- アプリ表示名などアプリ全体の設定 -->
     <application
-        android:label="買い物予報"  <!-- アプリ表示名 -->
+        android:label="買い物予報"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
