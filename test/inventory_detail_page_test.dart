@@ -101,4 +101,21 @@ void main() {
     expect(find.text('1.0個'), findsOneWidget);
     expect(find.text('追加'), findsOneWidget);
   });
+
+  testWidgets('履歴タイルのスタイルを確認', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: InventoryDetailPage(
+        inventoryId: '1',
+        categories: [Category(id: 1, name: '日用品', createdAt: DateTime.now())],
+        repository: _DataRepository(),
+      ),
+    ));
+    await tester.pump();
+
+    final text = tester.widget<Text>(find.text('追加'));
+    expect(text.style?.fontSize, 18);
+
+    final divider = tester.widget<Divider>(find.byType(Divider).first);
+    expect(divider.color, Colors.grey.shade300);
+  });
 }

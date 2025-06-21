@@ -188,23 +188,25 @@ class InventoryDetailPage extends StatelessWidget {
     final quantityText =
         '${e.before.toStringAsFixed(1)} -> ${e.after.toStringAsFixed(1)} ($diffSign${e.diff.abs().toStringAsFixed(1)}$unit)';
     final color = e.diff >= 0 ? Colors.green : Colors.red;
+    // 履歴の表示文字サイズをカテゴリ表示と合わせる
+    const style = TextStyle(fontSize: 18);
 
     return Column(
       children: [
         Row(
           children: [
-            Expanded(child: Text(_formatDate(e.timestamp))),
-            Expanded(child: Center(child: Text(_typeLabel(e.type)))),
+            Expanded(child: Text(_formatDate(e.timestamp), style: style)),
+            Expanded(child: Center(child: Text(_typeLabel(e.type), style: style))),
             Expanded(
               child: Text(
                 quantityText,
                 textAlign: TextAlign.right,
-                style: TextStyle(color: color),
+                style: style.copyWith(color: color),
               ),
             ),
           ],
         ),
-        const Divider(height: 1),
+        Divider(height: 1, color: Colors.grey.shade300),
       ],
     );
   }
