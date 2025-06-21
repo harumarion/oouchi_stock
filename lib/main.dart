@@ -14,6 +14,12 @@ import 'notification_service.dart';
 import 'login_page.dart';
 import 'root_navigation_page.dart';
 import 'theme.dart';
+import 'data/repositories/inventory_repository_impl.dart';
+import 'data/repositories/price_repository_impl.dart';
+import 'data/repositories/buy_prediction_repository_impl.dart';
+import 'domain/usecases/add_prediction_item.dart';
+import 'domain/services/auto_prediction_list_service.dart';
+import 'domain/services/purchase_decision_service.dart';
 
 // アプリのエントリーポイント。初期化処理中はローディング画面を表示する。
 
@@ -53,6 +59,7 @@ class _AppLoaderState extends State<AppLoader> {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       await _setupNotification();
+      await _runAutoPrediction();
       _loggedIn = true;
     }
     setState(() => _initialized = true);
@@ -68,6 +75,23 @@ class _AppLoaderState extends State<AppLoader> {
       title: loc.buyListNotificationTitle,
       body: loc.buyListNotificationBody,
     );
+  }
+
+  /// 在庫と価格情報を評価して予報リストを更新する
+  Future<void> _runAutoPrediction() async {
+    final invRepo = InventoryRepositoryImpl();
+    final priceRepo = PriceRepositoryImpl();
+    final service = AutoPredictionListService(
+      AddPredictionItem(BuyPredictionRepositoryImpl()),
+      PurchaseDecisionService(2),
+    );
+    final list = await invRepo.fetchAll();
+    for (final inv in list) {
+      final prices =
+          await priceRepo.watchByType(inv.category, inv.itemType).first;
+      final price = prices.isNotEmpty ? prices.first : null;
+      await service.process(inv, price);
+    }
   }
 
   @override
