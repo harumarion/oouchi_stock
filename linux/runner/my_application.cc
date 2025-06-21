@@ -38,13 +38,15 @@ static void my_application_activate(GApplication* application) {
   }
 #endif
   if (use_header_bar) {
+    // アプリ名「買い物予報」をヘッダーに表示
     GtkHeaderBar* header_bar = GTK_HEADER_BAR(gtk_header_bar_new());
     gtk_widget_show(GTK_WIDGET(header_bar));
-    gtk_header_bar_set_title(header_bar, "oouchi_stock");
+    gtk_header_bar_set_title(header_bar, "買い物予報");
     gtk_header_bar_set_show_close_button(header_bar, TRUE);
     gtk_window_set_titlebar(window, GTK_WIDGET(header_bar));
   } else {
-    gtk_window_set_title(window, "oouchi_stock");
+    // ヘッダーバーが使えない環境ではウィンドウタイトルを設定
+    gtk_window_set_title(window, "買い物予報");
   }
 
   gtk_window_set_default_size(window, 1280, 720);

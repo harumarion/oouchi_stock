@@ -1,6 +1,6 @@
 {
-    "name": "oouchi_stock",
-    "short_name": "oouchi_stock",
+    "name": "買い物予報", // アプリ名
+    "short_name": "買い物予報", // ランチャーでの表示名
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

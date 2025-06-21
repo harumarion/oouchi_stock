@@ -87,15 +87,15 @@ VS_VERSION_INFO VERSIONINFO
 BEGIN
     BLOCK "StringFileInfo"
     BEGIN
-        BLOCK "040904e4"
+        BLOCK "040904e4"  // 日本語ロケールのリソース定義
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "oouchi_stock" "\0"
+            VALUE "FileDescription", "買い物予報" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "oouchi_stock" "\0"
+            VALUE "InternalName", "買い物予報" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2025 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "oouchi_stock.exe" "\0"
-            VALUE "ProductName", "oouchi_stock" "\0"
+            VALUE "OriginalFilename", "kaimono_yohou.exe" "\0"
+            VALUE "ProductName", "買い物予報" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END
