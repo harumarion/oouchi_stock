@@ -91,6 +91,7 @@
   ,"loginTitle": "Login"
   ,"signInWithGoogle": "Sign in with Google"
   ,"anonymousLogin": "Continue anonymously"
+  ,"loginFailed": "Failed to login"
   ,"backup": "Backup"
   ,"restore": "Restore"
   ,"backupDone": "Backup completed"

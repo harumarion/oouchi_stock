@@ -91,6 +91,7 @@
   ,"loginTitle": "ログイン"
   ,"signInWithGoogle": "Googleでログイン"
   ,"anonymousLogin": "匿名で続行"
+  ,"loginFailed": "ログインに失敗しました"
   ,"backup": "バックアップ"
   ,"restore": "復元"
   ,"backupDone": "バックアップしました"
