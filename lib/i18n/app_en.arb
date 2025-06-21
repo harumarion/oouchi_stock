@@ -56,6 +56,7 @@
   "approvalUrl": "Approval URL",
   "regularPriceLabel": "Regular price: {value}",
   "salePriceLabel": "Sale price: {value}",
+  "priceDiffLabel": "Difference: {value}",
   "approvalUrlLabel": "URL: {value}",
   "memoLabel": "Memo: {value}",
   "shop": "Store",
