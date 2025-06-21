@@ -11,6 +11,9 @@ import 'domain/usecases/remove_buy_item.dart';
 import 'domain/usecases/watch_buy_items.dart';
 
 import 'data/repositories/inventory_repository_impl.dart';
+import 'domain/repositories/inventory_repository.dart';
+import 'domain/services/purchase_prediction_strategy.dart';
+import 'domain/usecases/calculate_days_left.dart';
 import 'domain/usecases/update_quantity.dart';
 import 'domain/entities/category.dart';
 import 'domain/entities/inventory.dart';
@@ -26,8 +29,16 @@ import 'main.dart';
 /// 買い物予報画面
 /// ホーム画面のメニューから遷移し、今買っておいた方が良い商品を表示する
 class BuyListPage extends StatefulWidget {
+  /// 外部から渡されるカテゴリ一覧
   final List<Category>? categories;
-  const BuyListPage({super.key, this.categories});
+  /// 在庫データ取得用リポジトリ
+  final InventoryRepository repository;
+
+  const BuyListPage({
+    super.key,
+    this.categories,
+    InventoryRepository? repository,
+  }) : repository = repository ?? InventoryRepositoryImpl();
 
   @override
   State<BuyListPage> createState() => _BuyListPageState();
@@ -136,9 +147,8 @@ class _BuyListPageState extends State<BuyListPage> {
     _condition = await loadBuyListConditionSettings();
     setState(() => _loaded = true);
     final strategy = createStrategy(_condition!);
-    final repo = InventoryRepositoryImpl();
-    // 条件に合致した在庫が通知された際に買い物リストへ追加する
-    _invSub = strategy.watch(repo).listen((list) {
+    // BuyListStrategy で条件に合致した在庫が通知されたらリストへ追加
+    _invSub = strategy.watch(widget.repository).listen((list) {
       for (final inv in list) {
         _addUsecase(BuyItem(inv.itemName, inv.category, inv.id));
       }
@@ -239,7 +249,7 @@ class _BuyListPageState extends State<BuyListPage> {
           final v = await _inputAmountDialog(context);
           if (v == null) return false;
           try {
-            await UpdateQuantity(InventoryRepositoryImpl())(
+            await UpdateQuantity(widget.repository)(
               item.inventoryId!,
               v,
               'bought',
@@ -272,25 +282,52 @@ class _BuyListPageState extends State<BuyListPage> {
       ),
       child: Card(
         margin: const EdgeInsets.only(bottom: 12),
-        child: ListTile(
-          title: Text(item.name),
-          trailing: item.inventoryId == null
-              ? null
-              : IconButton(
-                  icon: const Icon(Icons.info_outline),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => InventoryDetailPage(
-                          inventoryId: item.inventoryId!,
-                          categories: _categories,
+        child: item.inventoryId == null
+            // 在庫IDがない場合は名前のみ表示
+            ? ListTile(title: Text(item.name))
+            // 在庫IDがある場合は数量と残り日数も表示
+            : StreamBuilder<Inventory?>(
+                stream: widget.repository.watchInventory(item.inventoryId!),
+                builder: (context, invSnapshot) {
+                  final trailingButton = IconButton(
+                    icon: const Icon(Icons.info_outline),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => InventoryDetailPage(
+                            inventoryId: item.inventoryId!,
+                            categories: _categories,
+                            repository: widget.repository,
+                          ),
                         ),
-                      ),
-                    );
-                  },
-                ),
-        ),
+                      );
+                    },
+                  );
+                  if (!invSnapshot.hasData) {
+                    return ListTile(title: Text(item.name), trailing: trailingButton);
+                  }
+                  final inv = invSnapshot.data!;
+                  return FutureBuilder<int>(
+                    future: CalculateDaysLeft(
+                      widget.repository,
+                      const DummyPredictionStrategy(),
+                    )(inv),
+                    builder: (context, daysSnapshot) {
+                      final daysText = daysSnapshot.hasData
+                          ? ' ・ ${loc.daysLeft(daysSnapshot.data!.toString())}'
+                          : '';
+                      final subtitle =
+                          '${inv.quantity.toStringAsFixed(1)}${inv.unit}$daysText';
+                      return ListTile(
+                        title: Text(item.name),
+                        subtitle: Text(subtitle),
+                        trailing: trailingButton,
+                      );
+                    },
+                  );
+                },
+              ),
       ),
     );
   }
