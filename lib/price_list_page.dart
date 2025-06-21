@@ -141,8 +141,15 @@ class _PriceListPageState extends State<PriceListPage> {
 }
 
 class PriceCategoryList extends StatefulWidget {
-  final String category;
-  const PriceCategoryList({super.key, required this.category});
+  final String category; // 表示対象カテゴリ名
+  final WatchPriceByCategory _watch; // セール情報取得ユースケース
+
+  /// [watch] はテスト用に差し替え可能
+  const PriceCategoryList({
+    super.key,
+    required this.category,
+    WatchPriceByCategory? watch,
+  }) : _watch = watch ?? WatchPriceByCategory(PriceRepositoryImpl());
 
   @override
   State<PriceCategoryList> createState() => _PriceCategoryListState();
@@ -166,7 +173,8 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
 
   @override
   Widget build(BuildContext context) {
-    final watch = WatchPriceByCategory(PriceRepositoryImpl());
+    // ユースケースからセール情報を取得して表示
+    final watch = widget._watch;
     return Column(
       children: [
         Padding(
@@ -255,54 +263,48 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
               } else {
                 items.sort((a, b) => b.checkedAt.compareTo(a.checkedAt));
               }
-              return SingleChildScrollView(
-                scrollDirection: Axis.vertical,
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                    child: DataTable(
-                    // セール情報管理画面のテーブル表示。フォントを大きめに設定
-                    columns: [
-                      DataColumn(label: Text(AppLocalizations.of(context)!.itemName, style: const TextStyle(fontSize: 16))),
-                      DataColumn(label: Text(AppLocalizations.of(context)!.quantity, style: const TextStyle(fontSize: 16))),
-                      DataColumn(label: Text(AppLocalizations.of(context)!.volume, style: const TextStyle(fontSize: 16))),
-                      DataColumn(label: Text(AppLocalizations.of(context)!.totalVolumeLabel, style: const TextStyle(fontSize: 16))),
-                      DataColumn(label: Text(AppLocalizations.of(context)!.regularPrice, style: const TextStyle(fontSize: 16))),
-                      DataColumn(label: Text(AppLocalizations.of(context)!.salePrice, style: const TextStyle(fontSize: 16))),
-                      DataColumn(label: Text(AppLocalizations.of(context)!.shop, style: const TextStyle(fontSize: 16))),
-                      // 期限列のヘッダ
-                      DataColumn(label: Text(AppLocalizations.of(context)!.expiryLabel, style: const TextStyle(fontSize: 16))),
-                    ],
-                    rows: [
-                      for (final p in items)
-                        DataRow(
-                          cells: [
-                            DataCell(Text(p.itemName, style: const TextStyle(fontSize: 16))),
-                            DataCell(Text('${p.count} ${p.unit}', style: const TextStyle(fontSize: 16))),
-                            DataCell(Text(p.volume.toString(), style: const TextStyle(fontSize: 16))),
-                            DataCell(Text(p.totalVolume.toString(), style: const TextStyle(fontSize: 16))),
-                            DataCell(Text(p.regularPrice.toString(), style: const TextStyle(fontSize: 16))),
-                            DataCell(Text(p.salePrice.toString(), style: const TextStyle(fontSize: 16))),
-                            DataCell(Text(p.shop, style: const TextStyle(fontSize: 16))),
-                            // セール期限日を表示
-                            DataCell(Text(_formatDate(p.expiry), style: const TextStyle(fontSize: 16))),
+              return ListView.builder(
+                // カード型リストでセール情報を表示
+                itemCount: items.length,
+                itemBuilder: (context, index) {
+                  final p = items[index];
+                  final diff = p.regularPrice - p.salePrice;
+                  return InkWell(
+                    onTap: () {
+                      // タップでセール情報履歴画面へ遷移
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => PriceHistoryPage(
+                            category: widget.category,
+                            itemType: p.itemType,
+                            itemName: p.itemName,
+                          ),
+                        ),
+                      );
+                    },
+                    child: Card(
+                      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(p.itemType, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                            const SizedBox(height: 4),
+                            Text(p.itemName),
+                            const SizedBox(height: 4),
+                            Text(AppLocalizations.of(context)!.expiry(_formatDate(p.expiry))),
+                            const SizedBox(height: 4),
+                            Text(AppLocalizations.of(context)!.regularPriceLabel(p.regularPrice.toStringAsFixed(0))),
+                            Text(AppLocalizations.of(context)!.salePriceLabel(p.salePrice.toStringAsFixed(0))),
+                            Text(AppLocalizations.of(context)!.priceDiffLabel(diff.toStringAsFixed(0))),
                           ],
-                          onSelectChanged: (_) {
-                            // タップでセール情報履歴画面へ遷移
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => PriceHistoryPage(
-                                  category: widget.category,
-                                  itemType: p.itemType,
-                                  itemName: p.itemName,
-                                ),
-                              ),
-                            );
-                          },
-                        )
-                    ],
-                  ),
-                ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
               );
             },
           ),
