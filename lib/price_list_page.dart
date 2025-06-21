@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:oouchi_stock/i18n/app_localizations.dart';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'util/firestore_refs.dart';
 import 'util/date_time_parser.dart';
 
 import 'add_price_page.dart';
-import 'add_inventory_page.dart';
 import 'add_category_page.dart';
-import 'settings_page.dart';
 import 'widgets/settings_menu_button.dart';
 import 'data/repositories/price_repository_impl.dart';
 import 'domain/entities/category.dart';

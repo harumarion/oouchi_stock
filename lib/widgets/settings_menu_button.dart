@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../settings_page.dart';
 import '../domain/entities/category.dart';
-import '../main.dart';
 import '../i18n/app_localizations.dart';
 import '../price_list_page.dart';
 

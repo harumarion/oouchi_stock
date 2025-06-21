@@ -3,9 +3,7 @@ import 'buy_list_page.dart';
 import 'inventory_page.dart';
 import 'home_page.dart';
 import 'add_inventory_page.dart';
-import 'price_list_page.dart';
 import 'add_price_page.dart';
-import 'main.dart';
 import 'i18n/app_localizations.dart';
 import 'widgets/ad_banner.dart';
 

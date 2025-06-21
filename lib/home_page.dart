@@ -4,12 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'util/firestore_refs.dart';
 import 'util/date_time_parser.dart';
 import 'package:oouchi_stock/i18n/app_localizations.dart';
-import 'add_inventory_page.dart';
 import 'add_category_page.dart';
-import 'price_list_page.dart';
-import 'inventory_page.dart';
-import 'settings_page.dart';
-import 'widgets/dashboard_tile.dart';
 import 'widgets/settings_menu_button.dart';
 // 在庫カードウィジェット
 import 'widgets/inventory_card.dart';

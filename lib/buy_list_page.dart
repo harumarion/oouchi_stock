@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'util/firestore_refs.dart';
 import 'util/date_time_parser.dart';
 import 'package:oouchi_stock/i18n/app_localizations.dart';
@@ -20,7 +19,6 @@ import 'domain/entities/inventory.dart';
 import 'domain/entities/buy_list_condition_settings.dart';
 import 'domain/services/buy_list_strategy.dart';
 import 'inventory_detail_page.dart';
-import 'widgets/inventory_card.dart';
 import 'domain/entities/category_order.dart';
 import 'widgets/settings_menu_button.dart';
 // 言語変更時にアプリ全体のロケールを更新するため MyAppState を参照
