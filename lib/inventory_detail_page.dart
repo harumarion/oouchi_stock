@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:oouchi_stock/i18n/app_localizations.dart';
+import 'package:intl/intl.dart';
 import 'data/repositories/inventory_repository_impl.dart';
 import 'domain/repositories/inventory_repository.dart';
 import 'domain/entities/history_entry.dart';
@@ -92,16 +93,38 @@ class InventoryDetailPage extends StatelessWidget {
               final list = snapshot.data!;
               final predicted =
                   strategy.predict(DateTime.now(), list, _currentQuantity(list));
+              final textStyle = Theme.of(context)
+                  .textTheme
+                  .bodyLarge
+                  ?.copyWith(fontSize: 18);
+
               return ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
-                  Text('${AppLocalizations.of(context)!.category}: ${inv.category}'),
-                  Text('${AppLocalizations.of(context)!.itemType}: ${inv.itemType}'),
-                  Text('${AppLocalizations.of(context)!.quantity}: ${inv.quantity.toStringAsFixed(1)}${inv.unit}'),
+                  _buildDetailRow(
+                    AppLocalizations.of(context)!.category,
+                    inv.category,
+                    textStyle,
+                  ),
+                  _buildDetailRow(
+                    AppLocalizations.of(context)!.itemType,
+                    inv.itemType,
+                    textStyle,
+                  ),
+                  _buildDetailRow(
+                    AppLocalizations.of(context)!.quantity,
+                    '${inv.quantity.toStringAsFixed(1)}${inv.unit}',
+                    textStyle,
+                  ),
                   const SizedBox(height: 8),
-                  Text('${AppLocalizations.of(context)!.predictLabel} ${_formatDate(predicted)}'),
+                  _buildDetailRow(
+                    AppLocalizations.of(context)!.predictLabel,
+                    _formatDate(predicted),
+                    textStyle,
+                  ),
                   const SizedBox(height: 16),
-                  Text(AppLocalizations.of(context)!.history, style: const TextStyle(fontSize: 18)),
+                  Text(AppLocalizations.of(context)!.history,
+                      style: const TextStyle(fontSize: 18)),
                   SizedBox(
                     height: MediaQuery.of(context).size.height / 3,
                     child: ListView(
@@ -133,31 +156,72 @@ class InventoryDetailPage extends StatelessWidget {
     return total;
   }
 
+  /// 項目名と値を左右に表示する行を生成
+  Widget _buildDetailRow(String label, String value, TextStyle? style) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(child: Text(label, style: style)),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              value,
+              style: style,
+              textAlign: TextAlign.right,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 日付を "yyyy/MM/dd HH:mm" 形式で返す
   String _formatDate(DateTime date) {
-    return '${date.year}/${date.month}/${date.day}';
+    return DateFormat('yyyy/MM/dd HH:mm').format(date);
   }
 
   /// 履歴表示用のタイルを作成する。
   Widget _buildHistoryTile(HistoryEntry e, String unit) {
-    String title;
-    Color color = Colors.black;
-    if (e.type == 'stocktake') {
-      final sign = e.diff >= 0 ? '+' : '-';
-      title =
-          '棚卸 ${e.before.toStringAsFixed(1)} -> ${e.after.toStringAsFixed(1)} ($sign${e.diff.abs().toStringAsFixed(1)}$unit)';
-      color = e.diff >= 0 ? Colors.green : Colors.red;
-    } else if (e.type == 'add' || e.type == 'bought') {
-      title = '+${e.quantity.toStringAsFixed(1)}$unit';
-      color = Colors.green;
-    } else if (e.type == 'used') {
-      title = '-${e.quantity.toStringAsFixed(1)}$unit';
-      color = Colors.red;
-    } else {
-      title = '${e.quantity.toStringAsFixed(1)}$unit';
-    }
-    return ListTile(
-      title: Text(title, style: TextStyle(color: color)),
-      subtitle: Text(_formatDate(e.timestamp)),
+    final diffSign = e.diff >= 0 ? '+' : '-';
+    final quantityText =
+        '${e.before.toStringAsFixed(1)} -> ${e.after.toStringAsFixed(1)} ($diffSign${e.diff.abs().toStringAsFixed(1)}$unit)';
+    final color = e.diff >= 0 ? Colors.green : Colors.red;
+
+    return Column(
+      children: [
+        Row(
+          children: [
+            Expanded(child: Text(_formatDate(e.timestamp))),
+            Expanded(child: Center(child: Text(_typeLabel(e.type)))),
+            Expanded(
+              child: Text(
+                quantityText,
+                textAlign: TextAlign.right,
+                style: TextStyle(color: color),
+              ),
+            ),
+          ],
+        ),
+        const Divider(height: 1),
+      ],
     );
+  }
+
+  /// 操作種別を日本語で返す
+  String _typeLabel(String type) {
+    switch (type) {
+      case 'stocktake':
+        return '棚卸';
+      case 'add':
+        return '追加';
+      case 'bought':
+        return '購入';
+      case 'used':
+        return '使用';
+      default:
+        return type;
+    }
   }
 }
