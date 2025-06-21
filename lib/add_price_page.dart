@@ -8,6 +8,7 @@ import 'domain/entities/price_info.dart';
 import 'domain/usecases/add_price_info.dart';
 import 'domain/usecases/fetch_all_inventory.dart';
 import 'util/input_validators.dart';
+import 'add_inventory_page.dart';
 
 // セール情報追加画面
 
@@ -23,6 +24,8 @@ class _AddPricePageState extends State<AddPricePage> {
   DateTime _checkedAt = DateTime.now();
   Inventory? _inventory;
   List<Inventory> _inventories = [];
+  // 在庫一覧が読み込まれたか
+  bool _loaded = false;
 
   double _count = 1;
   double _volume = 1;
@@ -52,6 +55,7 @@ class _AddPricePageState extends State<AddPricePage> {
       setState(() {
         _inventories = list;
         if (list.isNotEmpty) _inventory = list.first;
+        _loaded = true;
       });
     });
   }
@@ -97,9 +101,28 @@ class _AddPricePageState extends State<AddPricePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text(AppLocalizations.of(context)!.priceAddTitle)),
-      body: _inventories.isEmpty
+      body: !_loaded
           ? const Center(child: CircularProgressIndicator())
-          : Padding(
+          : _inventories.isEmpty
+              ? Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(AppLocalizations.of(context)!.noItems),
+                      const SizedBox(height: 8),
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const AddInventoryPage()),
+                          );
+                        },
+                        child: Text(AppLocalizations.of(context)!.addItem),
+                      ),
+                    ],
+                  ),
+                )
+              : Padding(
               padding: const EdgeInsets.all(16),
               child: Form(
                 key: _formKey,

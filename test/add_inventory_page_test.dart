@@ -42,6 +42,13 @@ void main() {
     expect(find.byIcon(Icons.more_vert), findsOneWidget);
   });
 
+  testWidgets('カテゴリがない場合は追加ボタンを表示', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(home: AddInventoryPage()));
+    await tester.pump();
+    expect(find.byType(ElevatedButton), findsOneWidget);
+    expect(find.text('カテゴリを追加'), findsOneWidget);
+  });
+
   // Navigator.canPop が false の場合でも画面が消えないことを確認するテスト
   testWidgets('保存後も画面が残る', (WidgetTester tester) async {
     await tester.pumpWidget(

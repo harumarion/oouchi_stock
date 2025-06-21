@@ -108,5 +108,7 @@
   "addToBuyList": "Add to buy list",
   "confirmDelete": "Delete this item?",
   "selectColor": "Select color",
-  "showAds": "Show Ads"
+  "showAds": "Show Ads",
+  "noCategories": "No categories registered",
+  "noItems": "No items registered"
 }

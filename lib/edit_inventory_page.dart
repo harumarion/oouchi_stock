@@ -8,6 +8,7 @@ import 'domain/entities/inventory.dart';
 import 'domain/entities/category.dart';
 import 'domain/usecases/update_inventory.dart';
 import 'data/repositories/inventory_repository_impl.dart';
+import 'add_category_page.dart';
 import 'default_item_types.dart';
 
 /// 商品を編集する画面のウィジェット
@@ -44,6 +45,8 @@ class _EditInventoryPageState extends State<EditInventoryPage> {
       UpdateInventory(InventoryRepositoryImpl());
 
   List<Category> _categories = [];
+  // カテゴリが読み込まれたか
+  bool _categoriesLoaded = false;
   late final StreamSubscription<QuerySnapshot<Map<String, dynamic>>>
       _catSub;
   Map<String, List<String>> _typesMap = {};
@@ -86,6 +89,7 @@ class _EditInventoryPageState extends State<EditInventoryPage> {
             _itemType = types.contains(_itemType) ? _itemType : types.first;
           }
         }
+        _categoriesLoaded = true;
       });
     });
     // 品種コレクションの更新を監視
@@ -138,10 +142,34 @@ class _EditInventoryPageState extends State<EditInventoryPage> {
   @override
   Widget build(BuildContext context) {
     // カテゴリがまだ読み込まれていない場合はローディング
-    if (_categories.isEmpty) {
+    if (!_categoriesLoaded) {
       return Scaffold(
         appBar: AppBar(title: Text(AppLocalizations.of(context)!.inventoryEditTitle)),
         body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+    // カテゴリが存在しない場合は追加を促す画面を表示
+    if (_categories.isEmpty) {
+      return Scaffold(
+        appBar: AppBar(title: Text(AppLocalizations.of(context)!.inventoryEditTitle)),
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(AppLocalizations.of(context)!.noCategories),
+              const SizedBox(height: 8),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const AddCategoryPage()),
+                  );
+                },
+                child: Text(AppLocalizations.of(context)!.addCategory),
+              ),
+            ],
+          ),
+        ),
       );
     }
     // 商品編集フォームを表示
