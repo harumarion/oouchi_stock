@@ -80,11 +80,13 @@ class InventoryRepositoryImpl implements InventoryRepository {
 
   @override
   /// 数量変更履歴を保存し在庫数量を更新する
+  /// 在庫一覧画面のカードで+/-ボタンを押したときに実行される
   Future<void> updateQuantity(String id, double amount, String type) async {
     final doc = userCollection('inventory').doc(id);
     try {
       final snapshot = await doc.get();
-      final data = snapshot.data() as Map<String, dynamic>?;
+      // Firestore ドキュメントから取得したデータ。null の可能性があるため Map を nullable として扱う
+      final Map<String, dynamic>? data = snapshot.data();
       final before = (data?['quantity'] ?? 0).toDouble();
       final after = before + amount;
 
