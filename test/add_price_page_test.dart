@@ -9,4 +9,10 @@ void main() {
     expect(find.byType(ElevatedButton), findsOneWidget);
     expect(find.text('商品を追加'), findsOneWidget);
   });
+
+  testWidgets('確認日入力欄が表示されない', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(home: AddPricePage()));
+    await tester.pump();
+    expect(find.textContaining('確認日'), findsNothing);
+  });
 }

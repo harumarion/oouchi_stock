@@ -20,19 +20,25 @@ class AddPricePage extends StatefulWidget {
 }
 
 class _AddPricePageState extends State<AddPricePage> {
+  // フォームの状態キー
   final _formKey = GlobalKey<FormState>();
-  DateTime _checkedAt = DateTime.now();
+  // 選択中の在庫
+  // 選択した在庫データ
   Inventory? _inventory;
+  // 取得した在庫一覧
   List<Inventory> _inventories = [];
   // 在庫一覧が読み込まれたか
   bool _loaded = false;
 
+  // 購入数
   double _count = 1;
+  // 1個あたり容量
   double _volume = 1;
   // 通常価格
   double _regularPrice = 0;
   // セール価格
   double _salePrice = 0;
+  // 購入店舗
   String _shop = '';
   // 承認ページURL
   String _approvalUrl = '';
@@ -48,7 +54,7 @@ class _AddPricePageState extends State<AddPricePage> {
   void initState() {
     super.initState();
     // 初期表示時にセール終了日のデフォルトを設定
-    _expiry = _checkedAt.add(const Duration(days: 7));
+    _expiry = DateTime.now().add(const Duration(days: 7));
     final repo = InventoryRepositoryImpl();
     // 在庫一覧を一度だけ取得
     FetchAllInventory(repo)().then((list) {
@@ -76,7 +82,8 @@ class _AddPricePageState extends State<AddPricePage> {
     final info = PriceInfo(
       id: '',
       inventoryId: _inventory!.id,
-      checkedAt: _checkedAt,
+      // 保存時刻を確認日として登録
+      checkedAt: DateTime.now(),
       category: _inventory!.category,
       itemType: _inventory!.itemType,
       itemName: _inventory!.itemName,
@@ -138,20 +145,6 @@ class _AddPricePageState extends State<AddPricePage> {
                               ))
                           .toList(),
                       onChanged: (v) => setState(() => _inventory = v),
-                    ),
-                    const SizedBox(height: 12),
-                    ListTile(
-                      title: Text(AppLocalizations.of(context)!.checkedDate('${_checkedAt.year}/${_checkedAt.month}/${_checkedAt.day}')),
-                      trailing: const Icon(Icons.calendar_today),
-                      onTap: () async {
-                        final picked = await showDatePicker(
-                          context: context,
-                          firstDate: DateTime(2000),
-                          lastDate: DateTime(2100),
-                          initialDate: _checkedAt,
-                        );
-                        if (picked != null) setState(() => _checkedAt = picked);
-                      },
                     ),
                     const SizedBox(height: 12),
                     ListTile(
