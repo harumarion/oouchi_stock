@@ -122,11 +122,13 @@ class _BuyListPageState extends State<BuyListPage> {
 
   // BuyListPage 起動時に呼び出し、カテゴリ一覧と条件設定を読み込む
   Future<void> _load() async {
-    if (widget.categories != null) {
+    // カテゴリが渡されており、件数が 1 件以上の場合のみそのまま使用
+    if (widget.categories != null && widget.categories!.isNotEmpty) {
       // 設定画面から受け取ったカテゴリを並び順付きで保持
       _categories = List.from(widget.categories!);
       _categories = await applyCategoryOrder(_categories);
     } else {
+      // カテゴリが空の場合は Firestore から取得
       final snapshot = await userCollection('categories')
           .orderBy('createdAt')
           .get();
