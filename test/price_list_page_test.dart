@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:oouchi_stock/price_list_page.dart';
+import 'package:oouchi_stock/price_detail_page.dart';
 import 'package:oouchi_stock/domain/entities/price_info.dart';
 import 'package:oouchi_stock/domain/repositories/price_repository.dart';
 import 'package:oouchi_stock/domain/usecases/watch_price_by_category.dart';
@@ -43,6 +44,20 @@ void main() {
     ));
     await tester.pump();
     expect(find.byType(Card), findsNWidgets(2));
+  });
+
+  testWidgets('カードタップで詳細画面へ遷移', (WidgetTester tester) async {
+    final repo = _FakeRepository();
+    await tester.pumpWidget(MaterialApp(
+      home: PriceCategoryList(
+        category: '日用品',
+        watch: WatchPriceByCategory(repo),
+      ),
+    ));
+    await tester.pump();
+    await tester.tap(find.byType(InkWell).first);
+    await tester.pumpAndSettle();
+    expect(find.byType(PriceDetailPage), findsOneWidget);
   });
 }
 

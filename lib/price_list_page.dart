@@ -12,7 +12,7 @@ import 'domain/entities/category.dart';
 import 'domain/entities/price_info.dart';
 import 'domain/entities/category_order.dart';
 import 'domain/usecases/watch_price_by_category.dart';
-import 'price_history_page.dart';
+import 'price_detail_page.dart';
 import 'main.dart';
 
 // セール情報管理画面
@@ -269,15 +269,11 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
                   final diff = p.regularPrice - p.salePrice;
                   return InkWell(
                     onTap: () {
-                      // タップでセール情報履歴画面へ遷移
+                      // タップでセール詳細情報表示画面へ遷移
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => PriceHistoryPage(
-                            category: widget.category,
-                            itemType: p.itemType,
-                            itemName: p.itemName,
-                          ),
+                          builder: (_) => PriceDetailPage(info: p),
                         ),
                       );
                     },
