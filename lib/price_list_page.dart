@@ -235,28 +235,29 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
                 child: SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                     child: DataTable(
+                    // セール情報管理画面のテーブル表示。フォントを大きめに設定
                     columns: [
-                      DataColumn(label: Text(AppLocalizations.of(context)!.itemName)),
-                      DataColumn(label: Text(AppLocalizations.of(context)!.quantity)),
-                      DataColumn(label: Text(AppLocalizations.of(context)!.volume)),
-                      DataColumn(label: Text(AppLocalizations.of(context)!.totalVolumeLabel)),
-                      DataColumn(label: Text(AppLocalizations.of(context)!.regularPrice)),
-                      DataColumn(label: Text(AppLocalizations.of(context)!.salePrice)),
-                      DataColumn(label: Text(AppLocalizations.of(context)!.shop)),
-                      DataColumn(label: Text(AppLocalizations.of(context)!.expiry)),
+                      DataColumn(label: Text(AppLocalizations.of(context)!.itemName, style: const TextStyle(fontSize: 16))),
+                      DataColumn(label: Text(AppLocalizations.of(context)!.quantity, style: const TextStyle(fontSize: 16))),
+                      DataColumn(label: Text(AppLocalizations.of(context)!.volume, style: const TextStyle(fontSize: 16))),
+                      DataColumn(label: Text(AppLocalizations.of(context)!.totalVolumeLabel, style: const TextStyle(fontSize: 16))),
+                      DataColumn(label: Text(AppLocalizations.of(context)!.regularPrice, style: const TextStyle(fontSize: 16))),
+                      DataColumn(label: Text(AppLocalizations.of(context)!.salePrice, style: const TextStyle(fontSize: 16))),
+                      DataColumn(label: Text(AppLocalizations.of(context)!.shop, style: const TextStyle(fontSize: 16))),
+                      DataColumn(label: Text(AppLocalizations.of(context)!.expiry, style: const TextStyle(fontSize: 16))),
                     ],
                     rows: [
                       for (final p in items)
                         DataRow(
                           cells: [
-                            DataCell(Text(p.itemName)),
-                            DataCell(Text('${p.count} ${p.unit}')),
-                            DataCell(Text(p.volume.toString())),
-                            DataCell(Text(p.totalVolume.toString())),
-                            DataCell(Text(p.regularPrice.toString())),
-                            DataCell(Text(p.salePrice.toString())),
-                            DataCell(Text(p.shop)),
-                            DataCell(Text(_formatDate(p.checkedAt))),
+                            DataCell(Text(p.itemName, style: const TextStyle(fontSize: 16))),
+                            DataCell(Text('${p.count} ${p.unit}', style: const TextStyle(fontSize: 16))),
+                            DataCell(Text(p.volume.toString(), style: const TextStyle(fontSize: 16))),
+                            DataCell(Text(p.totalVolume.toString(), style: const TextStyle(fontSize: 16))),
+                            DataCell(Text(p.regularPrice.toString(), style: const TextStyle(fontSize: 16))),
+                            DataCell(Text(p.salePrice.toString(), style: const TextStyle(fontSize: 16))),
+                            DataCell(Text(p.shop, style: const TextStyle(fontSize: 16))),
+                            DataCell(Text(_formatDate(p.checkedAt), style: const TextStyle(fontSize: 16))),
                           ],
                           onSelectChanged: (_) {
                             // 履歴画面へ遷移

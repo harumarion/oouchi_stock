@@ -30,49 +30,51 @@ class PriceHistoryPage extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
           final list = snapshot.data!;
+          final loc = AppLocalizations.of(context)!;
           return ListView(
             children: [
               for (final p in list)
-                ListTile(
-                  title: Text(p.itemName),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '${_formatDate(p.checkedAt)} '
-                        '${AppLocalizations.of(context)!.priceSummary(
-                            p.count.toString(),
-                            p.unit,
-                            p.volume.toString(),
-                            p.totalVolume.toString(),
-                            p.salePrice.toString(),
-                            p.shop,
-                            p.unitPrice.toStringAsFixed(2))}',
-                      ),
-                      Text('${AppLocalizations.of(context)!.regularPriceLabel(p.regularPrice.toString())}'),
-                      Text('${AppLocalizations.of(context)!.salePriceLabel(p.salePrice.toString())}'),
-                      if (p.approvalUrl.isNotEmpty)
-                        Text('${AppLocalizations.of(context)!.approvalUrlLabel(p.approvalUrl)}'),
-                      if (p.memo.isNotEmpty)
-                        Text('${AppLocalizations.of(context)!.memoLabel(p.memo)}'),
-                    ],
-                  ),
-                  onLongPress: () async {
-                    final res = await showModalBottomSheet<String>(
-                      context: context,
-                      builder: (_) => SafeArea(
-                        child: ListTile(
-                          leading: const Icon(Icons.delete),
-                          title: Text(AppLocalizations.of(context)!.delete),
-                          onTap: () => Navigator.pop(context, 'delete'),
+                Card(
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: InkWell(
+                    // 長押しで削除メニューを表示
+                    onLongPress: () async {
+                      final res = await showModalBottomSheet<String>(
+                        context: context,
+                        builder: (_) => SafeArea(
+                          child: ListTile(
+                            leading: const Icon(Icons.delete),
+                            title: Text(loc.delete),
+                            onTap: () => Navigator.pop(context, 'delete'),
+                          ),
                         ),
+                      );
+                      if (res == 'delete') {
+                        await deleter(p.id);
+                      }
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        children: [
+                          _buildRow(loc.itemName, p.itemName),
+                          _buildRow(loc.checkedDate(_formatDate(p.checkedAt)), ''),
+                          _buildRow(loc.count, '${p.count} ${p.unit}'),
+                          _buildRow(loc.volume, p.volume.toString()),
+                          _buildRow(loc.totalVolumeLabel, p.totalVolume.toString()),
+                          _buildRow(loc.regularPrice, p.regularPrice.toString()),
+                          _buildRow(loc.salePrice, p.salePrice.toString()),
+                          _buildRow(loc.unitPriceLabel, p.unitPrice.toStringAsFixed(2)),
+                          _buildRow(loc.shop, p.shop),
+                          if (p.approvalUrl.isNotEmpty)
+                            _buildRow(loc.approvalUrl, p.approvalUrl),
+                          if (p.memo.isNotEmpty)
+                            _buildRow(loc.memo, p.memo),
+                        ],
                       ),
-                    );
-                    if (res == 'delete') {
-                      await deleter(p.id);
-                    }
-                  },
-                )
+                    ),
+                  ),
+                ),
             ],
           );
         },
@@ -82,5 +84,31 @@ class PriceHistoryPage extends StatelessWidget {
 
   String _formatDate(DateTime d) {
     return '${d.year}/${d.month}/${d.day}';
+  }
+
+  /// 項目名と値を左右に表示する行を作成する
+  Widget _buildRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: const TextStyle(fontSize: 16),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              value,
+              textAlign: TextAlign.right,
+              style: const TextStyle(fontSize: 16),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
