@@ -42,7 +42,7 @@
   "boughtAmount": "Bought amount",
   "stockAmount": "Current stock",
   "updateFailed": "Update failed",
-  "predictLabel": "Prediction:",
+  "predictLabel": "Prediction",
   "daysLeft": "in {value} days",
   "calculating": "Calculating...",
   "history": "History",

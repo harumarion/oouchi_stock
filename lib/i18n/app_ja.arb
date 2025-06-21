@@ -42,7 +42,7 @@
   "boughtAmount": "買った量",
   "stockAmount": "現在の在庫",
   "updateFailed": "更新に失敗しました",
-  "predictLabel": "予測:",
+  "predictLabel": "予測",
   "daysLeft": "あと{value}日",
   "calculating": "計算中...",
   "history": "履歴",
