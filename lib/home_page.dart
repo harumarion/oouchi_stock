@@ -126,20 +126,28 @@ class _HomePageState extends State<HomePage> {
         body: const Center(child: CircularProgressIndicator()),
       );
     }
-    // カテゴリがまだ存在しない場合は追加を促す画面を表示
+    // カテゴリがまだ存在しない場合は案内テキストと追加ボタンを表示
     if (_categories.isEmpty) {
       return Scaffold(
         appBar: AppBar(title: Text(AppLocalizations.of(context)!.buyListTitle)),
         body: Center(
-          child: ElevatedButton(
-            onPressed: () {
-              // カテゴリ追加画面へ遷移
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const AddCategoryPage()),
-              );
-            },
-            child: Text(AppLocalizations.of(context)!.addCategory),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // カテゴリ未登録メッセージ
+              Text(AppLocalizations.of(context)!.noCategories),
+              const SizedBox(height: 8),
+              ElevatedButton(
+                onPressed: () {
+                  // カテゴリ追加画面へ遷移
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const AddCategoryPage()),
+                  );
+                },
+                child: Text(AppLocalizations.of(context)!.addCategory),
+              ),
+            ],
           ),
         ),
       );
