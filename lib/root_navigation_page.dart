@@ -27,7 +27,8 @@ class _RootNavigationPageState extends State<RootNavigationPage> {
   // 3: 商品追加画面
   // 4: セール情報追加画面
   late final List<Widget> _pages = [
-    const BuyListPage(),
+    // 非 const コンストラクタのため const を付けない
+    BuyListPage(),
     const InventoryPage(),
     const HomePage(),
     const AddInventoryPage(),
