@@ -34,7 +34,7 @@ class BuyListPage extends StatefulWidget {
   /// 在庫データ取得用リポジトリ
   final InventoryRepository repository;
 
-  const BuyListPage({
+  BuyListPage({
     super.key,
     this.categories,
     InventoryRepository? repository,

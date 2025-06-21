@@ -13,6 +13,8 @@ class PriceHistoryPage extends StatelessWidget {
   final String category;
   /// 品種名
   final String itemType;
+  /// 商品名 (null なら品種名をタイトルに表示)
+  final String? itemName;
   /// セール情報取得ユースケース
   final WatchPriceByType _watch;
   /// セール情報削除ユースケース
@@ -23,6 +25,7 @@ class PriceHistoryPage extends StatelessWidget {
     super.key,
     required this.category,
     required this.itemType,
+    this.itemName,
     WatchPriceByType? watch,
     DeletePriceInfo? deleter,
   })  : _watch = watch ?? WatchPriceByType(PriceRepositoryImpl()),
@@ -33,8 +36,8 @@ class PriceHistoryPage extends StatelessWidget {
     final textStyle =
         Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 18);
     return Scaffold(
-      // 商品名をタイトルに表示
-      appBar: AppBar(title: Text(itemName)),
+      // 商品名が指定されていればタイトルに表示、無ければ品種名を表示
+      appBar: AppBar(title: Text(itemName ?? itemType)),
       body: StreamBuilder<List<PriceInfo>>(
         stream: _watch(category, itemType),
         builder: (context, snapshot) {
@@ -75,6 +78,7 @@ class PriceHistoryPage extends StatelessWidget {
                         children: [
                           _buildRow(loc.category, p.category),
                           _buildRow(loc.itemType, p.itemType),
+                          _buildRow(loc.itemName, p.itemName),
                           _buildRow(loc.checkedDate(_formatDate(p.checkedAt)), ''),
                           _buildRow(loc.expiry(_formatDate(p.expiry)), ''),
                           _buildRow(loc.count, '${p.count} ${p.unit}'),
@@ -105,7 +109,7 @@ class PriceHistoryPage extends StatelessWidget {
   }
 
   /// 項目名と値を左右に表示する行を作成する
-  Widget _buildRow(String label, String value, TextStyle? style) {
+  Widget _buildRow(String label, String value, [TextStyle? style]) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(

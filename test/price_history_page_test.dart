@@ -8,7 +8,7 @@ import 'package:oouchi_stock/domain/usecases/watch_price_by_type.dart';
 
 void main() {
   testWidgets('PriceHistoryPage が表示される', (WidgetTester tester) async {
-    await tester.pumpWidget(const MaterialApp(
+    await tester.pumpWidget(MaterialApp(
       home: PriceHistoryPage(
         category: '日用品',
         itemType: '洗剤',
