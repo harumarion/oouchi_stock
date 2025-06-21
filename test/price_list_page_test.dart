@@ -13,5 +13,6 @@ void main() {
     await tester.pumpWidget(const MaterialApp(home: PriceListPage()));
     await tester.pumpAndSettle();
     expect(find.byIcon(Icons.more_vert), findsOneWidget);
+    expect(find.byType(Switch), findsWidgets);
   });
 }

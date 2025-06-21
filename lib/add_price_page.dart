@@ -36,11 +36,15 @@ class _AddPricePageState extends State<AddPricePage> {
   // メモ
   String _memo = '';
 
+  // セールの終了日
+  DateTime _expiry = DateTime.now();
+
   final AddPriceInfo _usecase = AddPriceInfo(PriceRepositoryImpl());
 
   @override
   void initState() {
     super.initState();
+    _expiry = _checkedAt.add(const Duration(days: 7));
     final repo = InventoryRepositoryImpl();
     // fetch all inventories once
     FetchAllInventory(repo)().then((list) {
@@ -79,6 +83,7 @@ class _AddPricePageState extends State<AddPricePage> {
       approvalUrl: _approvalUrl,
       memo: _memo,
       unitPrice: _unitPrice,
+      expiry: _expiry,
     );
     await _usecase(info);
   }
@@ -118,6 +123,20 @@ class _AddPricePageState extends State<AddPricePage> {
                           initialDate: _checkedAt,
                         );
                         if (picked != null) setState(() => _checkedAt = picked);
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    ListTile(
+                      title: Text(AppLocalizations.of(context)!.expiry('${_expiry.year}/${_expiry.month}/${_expiry.day}')),
+                      trailing: const Icon(Icons.calendar_today),
+                      onTap: () async {
+                        final picked = await showDatePicker(
+                          context: context,
+                          firstDate: DateTime(2000),
+                          lastDate: DateTime(2100),
+                          initialDate: _expiry,
+                        );
+                        if (picked != null) setState(() => _expiry = picked);
                       },
                     ),
                     const SizedBox(height: 12),
