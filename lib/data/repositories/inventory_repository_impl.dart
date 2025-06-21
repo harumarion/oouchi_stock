@@ -6,7 +6,9 @@ import '../../domain/entities/inventory.dart';
 import '../../domain/entities/history_entry.dart';
 import '../../domain/repositories/inventory_repository.dart';
 
+// InventoryRepositoryImpl: Firestore を利用した在庫リポジトリ実装
 class InventoryRepositoryImpl implements InventoryRepository {
+  // Firestore インスタンス
   final FirebaseFirestore _firestore;
   InventoryRepositoryImpl({FirebaseFirestore? firestore})
       : _firestore = firestore ?? FirebaseFirestore.instance;
@@ -71,14 +73,25 @@ class InventoryRepositoryImpl implements InventoryRepository {
     return doc.id;
   }
 
+  // 数量変更履歴を保存し在庫数量を更新する
   @override
   Future<void> updateQuantity(String id, double amount, String type) async {
     final doc = userCollection('inventory').doc(id);
-    await doc.update({'quantity': FieldValue.increment(amount)});
-    await doc.collection('history').add({
-      'type': type,
-      'quantity': amount.abs(),
-      'timestamp': Timestamp.now(),
+    await _firestore.runTransaction((tx) async {
+      final snapshot = await tx.get(doc);
+      final data = snapshot.data() as Map<String, dynamic>?;
+      final before = (data?['quantity'] ?? 0).toDouble();
+      final after = before + amount;
+      final diff = amount;
+      tx.update(doc, {'quantity': after});
+      tx.set(doc.collection('history').doc(), {
+        'type': type,
+        'quantity': amount.abs(),
+        'before': before,
+        'after': after,
+        'diff': diff,
+        'timestamp': Timestamp.now(),
+      });
     });
   }
 

@@ -113,6 +113,22 @@ void main() {
     expect(find.text('予測'), findsOneWidget);
   });
 
+  testWidgets('履歴タイルに増減量が表示される', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: const Locale('ja'),
+      home: InventoryDetailPage(
+        inventoryId: '1',
+        categories: [Category(id: 1, name: '日用品', createdAt: DateTime.now())],
+        repository: _DataRepository(),
+      ),
+    ));
+    await tester.pump();
+
+    expect(find.textContaining('0.0 -> 1.0 (+1.0個)'), findsOneWidget);
+  });
+
   testWidgets('履歴タイルのスタイルを確認', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: InventoryDetailPage(
