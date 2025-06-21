@@ -48,6 +48,9 @@ class PriceInfo {
   /// 単価
   final double unitPrice;
 
+  /// セール期限
+  final DateTime expiry;
+
   PriceInfo({
     required this.id,
     required this.inventoryId,
@@ -65,5 +68,6 @@ class PriceInfo {
     required this.approvalUrl,
     required this.memo,
     required this.unitPrice,
+    required this.expiry,
   });
 }

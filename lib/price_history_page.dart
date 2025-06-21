@@ -51,6 +51,7 @@ class PriceHistoryPage extends StatelessWidget {
                       ),
                       Text('${AppLocalizations.of(context)!.regularPriceLabel(p.regularPrice.toString())}'),
                       Text('${AppLocalizations.of(context)!.salePriceLabel(p.salePrice.toString())}'),
+                      Text('${AppLocalizations.of(context)!.expiry(_formatDate(p.expiry))}'),
                       if (p.approvalUrl.isNotEmpty)
                         Text('${AppLocalizations.of(context)!.approvalUrlLabel(p.approvalUrl)}'),
                       if (p.memo.isNotEmpty)

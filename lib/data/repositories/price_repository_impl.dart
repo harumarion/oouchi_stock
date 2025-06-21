@@ -30,6 +30,8 @@ class PriceRepositoryImpl implements PriceRepository {
       'approvalUrl': info.approvalUrl,
       'memo': info.memo,
       'unitPrice': info.unitPrice,
+      // セール期限
+      'expiry': Timestamp.fromDate(info.expiry),
       'createdAt': Timestamp.now(),
     });
     return doc.id;
@@ -73,6 +75,9 @@ class PriceRepositoryImpl implements PriceRepository {
       approvalUrl: data['approvalUrl'] ?? '',
       memo: data['memo'] ?? '',
       unitPrice: (data['unitPrice'] ?? 0).toDouble(),
+      // ドキュメントに存在しない場合は checkedAt を使用
+      expiry: (data['expiry'] as Timestamp?)?.toDate() ??
+          (data['checkedAt'] as Timestamp).toDate(),
     );
   }
 
