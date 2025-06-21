@@ -12,6 +12,7 @@ import 'domain/usecases/add_inventory.dart';
 import 'data/repositories/inventory_repository_impl.dart';
 import 'widgets/settings_menu_button.dart';
 import 'main.dart';
+import 'add_category_page.dart';
 
 // 商品を追加する画面のウィジェット
 
@@ -59,6 +60,8 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
 
   // カテゴリの選択肢
   List<Category> _categories = [];
+  // カテゴリが読み込まれたかどうか
+  bool _categoriesLoaded = false;
   StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _catSub;
   // カテゴリごとの品種一覧
   Map<String, List<String>> _typesMap = {};
@@ -74,6 +77,7 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
       if (_categories.isNotEmpty) {
         _category = _categories.first;
       }
+      _categoriesLoaded = true;
     } else {
       _catSub = userCollection('categories')
           .orderBy('createdAt')
@@ -94,6 +98,7 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
                   (c) => c.id != _category?.id && c.name != _category?.name)) {
             _category = _categories.first;
           }
+          _categoriesLoaded = true;
         });
       });
     }
@@ -135,10 +140,33 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (_categories.isEmpty) {
+    if (!_categoriesLoaded) {
       return Scaffold(
         appBar: AppBar(title: Text(AppLocalizations.of(context)!.inventoryAddTitle)),
         body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+    if (_categories.isEmpty) {
+      return Scaffold(
+        appBar: AppBar(title: Text(AppLocalizations.of(context)!.inventoryAddTitle)),
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(AppLocalizations.of(context)!.noCategories),
+              const SizedBox(height: 8),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const AddCategoryPage()),
+                  );
+                },
+                child: Text(AppLocalizations.of(context)!.addCategory),
+              ),
+            ],
+          ),
+        ),
       );
     }
     // 画面のレイアウトを構築

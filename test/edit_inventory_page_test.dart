@@ -4,7 +4,7 @@ import 'package:oouchi_stock/edit_inventory_page.dart';
 import 'package:oouchi_stock/domain/entities/category.dart';
 
 void main() {
-  testWidgets('EditInventoryPage が表示される', (WidgetTester tester) async {
+  testWidgets('カテゴリ読み込み前はローディング表示', (WidgetTester tester) async {
     final cat = Category(id: 1, name: '日用品', createdAt: DateTime.now());
     await tester.pumpWidget(MaterialApp(
       home: EditInventoryPage(
@@ -16,6 +16,6 @@ void main() {
         note: '',
       ),
     ));
-    expect(find.text('ティッシュ'), findsOneWidget);
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
   });
 }

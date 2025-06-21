@@ -108,5 +108,7 @@
   "addToBuyList": "買い物リストに追加",
   "confirmDelete": "削除しますか?",
   "selectColor": "色を選択",
-  "showAds": "広告を表示"
+  "showAds": "広告を表示",
+  "noCategories": "カテゴリが登録されていません",
+  "noItems": "商品が登録されていません"
 }

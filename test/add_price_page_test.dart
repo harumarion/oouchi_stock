@@ -3,8 +3,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:oouchi_stock/add_price_page.dart';
 
 void main() {
-  testWidgets('AddPricePage 初期表示', (WidgetTester tester) async {
+  testWidgets('在庫がない場合は商品追加ボタンを表示', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(home: AddPricePage()));
-    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    await tester.pump();
+    expect(find.byType(ElevatedButton), findsOneWidget);
+    expect(find.text('商品を追加'), findsOneWidget);
   });
 }
