@@ -16,11 +16,13 @@ import 'domain/entities/category.dart';
 import 'domain/entities/inventory.dart';
 import 'domain/entities/category_order.dart';
 import 'domain/usecases/calculate_days_left.dart';
-import 'domain/usecases/fetch_all_inventory.dart';
 import 'domain/entities/buy_list_condition_settings.dart';
 import 'data/repositories/buy_list_repository_impl.dart';
 import 'domain/entities/buy_item.dart';
 import 'domain/usecases/add_buy_item.dart';
+import 'data/repositories/buy_prediction_repository_impl.dart';
+import 'domain/usecases/watch_prediction_items.dart';
+import 'domain/usecases/remove_prediction_item.dart';
 
 /// ホーム画面。起動時に表示され、買い物リストを管理する。
 class HomePage extends StatefulWidget {
@@ -46,12 +48,16 @@ class _HomePageState extends State<HomePage> {
   final CalculateDaysLeft _calcUsecase =
       CalculateDaysLeft(InventoryRepositoryImpl());
 
-  /// 在庫一覧取得用ユースケース
-  final FetchAllInventory _fetchAllUsecase =
-      FetchAllInventory(InventoryRepositoryImpl());
 
   // 買い物リストへ商品を追加するユースケース
   final AddBuyItem _addBuyItem = AddBuyItem(BuyListRepositoryImpl());
+
+  // 予報リストの監視・操作用
+  final _predictionRepo = BuyPredictionRepositoryImpl();
+  late final WatchPredictionItems _watchPrediction =
+      WatchPredictionItems(_predictionRepo);
+  late final RemovePredictionItem _removePrediction =
+      RemovePredictionItem(_predictionRepo);
 
   /// 設定画面から戻った際にカテゴリリストを更新する
   void _updateCategories(List<Category> list) {
@@ -161,98 +167,136 @@ class _HomePageState extends State<HomePage> {
     }
     // 画面表示時に在庫一覧を取得
     // 画面描画時に在庫一覧を取得する
-    return FutureBuilder<List<Inventory>>(
-      future: _fetchAllUsecase(),
+    return StreamBuilder<List<BuyItem>>( 
+      stream: _watchPrediction(),
       builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          final err = snapshot.error?.toString() ?? 'unknown';
-          return Center(child: Text(AppLocalizations.of(context)!.loadError(err)));
-        }
         if (!snapshot.hasData) {
           return const Scaffold(body: Center(child: CircularProgressIndicator()));
         }
-        final list = snapshot.data!;
-        if (list.isEmpty) {
+        final items = snapshot.data!;
+        if (items.isEmpty) {
           return Scaffold(
             appBar: AppBar(title: Text(AppLocalizations.of(context)!.buyListTitle)),
             body: Center(child: Text(AppLocalizations.of(context)!.noBuyItems)),
           );
         }
-          // カテゴリごとに在庫を振り分ける
-          final map = {for (final c in _categories) c.name: <Inventory>[]};
-          for (final inv in list) {
-            map[inv.category]?.add(inv);
-          }
-          return DefaultTabController(
-            length: _categories.length,
-            child: Scaffold(
-              appBar: AppBar(
-                title: Text(AppLocalizations.of(context)!.buyListTitle),
-                actions: [
-                  SettingsMenuButton(
-                    categories: _categories,
-                    onCategoriesChanged: _updateCategories,
-                    onLocaleChanged: (l) => context.findAncestorStateOfType<MyAppState>()?.updateLocale(l),
-                    onConditionChanged: _loadCondition,
-                  )
-                ],
-                // カテゴリ別にタブを生成。3件を超える場合はスクロール表示
-                bottom: TabBar(
-                  isScrollable: true,
-                  tabs: [
-                    for (final c in _categories)
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width / 3,
-                        child: Tab(text: c.name),
-                      )
-                  ],
-                ),
-              ),
-              // 各タブに対応する在庫リストを表示
-              body: TabBarView(
-                children: [
+        final map = {for (final c in _categories) c.name: <BuyItem>[]};
+        for (final item in items) {
+          map[item.category]?.add(item);
+        }
+        return DefaultTabController(
+          length: _categories.length,
+          child: Scaffold(
+            appBar: AppBar(
+              title: Text(AppLocalizations.of(context)!.buyListTitle),
+              actions: [
+                SettingsMenuButton(
+                  categories: _categories,
+                  onCategoriesChanged: _updateCategories,
+                  onLocaleChanged: (l) => context.findAncestorStateOfType<MyAppState>()?.updateLocale(l),
+                  onConditionChanged: _loadCondition,
+                )
+              ],
+              bottom: TabBar(
+                isScrollable: true,
+                tabs: [
                   for (final c in _categories)
-                    map[c.name]!.isEmpty
-                        ? Center(
-                            child: Text(
-                              AppLocalizations.of(context)!.noBuyItems,
-                            ),
-                          )
-                        : ListView(
-                            padding: const EdgeInsets.all(16),
-                            children: [
-                              for (final inv in map[c.name]!)
-                                // ホーム画面で表示する在庫カード
-                                InventoryCard(
-                                  inventory: inv,
-                                  // カードタップで在庫詳細画面へ遷移
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => InventoryDetailPage(
-                                          inventoryId: inv.id,
-                                          categories: _categories,
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                  onAddToList: () async {
-                                    await _addBuyItem(BuyItem(inv.itemName, inv.category, inv.id));
-                                    if (context.mounted) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: Text(AppLocalizations.of(context)!.addedBuyItem)),
-                                      );
-                                    }
-                                  },
-                                ),
-                            ],
-                          ),
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width / 3,
+                      child: Tab(text: c.name),
+                    )
                 ],
               ),
             ),
+            body: TabBarView(
+              children: [
+                for (final c in _categories)
+                  map[c.name]!.isEmpty
+                      ? Center(child: Text(AppLocalizations.of(context)!.noBuyItems))
+                      : ListView(
+                          padding: const EdgeInsets.all(16),
+                          children: [
+                            for (final item in map[c.name]!)
+                              _predictionCard(item),
+                          ],
+                        ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  /// 予報リスト用のカード。スワイプで予報リストから削除できる
+  Widget _predictionCard(BuyItem item) {
+    return Dismissible(
+      key: ValueKey(item.key),
+      direction: DismissDirection.startToEnd,
+      onDismissed: (_) => _removePrediction(item),
+      background: Container(
+        color: Colors.red,
+        alignment: Alignment.centerLeft,
+        padding: const EdgeInsets.only(left: 16),
+        child: const Icon(Icons.delete, color: Colors.white),
+      ),
+      child: StreamBuilder<Inventory?>(
+        stream: InventoryRepositoryImpl().watchInventory(item.inventoryId!),
+        builder: (context, invSnapshot) {
+          final trailingButton = IconButton(
+            icon: const Icon(Icons.info_outline),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => InventoryDetailPage(
+                    inventoryId: item.inventoryId!,
+                    categories: _categories,
+                  ),
+                ),
+              );
+            },
+          );
+          if (!invSnapshot.hasData) {
+            return ListTile(title: Text(item.name), trailing: trailingButton);
+          }
+          final inv = invSnapshot.data!;
+          return FutureBuilder<int>(
+            future: _calcDaysLeft(inv),
+            builder: (context, daysSnapshot) {
+              final daysText = daysSnapshot.hasData
+                  ? ' ・ ${AppLocalizations.of(context)!.daysLeft(daysSnapshot.data!.toString())}'
+                  : '';
+              final subtitle =
+                  '${inv.quantity.toStringAsFixed(1)}${inv.unit}$daysText';
+              return ListTile(
+                title: Text(item.name),
+                subtitle: Text(subtitle),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.playlist_add),
+                      onPressed: () async {
+                        await _addBuyItem(
+                            BuyItem(inv.itemName, inv.category, inv.id));
+                        await _removePrediction(item);
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                                content: Text(AppLocalizations.of(context)!.addedBuyItem)),
+                          );
+                        }
+                      },
+                    ),
+                    trailingButton,
+                  ],
+                ),
+              );
+            },
           );
         },
-      );
+      ),
+    );
   }
 }
