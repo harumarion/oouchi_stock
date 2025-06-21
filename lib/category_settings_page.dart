@@ -163,6 +163,8 @@ class _CategorySettingsPageState extends State<CategorySettingsPage> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
+        // カテゴリ設定画面専用のヒーロータグ
+        heroTag: 'categoryFab',
         onPressed: () async {
           await Navigator.push(
             context,

@@ -126,6 +126,8 @@ class _PriceListPageState extends State<PriceListPage> {
           ],
         ),
         floatingActionButton: FloatingActionButton(
+          // セール情報管理画面専用のヒーロータグ
+          heroTag: 'priceListFab',
           onPressed: () {
             // セール情報追加画面を開く
             Navigator.push(
