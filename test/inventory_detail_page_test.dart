@@ -38,6 +38,32 @@ class _FakeRepository implements InventoryRepository {
   Stream<List<Inventory>> watchNeedsBuy(double threshold) => const Stream.empty();
 }
 
+class _DataRepository extends _FakeRepository {
+  @override
+  Stream<Inventory?> watchInventory(String inventoryId) =>
+      Stream.value(Inventory(
+        id: '1',
+        itemName: 'テスト商品',
+        category: '日用品',
+        itemType: '一般',
+        quantity: 1.0,
+        unit: '個',
+        createdAt: DateTime.now(),
+      ));
+
+  @override
+  Stream<List<HistoryEntry>> watchHistory(String inventoryId) =>
+      Stream.value([
+        HistoryEntry(
+            timestamp: DateTime.now(),
+            type: 'add',
+            quantity: 1,
+            before: 0,
+            after: 1,
+            diff: 1),
+      ]);
+}
+
 void main() {
   testWidgets('InventoryDetailPage ローディング表示', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
@@ -59,5 +85,20 @@ void main() {
     ));
     await tester.pump();
     expect(find.textContaining('Load error'), findsOneWidget);
+  });
+
+  testWidgets('詳細情報が左右に表示される', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: InventoryDetailPage(
+        inventoryId: '1',
+        categories: [Category(id: 1, name: '日用品', createdAt: DateTime.now())],
+        repository: _DataRepository(),
+      ),
+    ));
+    await tester.pump();
+    expect(find.text('日用品'), findsOneWidget);
+    expect(find.text('一般'), findsOneWidget);
+    expect(find.text('1.0個'), findsOneWidget);
+    expect(find.text('追加'), findsOneWidget);
   });
 }
