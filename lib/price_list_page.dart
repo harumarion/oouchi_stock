@@ -140,12 +140,14 @@ class _PriceListPageState extends State<PriceListPage> {
   }
 }
 
+// セール情報管理画面の各タブに表示される
+// カテゴリ別セール一覧ウィジェット
 class PriceCategoryList extends StatefulWidget {
   final String category; // 表示対象カテゴリ名
   final WatchPriceByCategory _watch; // セール情報取得ユースケース
 
   /// [watch] はテスト用に差し替え可能
-  const PriceCategoryList({
+  PriceCategoryList({
     super.key,
     required this.category,
     WatchPriceByCategory? watch,
