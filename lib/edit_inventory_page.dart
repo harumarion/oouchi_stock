@@ -34,23 +34,34 @@ class EditInventoryPage extends StatefulWidget {
 }
 
 class _EditInventoryPageState extends State<EditInventoryPage> {
+  // フォーム状態を管理するキー
   final _formKey = GlobalKey<FormState>();
+  // 商品名
   late String _itemName;
+  // 選択中のカテゴリ
   late Category _category;
+  // 品種
   late String _itemType;
+  // 単位
   late String _unit;
+  // メモ
   late String _note;
 
+  // 在庫更新ユースケース
   final UpdateInventory _usecase =
       UpdateInventory(InventoryRepositoryImpl());
 
+  // 取得したカテゴリ一覧
   List<Category> _categories = [];
-  // カテゴリが読み込まれたか
+  // カテゴリが読み込まれたかどうか
   bool _categoriesLoaded = false;
-  late final StreamSubscription<QuerySnapshot<Map<String, dynamic>>>
-      _catSub;
+  // カテゴリ更新監視用の購読
+  late final StreamSubscription<QuerySnapshot<Map<String, dynamic>>> _catSub;
+  // カテゴリごとの品種マップ
   Map<String, List<String>> _typesMap = {};
+  // 品種更新監視用の購読
   late final StreamSubscription<QuerySnapshot<Map<String, dynamic>>> _typeSub;
+  // 単位の選択肢
   final List<String> _units = ['個', '本', '袋', 'ロール'];
 
   @override
@@ -87,6 +98,9 @@ class _EditInventoryPageState extends State<EditInventoryPage> {
           final types = _typesMap[_category.name];
           if (types != null && types.isNotEmpty) {
             _itemType = types.contains(_itemType) ? _itemType : types.first;
+          } else {
+            // 品種が存在しないカテゴリを選択中の場合は "その他" を設定
+            _itemType = 'その他';
           }
         }
         _categoriesLoaded = true;
@@ -107,11 +121,16 @@ class _EditInventoryPageState extends State<EditInventoryPage> {
           final data = doc.data();
           final cat = data['category'] ?? '';
           final name = data['name'] ?? '';
-          _typesMap.putIfAbsent(cat, () => []).add(name);
+          // Firestore 上に重複した品種があっても一意になるようチェック
+          final list = _typesMap.putIfAbsent(cat, () => []);
+          if (!list.contains(name)) list.add(name);
         }
         final types = _typesMap[_category.name];
         if (types != null && types.isNotEmpty) {
           _itemType = types.contains(_itemType) ? _itemType : types.first;
+        } else {
+          // 対応する品種が無い場合は "その他" を設定
+          _itemType = 'その他';
         }
       });
     });
@@ -198,23 +217,34 @@ class _EditInventoryPageState extends State<EditInventoryPage> {
                 onChanged: (v) {
                   if (v == null) return;
                   setState(() {
+                    // カテゴリ変更時に選択中の品種も更新する
                     _category = v;
                     final types = _typesMap[v.name];
                     if (types != null && types.isNotEmpty) {
                       _itemType = types.first;
+                    } else {
+                      // 品種が無いカテゴリを選択した場合は "その他" を適用
+                      _itemType = 'その他';
                     }
                   });
                 },
               ),
               const SizedBox(height: 12),
-              DropdownButtonFormField<String>(
-                decoration: InputDecoration(labelText: AppLocalizations.of(context)!.itemType),
-                value: _itemType,
-                items: (_typesMap[_category.name] ?? ['その他'])
-                    .map((t) => DropdownMenuItem(value: t, child: Text(t)))
-                    .toList(),
-                onChanged: (v) => setState(() => _itemType = v ?? ''),
-              ),
+              Builder(builder: (context) {
+                // 選択中カテゴリに該当する品種リストを取得
+                final itemTypes = _typesMap[_category.name] ?? ['その他'];
+                if (!itemTypes.contains(_itemType)) {
+                  _itemType = itemTypes.first;
+                }
+                return DropdownButtonFormField<String>(
+                  decoration: InputDecoration(labelText: AppLocalizations.of(context)!.itemType),
+                  value: _itemType,
+                  items: itemTypes
+                      .map((t) => DropdownMenuItem(value: t, child: Text(t)))
+                      .toList(),
+                  onChanged: (v) => setState(() => _itemType = v ?? ''),
+                );
+              }),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
                 decoration: InputDecoration(labelText: AppLocalizations.of(context)!.unit),
