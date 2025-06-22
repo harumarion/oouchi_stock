@@ -110,6 +110,7 @@ void main() {
     expect(find.text('日用品'), findsOneWidget);
     expect(find.text('一般'), findsOneWidget);
     expect(find.text('1.0個'), findsOneWidget);
+    expect(find.text('0.0'), findsOneWidget);
     expect(find.text('追加'), findsOneWidget);
     expect(find.text('予測'), findsOneWidget);
   });
