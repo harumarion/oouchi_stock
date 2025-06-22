@@ -5,8 +5,8 @@ import 'package:oouchi_stock/add_inventory_page.dart';
 import 'package:oouchi_stock/domain/entities/category.dart';
 
 void main() {
-  // 加減ボタンを押した際に数量が変化するかを確認するテスト
-  testWidgets('数量の増減テスト', (WidgetTester tester) async {
+  // 加減ボタンを押した際に個数が変化するかを確認するテスト
+  testWidgets('個数の増減テスト', (WidgetTester tester) async {
     // AddInventoryPage を MaterialApp でラップして表示
     await tester.pumpWidget(
       MaterialApp(
@@ -48,6 +48,23 @@ void main() {
     expect(find.text('カテゴリが登録されていません'), findsOneWidget);
     expect(find.byType(ElevatedButton), findsOneWidget);
     expect(find.text('カテゴリを追加'), findsOneWidget);
+  });
+
+  testWidgets('容量入力で総容量が更新される', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: AddInventoryPage(
+          categories: [Category(id: 1, name: '日用品', createdAt: DateTime.now())],
+        ),
+      ),
+    );
+    await tester.pump();
+
+    // 容量入力欄は2番目のTextFormField
+    await tester.enterText(find.byType(TextFormField).at(1), '2');
+    await tester.pump();
+
+    expect(find.text('総容量: 2.0'), findsOneWidget);
   });
 
   // Navigator.canPop が false の場合でも画面が消えないことを確認するテスト

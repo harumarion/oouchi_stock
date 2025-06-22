@@ -15,6 +15,12 @@ class Inventory {
   /// 数量
   final double quantity;
 
+  /// 1個あたりの容量
+  final double volume;
+
+  /// 総容量
+  final double totalVolume;
+
   /// 単位
   final String unit;
 
@@ -33,6 +39,8 @@ class Inventory {
     required this.category,
     required this.itemType,
     required this.quantity,
+    this.volume = 0,
+    this.totalVolume = 0,
     required this.unit,
     this.note = '',
     this.monthlyConsumption = 0,
