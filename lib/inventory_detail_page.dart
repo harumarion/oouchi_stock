@@ -125,6 +125,11 @@ class InventoryDetailPage extends StatelessWidget {
                     '${inv.quantity.toStringAsFixed(1)}${inv.unit}',
                     textStyle,
                   ),
+                  _buildDetailRow(
+                    AppLocalizations.of(context)!.monthlyConsumption,
+                    inv.monthlyConsumption.toStringAsFixed(1),
+                    textStyle,
+                  ),
                   const SizedBox(height: 8),
                   _buildDetailRow(
                     AppLocalizations.of(context)!.predictLabel,

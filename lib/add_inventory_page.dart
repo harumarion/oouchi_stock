@@ -35,10 +35,15 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
   String _itemType = '柔軟剤';
   // 数量（整数で管理）
   double _quantity = 1.0;
+  // 1個あたり容量
+  double _volume = 1.0;
   // 単位
   String _unit = '個';
   // 任意のメモ
   String _note = '';
+
+  // 総容量計算用ゲッター
+  double get _totalVolume => _quantity * _volume;
 
   final AddInventory _usecase =
       AddInventory(InventoryRepositoryImpl());
@@ -51,6 +56,8 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
       category: _category?.name ?? '',
       itemType: _itemType,
       quantity: _quantity,
+      volume: _volume,
+      totalVolume: _quantity * _volume,
       unit: _unit,
       note: _note,
       monthlyConsumption: 0,
@@ -242,7 +249,7 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
               const SizedBox(height: 12),
               Row(
                 children: [
-                  Text('${AppLocalizations.of(context)!.quantity}:'),
+                  Text('${AppLocalizations.of(context)!.pieceCount}:'),
                   IconButton(
                     icon: const Icon(Icons.remove),
                     onPressed: () => setState(() {
@@ -263,6 +270,14 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
                 ],
               ),
               const SizedBox(height: 12),
+              // 1個あたり容量入力
+              TextFormField(
+                decoration: InputDecoration(labelText: AppLocalizations.of(context)!.volume),
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                initialValue: '1',
+                onChanged: (v) => setState(() => _volume = double.tryParse(v) ?? 1.0),
+              ),
+              const SizedBox(height: 12),
               // 単位選択
               DropdownButtonFormField<String>(
                 decoration: InputDecoration(labelText: AppLocalizations.of(context)!.unit),
@@ -271,6 +286,12 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
                     .map((u) => DropdownMenuItem(value: u, child: Text(u)))
                     .toList(),
                 onChanged: (value) => setState(() => _unit = value!),
+              ),
+              const SizedBox(height: 12),
+              // 総容量表示
+              Text(
+                AppLocalizations.of(context)!.totalVolume(_totalVolume.toStringAsFixed(2)),
+                style: const TextStyle(fontSize: 20),
               ),
               const SizedBox(height: 12),
               // メモの入力（任意）
@@ -305,6 +326,7 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
                           _itemName = '';
                           _note = '';
                           _quantity = 1.0;
+                          _volume = 1.0;
                         });
                       }
                     } on FirebaseException catch (e) {
