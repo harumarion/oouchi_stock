@@ -32,6 +32,7 @@ void main() {
   });
 
   test('PriceCategoryList の検索条件', () {
+    // セール情報管理画面のリスト検索で利用するデータ
     final p1 = PriceInfo(
       id: '1',
       inventoryId: '1',
@@ -49,6 +50,7 @@ void main() {
       approvalUrl: '',
       memo: '',
       unitPrice: 100,
+      expiry: DateTime.now().add(const Duration(days: 1)),
     );
     final p2 = PriceInfo(
       id: '2',
@@ -67,6 +69,7 @@ void main() {
       approvalUrl: '',
       memo: '',
       unitPrice: 50,
+      expiry: DateTime.now().add(const Duration(days: 1)),
     );
     final list = [p1, p2];
     const keyword = '野菜';
