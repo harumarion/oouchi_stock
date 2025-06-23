@@ -7,12 +7,24 @@ import 'package:oouchi_stock/domain/usecases/stocktake.dart';
 import 'package:oouchi_stock/domain/repositories/inventory_repository.dart';
 import 'package:oouchi_stock/domain/entities/history_entry.dart';
 
+/// テストで利用するフェイクの在庫リポジトリ
 class FakeInventoryRepository implements InventoryRepository {
+  /// AddInventory で追加された在庫
   Inventory? addedInventory;
+
+  /// UpdateQuantity で指定されたID
   String? updateId;
+
+  /// UpdateQuantity で指定された増減量
   double? updateAmount;
+
+  /// UpdateQuantity の種類
   String? updateType;
+
+  /// DeleteInventory で削除されたID
   String? deletedId;
+
+  /// Stocktake で渡された引数
   Map<String, double>? stocktakeArgs;
 
   @override
@@ -57,6 +69,9 @@ class FakeInventoryRepository implements InventoryRepository {
       throw UnimplementedError();
   @override
   Stream<List<HistoryEntry>> watchHistory(String inventoryId) =>
+      throw UnimplementedError();
+  @override
+  Stream<List<Inventory>> watchNeedsBuy(double threshold) =>
       throw UnimplementedError();
 }
 
