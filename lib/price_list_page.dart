@@ -14,6 +14,7 @@ import 'domain/entities/category_order.dart';
 import 'domain/usecases/watch_price_by_category.dart';
 import 'price_detail_page.dart';
 import 'main.dart';
+import 'widgets/scrolling_text.dart';
 
 // セール情報管理画面
 
@@ -269,34 +270,43 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
                 itemBuilder: (context, index) {
                   final p = items[index];
                   final diff = p.regularPrice - p.salePrice;
-                  return InkWell(
-                    onTap: () {
-                      // タップでセール詳細情報表示画面へ遷移
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => PriceDetailPage(info: p),
-                        ),
-                      );
-                    },
-                    child: Card(
-                      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      child: Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(p.itemType, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                            const SizedBox(height: 4),
-                            Text(p.itemName),
-                            const SizedBox(height: 4),
-                            Text(AppLocalizations.of(context)!.expiry(_formatDate(p.expiry))),
-                            const SizedBox(height: 4),
-                            Text(AppLocalizations.of(context)!.regularPriceLabel(p.regularPrice.toStringAsFixed(0))),
-                            Text(AppLocalizations.of(context)!.salePriceLabel(p.salePrice.toStringAsFixed(0))),
-                            Text(AppLocalizations.of(context)!.priceDiffLabel(diff.toStringAsFixed(0))),
-                          ],
-                        ),
+                  return Card(
+                    margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              // 品種/商品名を1行で表示
+                              Expanded(
+                                child: ScrollingText(
+                                  '${p.itemType} / ${p.itemName}',
+                                  style: const TextStyle(fontSize: 18),
+                                ),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.info_outline),
+                                onPressed: () {
+                                  // i アイコン押下でセール詳細情報画面へ遷移
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => PriceDetailPage(info: p),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Text(AppLocalizations.of(context)!.expiry(_formatDate(p.expiry))),
+                          const SizedBox(height: 4),
+                          Text(AppLocalizations.of(context)!.regularPriceLabel(p.regularPrice.toStringAsFixed(0))),
+                          Text(AppLocalizations.of(context)!.salePriceLabel(p.salePrice.toStringAsFixed(0))),
+                          Text(AppLocalizations.of(context)!.priceDiffLabel(diff.toStringAsFixed(0))),
+                        ],
                       ),
                     ),
                   );
