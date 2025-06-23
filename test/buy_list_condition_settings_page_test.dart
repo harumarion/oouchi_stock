@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:oouchi_stock/buy_list_condition_settings_page.dart';
+import 'package:oouchi_stock/domain/entities/buy_list_condition_settings.dart';
+
+// 買い物予報条件設定画面のウィジェットテスト
 
 void main() {
   testWidgets('BuyListConditionSettingsPage 表示', (tester) async {
