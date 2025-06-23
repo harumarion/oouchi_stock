@@ -56,13 +56,15 @@ class _DataRepository extends _FakeRepository {
   @override
   Stream<List<HistoryEntry>> watchHistory(String inventoryId) =>
       Stream.value([
+        // 履歴エントリを生成
         HistoryEntry(
-            timestamp: DateTime.now(),
-            type: 'add',
-            quantity: 1,
-            before: 0,
-            after: 1,
-            diff: 1),
+          'add',
+          1,
+          DateTime.now(),
+          before: 0,
+          after: 1,
+          diff: 1,
+        ),
       ]);
 }
 
