@@ -79,5 +79,7 @@ void main() {
     ));
     await tester.pump();
     expect(find.text('テスト'), findsOneWidget);
+    // カードウィジェットとして表示されることを確認
+    expect(find.byType(Card), findsOneWidget);
   });
 }

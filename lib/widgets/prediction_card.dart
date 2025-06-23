@@ -67,8 +67,12 @@ class PredictionCard extends StatelessWidget {
             icon: const Icon(Icons.info_outline),
             onPressed: () => _openDetail(context),
           );
+          // 在庫がまだ取得できない場合もカードとして表示する
           if (!snapshot.hasData) {
-            return ListTile(title: Text(item.name), trailing: detailButton);
+            return Card(
+              margin: const EdgeInsets.only(bottom: 12),
+              child: ListTile(title: Text(item.name), trailing: detailButton),
+            );
           }
           final inv = snapshot.data!;
           return FutureBuilder<int>(
@@ -79,27 +83,31 @@ class PredictionCard extends StatelessWidget {
                   : '';
               final subtitle =
                   '${inv.quantity.toStringAsFixed(1)}${inv.unit}$daysText';
-              return ListTile(
-                title: Text(item.name),
-                subtitle: Text(subtitle),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.playlist_add),
-                      onPressed: () async {
-                        await addUsecase(
-                            BuyItem(inv.itemName, inv.category, inv.id));
-                        await removeUsecase(item);
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(loc.addedBuyItem)),
-                          );
-                        }
-                      },
-                    ),
-                    detailButton,
-                  ],
+              return Card(
+                // 買い物予報画面の1アイテムをカード表示
+                margin: const EdgeInsets.only(bottom: 12),
+                child: ListTile(
+                  title: Text(item.name),
+                  subtitle: Text(subtitle),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.playlist_add),
+                        onPressed: () async {
+                          await addUsecase(
+                              BuyItem(inv.itemName, inv.category, inv.id));
+                          await removeUsecase(item);
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(loc.addedBuyItem)),
+                            );
+                          }
+                        },
+                      ),
+                      detailButton,
+                    ],
+                  ),
                 ),
               );
             },
