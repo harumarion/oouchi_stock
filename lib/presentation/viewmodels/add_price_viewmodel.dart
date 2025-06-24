@@ -1,4 +1,5 @@
-import 'package:flutter/foundation.dart';
+// Flutter の基本ウィジェットとステート管理を使用
+import 'package:flutter/material.dart';
 
 import '../../domain/entities/inventory.dart';
 import '../../domain/entities/price_info.dart';

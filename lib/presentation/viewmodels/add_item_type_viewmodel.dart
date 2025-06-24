@@ -1,6 +1,6 @@
 import 'dart:math';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+// Flutter の基本ウィジェットとステート管理を使用
+import 'package:flutter/material.dart' hide Category;
 
 import '../../domain/entities/category.dart';
 import '../../domain/entities/item_type.dart';
