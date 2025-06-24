@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:oouchi_stock/i18n/app_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -13,6 +12,8 @@ import 'data/repositories/inventory_repository_impl.dart';
 import 'widgets/settings_menu_button.dart';
 import 'main.dart';
 import 'add_category_page.dart';
+import 'presentation/viewmodels/add_inventory_viewmodel.dart';
+import 'presentation/viewmodels/add_inventory_viewmodel.dart';
 
 // 商品を追加する画面のウィジェット
 
@@ -25,137 +26,36 @@ class AddInventoryPage extends StatefulWidget {
 }
 
 class _AddInventoryPageState extends State<AddInventoryPage> {
-  // フォームの状態を管理するキー
-  final _formKey = GlobalKey<FormState>();
-  // 商品名
-  String _itemName = '';
-  // カテゴリ
-  Category? _category;
-  // 品種
-  String _itemType = '柔軟剤';
-  // 数量（整数で管理）
-  double _quantity = 1.0;
-  // 1個あたり容量
-  double _volume = 1.0;
-  // 単位
-  String _unit = '個';
-  // 任意のメモ
-  String _note = '';
-
-  // 総容量計算用ゲッター
-  double get _totalVolume => _quantity * _volume;
-
-  final AddInventory _usecase =
-      AddInventory(InventoryRepositoryImpl());
-
-  /// 保存ボタンの処理。入力内容を Firestore に保存する
-  Future<void> _saveItem() async {
-    final item = Inventory(
-      id: '',
-      itemName: _itemName,
-      category: _category?.name ?? '',
-      itemType: _itemType,
-      quantity: _quantity,
-      volume: _volume,
-      totalVolume: _quantity * _volume,
-      unit: _unit,
-      note: _note,
-      monthlyConsumption: 0,
-      createdAt: DateTime.now(),
-    );
-    await _usecase(item);
-  }
-
-  // カテゴリの選択肢
-  List<Category> _categories = [];
-  // カテゴリが読み込まれたかどうか
-  bool _categoriesLoaded = false;
-  StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _catSub;
-  // カテゴリごとの品種一覧
-  Map<String, List<String>> _typesMap = {};
-  StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _typeSub;
-  // 単位の選択肢
-  final List<String> _units = ['個', '本', '袋', 'ロール'];
+  /// 画面の状態を管理する ViewModel
+  late final AddInventoryViewModel _viewModel;
 
   @override
   void initState() {
     super.initState();
-    // 引数にカテゴリが渡されており、かつ件数が1件以上ある場合のみ
-    if (widget.categories != null && widget.categories!.isNotEmpty) {
-      // 画面初期化時にカテゴリリストを設定
-      _categories = List.from(widget.categories!);
-      _category = _categories.first;
-      _categoriesLoaded = true;
-    } else {
-      // カテゴリが無い場合は Firestore を監視して更新を待つ
-      _catSub = userCollection('categories')
-          .orderBy('createdAt')
-          .snapshots()
-          .listen((snapshot) {
-        setState(() {
-          _categories = snapshot.docs.map((d) {
-            final data = d.data();
-            return Category(
-              id: data['id'] ?? 0,
-              name: data['name'] ?? '',
-              createdAt: parseDateTime(data['createdAt']),
-              color: data['color'],
-            );
-          }).toList();
-          if (_categories.isNotEmpty &&
-              _categories.every(
-                  (c) => c.id != _category?.id && c.name != _category?.name)) {
-            _category = _categories.first;
-          }
-          _categoriesLoaded = true;
-        });
-      });
-    }
-    _typeSub = userCollection('itemTypes')
-        .orderBy('createdAt')
-        .snapshots()
-        .listen((snapshot) async {
-      if (snapshot.docs.isEmpty) {
-        await insertDefaultItemTypes();
-        return;
-      }
-      setState(() {
-        _typesMap = {};
-        for (final doc in snapshot.docs) {
-          final data = doc.data();
-          final cat = data['category'] ?? '';
-          final name = data['name'] ?? '';
-          _typesMap.putIfAbsent(cat, () => []).add(name);
-        }
-        if (_category != null) {
-          final types = _typesMap[_category!.name];
-          if (types != null && types.isNotEmpty) {
-            _itemType = types.first;
-          } else {
-            // 品種が存在しない場合は "その他" を初期値とする
-            _itemType = 'その他';
-          }
-        }
-      });
+    _viewModel =
+        AddInventoryViewModel(AddInventory(InventoryRepositoryImpl()))
+          ..load(widget.categories);
+    _viewModel.addListener(() {
+      if (mounted) setState(() {});
     });
   }
 
   @override
   void dispose() {
-    _catSub?.cancel();
-    _typeSub?.cancel();
+    _viewModel.disposeSubscriptions();
+    _viewModel.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!_categoriesLoaded) {
+    if (!_viewModel.categoriesLoaded) {
       return Scaffold(
         appBar: AppBar(title: Text(AppLocalizations.of(context)!.inventoryAddTitle)),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
-    if (_categories.isEmpty) {
+    if (_viewModel.categories.isEmpty) {
       return Scaffold(
         appBar: AppBar(title: Text(AppLocalizations.of(context)!.inventoryAddTitle)),
         body: Center(
@@ -185,8 +85,8 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
         actions: [
           // 設定メニュー。買い物リスト画面と同じ内容を表示
           SettingsMenuButton(
-            categories: _categories,
-            onCategoriesChanged: (l) => setState(() => _categories = List.from(l)),
+            categories: _viewModel.categories,
+            onCategoriesChanged: (l) => setState(() => _viewModel.categories = List.from(l)),
             onLocaleChanged: (l) =>
                 context.findAncestorStateOfType<MyAppState>()?.updateLocale(l),
             onConditionChanged: () {},
@@ -196,13 +96,13 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Form(
-          key: _formKey,
+          key: _viewModel.formKey,
           child: ListView(
             children: [
               // 商品名入力
               TextFormField(
                 decoration: InputDecoration(labelText: AppLocalizations.of(context)!.itemName),
-                onChanged: (value) => _itemName = value,
+                onChanged: (value) => _viewModel.setItemName(value),
                 validator: (value) =>
                     value == null || value.isEmpty ? AppLocalizations.of(context)!.itemNameRequired : null,
               ),
@@ -210,40 +110,32 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
               // カテゴリ選択
               DropdownButtonFormField<Category>(
                 decoration: InputDecoration(labelText: AppLocalizations.of(context)!.category),
-                value: _category,
-                items: _categories
+                value: _viewModel.category,
+                items: _viewModel.categories
                     .map((c) => DropdownMenuItem(value: c, child: Text(c.name)))
                     .toList(),
                 onChanged: (value) {
                   if (value == null) return;
-                  setState(() {
-                    _category = value;
-                    final types = _typesMap[value.name];
-                    if (types != null && types.isNotEmpty) {
-                      _itemType = types.first;
-                    } else {
-                      // 品種が存在しないカテゴリを選んだ場合は "その他" に変更
-                      _itemType = 'その他';
-                    }
-                  });
+                  _viewModel.changeCategory(value);
                 },
               ),
               const SizedBox(height: 12),
               // 品種選択
               Builder(builder: (context) {
-                // 現在選択中のカテゴリに対応する品種リストを取得
-                final itemTypes = _typesMap[_category?.name] ?? ['その他'];
-                // ドロップダウンに存在しない値を選んでいる場合は先頭に合わせる
-                if (!itemTypes.contains(_itemType)) {
-                  _itemType = itemTypes.first;
+                final itemTypes =
+                    _viewModel.typesMap[_viewModel.category?.name] ?? ['その他'];
+                if (!itemTypes.contains(_viewModel.itemType)) {
+                  _viewModel.changeItemType(itemTypes.first);
                 }
                 return DropdownButtonFormField<String>(
                   decoration: InputDecoration(labelText: AppLocalizations.of(context)!.itemType),
-                  value: _itemType,
+                  value: _viewModel.itemType,
                   items: itemTypes
                       .map((t) => DropdownMenuItem(value: t, child: Text(t)))
                       .toList(),
-                  onChanged: (value) => setState(() => _itemType = value ?? ''),
+                  onChanged: (value) {
+                    if (value != null) _viewModel.changeItemType(value);
+                  },
                 );
               }),
               const SizedBox(height: 12),
@@ -252,20 +144,12 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
                   Text('${AppLocalizations.of(context)!.pieceCount}:'),
                   IconButton(
                     icon: const Icon(Icons.remove),
-                    onPressed: () => setState(() {
-                      // 商品追加画面: 数量を1単位で減らす
-                      if (_quantity > 1.0) _quantity -= 1.0;
-                      _quantity = double.parse(_quantity.toStringAsFixed(0));
-                    }),
+                    onPressed: () => _viewModel.changeQuantity(-1),
                   ),
-                  Text(_quantity.toStringAsFixed(0)),
+                  Text(_viewModel.quantity.toStringAsFixed(0)),
                   IconButton(
                     icon: const Icon(Icons.add),
-                    onPressed: () => setState(() {
-                      // 商品追加画面: 数量を1単位で増やす
-                      _quantity += 1.0;
-                      _quantity = double.parse(_quantity.toStringAsFixed(0));
-                    }),
+                    onPressed: () => _viewModel.changeQuantity(1),
                   ),
                 ],
               ),
@@ -275,29 +159,29 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
                 decoration: InputDecoration(labelText: AppLocalizations.of(context)!.volume),
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 initialValue: '1',
-                onChanged: (v) => setState(() => _volume = double.tryParse(v) ?? 1.0),
+                onChanged: (v) => _viewModel.setVolume(v),
               ),
               const SizedBox(height: 12),
               // 単位選択
               DropdownButtonFormField<String>(
                 decoration: InputDecoration(labelText: AppLocalizations.of(context)!.unit),
-                value: _unit,
-                items: _units
+                value: _viewModel.unit,
+                items: _viewModel.units
                     .map((u) => DropdownMenuItem(value: u, child: Text(u)))
                     .toList(),
-                onChanged: (value) => setState(() => _unit = value!),
+                onChanged: (value) => _viewModel.setUnit(value!),
               ),
               const SizedBox(height: 12),
               // 総容量表示
               Text(
-                AppLocalizations.of(context)!.totalVolume(_totalVolume.toStringAsFixed(2)),
+                AppLocalizations.of(context)!.totalVolume(_viewModel.totalVolume.toStringAsFixed(2)),
                 style: const TextStyle(fontSize: 20),
               ),
               const SizedBox(height: 12),
               // メモの入力（任意）
               TextFormField(
                 decoration: InputDecoration(labelText: AppLocalizations.of(context)!.memoOptional),
-                onChanged: (value) => _note = value,
+                onChanged: (value) => _viewModel.setNote(value),
               ),
               const SizedBox(height: 24),
               // 入力内容を保存するボタン
@@ -307,9 +191,9 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
                 label: Text(AppLocalizations.of(context)!.save),
                 onPressed: () async {
                   // フォームの入力が正しいか確認
-                  if (_formKey.currentState!.validate()) {
+                  if (_viewModel.formKey.currentState!.validate()) {
                     try {
-                      await _saveItem();
+                      await _viewModel.save();
                       if (!mounted) return;
                       final snackBar = ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text(AppLocalizations.of(context)!.saved)),
@@ -322,11 +206,12 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
                       } else {
                         // ルート画面から商品追加した場合はフォームをリセットする
                         setState(() {
-                          _formKey.currentState?.reset();
-                          _itemName = '';
-                          _note = '';
-                          _quantity = 1.0;
-                          _volume = 1.0;
+                          _viewModel.formKey.currentState?.reset();
+                          _viewModel.setItemName('');
+                          _viewModel.setNote('');
+                          _viewModel.quantity = 1.0;
+                          _viewModel.volume = 1.0;
+                          _viewModel.notifyListeners();
                         });
                       }
                     } on FirebaseException catch (e) {

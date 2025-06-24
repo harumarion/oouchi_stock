@@ -1,8 +1,9 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:oouchi_stock/i18n/app_localizations.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'util/firestore_refs.dart';
+
+import 'presentation/viewmodels/add_category_viewmodel.dart';
+import 'data/repositories/category_repository_impl.dart';
+import 'domain/usecases/add_category.dart';
 
 /// カテゴリを追加する画面。
 /// 入力されたカテゴリ名を Firestore の `categories` コレクションに保存する。
@@ -14,44 +15,23 @@ class AddCategoryPage extends StatefulWidget {
 }
 
 class _AddCategoryPageState extends State<AddCategoryPage> {
-  final _formKey = GlobalKey<FormState>();
-  String _name = '';
-  Color? _color;
-  final _colors = [
-    Colors.red,
-    Colors.green,
-    Colors.blue,
-    Colors.orange,
-    Colors.purple,
-    Colors.brown,
-    Colors.pink,
-    Colors.cyan,
-  ];
+  /// 画面状態を管理する ViewModel
+  late final AddCategoryViewModel _viewModel;
 
-  /// 保存ボタンの処理。入力されたカテゴリ名を保存する
-  Future<void> _save() async {
-    try {
-      final id = Random().nextInt(0xffffffff);
-      await userCollection('categories').add({
-        'id': id,
-        'name': _name,
-        'createdAt': Timestamp.now(),
-        if (_color != null)
-          'color': '#${_color!.value.toRadixString(16).padLeft(8, '0').substring(2)}',
-      });
-      if (!mounted) return;
-      await ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.saved)))
-          .closed;
-      if (mounted) Navigator.pop(context);
-    } catch (e) {
-      // 例外内容をログに出力
-      debugPrint('カテゴリ保存失敗: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.saveFailed)));
-      }
-    }
+  @override
+  void initState() {
+    super.initState();
+    _viewModel =
+        AddCategoryViewModel(AddCategory(CategoryRepositoryImpl()));
+    _viewModel.addListener(() {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _viewModel.dispose();
+    super.dispose();
   }
 
   @override
@@ -61,12 +41,12 @@ class _AddCategoryPageState extends State<AddCategoryPage> {
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Form(
-          key: _formKey,
+          key: _viewModel.formKey,
           child: Column(
             children: [
               TextFormField(
                 decoration: InputDecoration(labelText: AppLocalizations.of(context)!.categoryName),
-                onChanged: (v) => _name = v,
+                onChanged: (v) => _viewModel.name = v,
                 validator: (v) => v == null || v.isEmpty ? AppLocalizations.of(context)!.required : null,
               ),
               const SizedBox(height: 16),
@@ -80,9 +60,9 @@ class _AddCategoryPageState extends State<AddCategoryPage> {
                 child: ListView(
                   scrollDirection: Axis.horizontal,
                   children: [
-                    for (final c in _colors)
+                    for (final c in _viewModel.colors)
                       GestureDetector(
-                        onTap: () => setState(() => _color = c),
+                        onTap: () => setState(() => _viewModel.color = c),
                         child: Container(
                           margin: const EdgeInsets.symmetric(horizontal: 4),
                           width: 40,
@@ -90,7 +70,7 @@ class _AddCategoryPageState extends State<AddCategoryPage> {
                             color: c,
                             shape: BoxShape.circle,
                             border: Border.all(
-                              color: _color == c ? Colors.black : Colors.transparent,
+                              color: _viewModel.color == c ? Colors.black : Colors.transparent,
                               width: 3,
                             ),
                           ),
@@ -101,9 +81,22 @@ class _AddCategoryPageState extends State<AddCategoryPage> {
               ),
               const SizedBox(height: 24),
               ElevatedButton(
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    _save();
+                onPressed: () async {
+                  if (_viewModel.formKey.currentState!.validate()) {
+                    try {
+                      await _viewModel.save();
+                      if (!mounted) return;
+                      await ScaffoldMessenger.of(context)
+                          .showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.saved)))
+                          .closed;
+                      if (mounted) Navigator.pop(context);
+                    } catch (e) {
+                      debugPrint('カテゴリ保存失敗: $e');
+                      if (mounted) {
+                        ScaffoldMessenger.of(context)
+                            .showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.saveFailed)));
+                      }
+                    }
                   }
                 },
                 child: Text(AppLocalizations.of(context)!.save),

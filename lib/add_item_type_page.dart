@@ -1,7 +1,7 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'util/firestore_refs.dart';
+import 'presentation/viewmodels/add_item_type_viewmodel.dart';
+import 'data/repositories/item_type_repository_impl.dart';
+import 'domain/usecases/add_item_type.dart';
 
 import 'domain/entities/category.dart';
 import 'package:oouchi_stock/i18n/app_localizations.dart';
@@ -15,40 +15,25 @@ class AddItemTypePage extends StatefulWidget {
 }
 
 class _AddItemTypePageState extends State<AddItemTypePage> {
-  final _formKey = GlobalKey<FormState>();
-  String _name = '';
-  Category? _category;
+  /// 画面状態を管理する ViewModel
+  late final AddItemTypeViewModel _viewModel;
 
   @override
   void initState() {
     super.initState();
-    if (widget.categories.isNotEmpty) {
-      _category = widget.categories.first;
-    }
+    _viewModel = AddItemTypeViewModel(
+      AddItemType(ItemTypeRepositoryImpl()),
+      widget.categories,
+    );
+    _viewModel.addListener(() {
+      if (mounted) setState(() {});
+    });
   }
 
-  Future<void> _save() async {
-    try {
-      final id = Random().nextInt(0xffffffff);
-      await userCollection('itemTypes').add({
-        'id': id,
-        'category': _category?.name ?? '',
-        'name': _name,
-        'createdAt': Timestamp.now(),
-      });
-      if (!mounted) return;
-      await ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.saved)))
-          .closed;
-      if (mounted) Navigator.pop(context);
-    } catch (e) {
-      // エラー内容をログに出力
-      debugPrint('品種保存失敗: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.saveFailed)));
-      }
-    }
+  @override
+  void dispose() {
+    _viewModel.dispose();
+    super.dispose();
   }
 
   @override
@@ -58,28 +43,41 @@ class _AddItemTypePageState extends State<AddItemTypePage> {
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Form(
-          key: _formKey,
+          key: _viewModel.formKey,
           child: Column(
             children: [
               TextFormField(
                 decoration: InputDecoration(labelText: AppLocalizations.of(context)!.itemType),
-                onChanged: (v) => _name = v,
+                onChanged: (v) => _viewModel.name = v,
                 validator: (v) => v == null || v.isEmpty ? AppLocalizations.of(context)!.required : null,
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<Category>(
                 decoration: InputDecoration(labelText: AppLocalizations.of(context)!.category),
-                value: _category,
-                items: widget.categories
+                value: _viewModel.category,
+                items: _viewModel.categories
                     .map((c) => DropdownMenuItem(value: c, child: Text(c.name)))
                     .toList(),
-                onChanged: (v) => setState(() => _category = v),
+                onChanged: (v) => setState(() => _viewModel.category = v),
               ),
               const SizedBox(height: 24),
               ElevatedButton(
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    _save();
+                onPressed: () async {
+                  if (_viewModel.formKey.currentState!.validate()) {
+                    try {
+                      await _viewModel.save();
+                      if (!mounted) return;
+                      await ScaffoldMessenger.of(context)
+                          .showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.saved)))
+                          .closed;
+                      if (mounted) Navigator.pop(context);
+                    } catch (e) {
+                      debugPrint('品種保存失敗: $e');
+                      if (mounted) {
+                        ScaffoldMessenger.of(context)
+                            .showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.saveFailed)));
+                      }
+                    }
                   }
                 },
                 child: Text(AppLocalizations.of(context)!.save),

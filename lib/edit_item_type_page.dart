@@ -4,6 +4,9 @@ import 'util/firestore_refs.dart';
 import 'domain/entities/item_type.dart';
 import 'domain/entities/category.dart';
 import 'package:oouchi_stock/i18n/app_localizations.dart';
+import 'presentation/viewmodels/edit_item_type_viewmodel.dart';
+import 'domain/usecases/update_item_type.dart';
+import 'data/repositories/item_type_repository_impl.dart';
 
 /// アイテム種別を編集する画面
 
@@ -21,32 +24,25 @@ class EditItemTypePage extends StatefulWidget {
 }
 
 class _EditItemTypePageState extends State<EditItemTypePage> {
-  final _formKey = GlobalKey<FormState>();
-  late String _name;
-  Category? _category;
+  /// 画面状態を管理する ViewModel
+  late final EditItemTypeViewModel _viewModel;
 
   @override
   void initState() {
     super.initState();
-    _name = widget.itemType.name;
-    // 画面初期化時に現在のカテゴリを設定
-    if (widget.categories.isNotEmpty) {
-      _category = widget.categories.firstWhere(
-        (c) => c.name == widget.itemType.category,
-        orElse: () => widget.categories.first,
-      );
-    }
+    _viewModel = EditItemTypeViewModel(
+      UpdateItemType(ItemTypeRepositoryImpl()),
+      widget.itemType,
+      widget.categories,
+    );
+    _viewModel.addListener(() {
+      if (mounted) setState(() {});
+    });
   }
 
   Future<void> _save() async {
     try {
-      final snapshot = await userCollection('itemTypes')
-          .where('id', isEqualTo: widget.itemType.id)
-          .get();
-      for (final doc in snapshot.docs) {
-        await doc.reference
-            .update({'name': _name, 'category': _category?.name ?? ''});
-      }
+      await _viewModel.save();
       if (!mounted) return;
       await ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.saved)))
@@ -67,29 +63,29 @@ class _EditItemTypePageState extends State<EditItemTypePage> {
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Form(
-          key: _formKey,
+          key: _viewModel.formKey,
           child: Column(
             children: [
               TextFormField(
-                initialValue: _name,
+                initialValue: _viewModel.name,
                 decoration: InputDecoration(labelText: AppLocalizations.of(context)!.itemType),
-                onChanged: (v) => _name = v,
+                onChanged: (v) => _viewModel.name = v,
                 validator: (v) => v == null || v.isEmpty ? AppLocalizations.of(context)!.required : null,
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<Category>(
                 decoration: InputDecoration(labelText: AppLocalizations.of(context)!.category),
-                value: _category,
-                items: widget.categories
+                value: _viewModel.category,
+                items: _viewModel.categories
                     .map((c) => DropdownMenuItem(value: c, child: Text(c.name)))
                     .toList(),
-                onChanged: (v) => setState(() => _category = v),
+                onChanged: (v) => setState(() => _viewModel.category = v),
               ),
               const SizedBox(height: 24),
               // 保存ボタンをタップしたときにアイテム種別を更新
               ElevatedButton(
                 onPressed: () {
-                  if (_formKey.currentState!.validate()) {
+                  if (_viewModel.formKey.currentState!.validate()) {
                     _save();
                   }
                 },
