@@ -7,6 +7,7 @@ import '../../domain/entities/inventory.dart';
 import '../../domain/entities/category.dart';
 import '../../domain/entities/category_order.dart';
 import '../../domain/entities/buy_list_condition_settings.dart';
+import '../../domain/entities/buy_item.dart';
 import '../../data/repositories/inventory_repository_impl.dart';
 import '../../domain/usecases/calculate_days_left.dart';
 import '../../domain/usecases/watch_inventory.dart';
@@ -42,12 +43,12 @@ class HomePageViewModel extends ChangeNotifier {
   /// 買い物リストへ商品を追加するユースケースを公開
   AddBuyItem get addBuyItem => _addBuyItem;
 
-  /// 予報アイテムを買い物リストへ追加
+  /// ホーム画面で予報カードの「買い物リストに追加」ボタンを押したときの処理
   Future<void> addPredictionToBuyList(BuyItem item) async {
     await _addBuyItem(item);
   }
 
-  /// 予報アイテムを削除
+  /// ホーム画面で予報カードをスワイプしたときの削除処理
   Future<void> removePredictionItem(BuyItem item) async {
     await removePrediction(item);
   }

@@ -91,6 +91,7 @@ class BuyListPageState extends State<BuyListPage> {
                         decoration: InputDecoration(labelText: loc.enterItemName),
                       ),
                     ),
+                    // 追加ボタンをタップしたときの処理
                     IconButton(
                       onPressed: () async {
                         await _viewModel.addManualItem();
