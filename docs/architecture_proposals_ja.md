@@ -22,6 +22,9 @@
 - ViewModel が UseCase を呼び出し、画面は ViewModel を監視するだけにすると見通しが良くなります。
 - 例として `AddInventoryPage` をはじめ、カテゴリの追加・編集画面やセール情報追加画面も
   ViewModel (`AddCategoryViewModel`, `EditCategoryViewModel`, `EditInventoryViewModel` など) で状態管理するようリファクタリングしました。
+  さらに在庫一覧画面でも `InventoryPageViewModel` と `InventoryListViewModel` を導入し、
+  画面の状態遷移を ViewModel に集約しました。
+  買い物予報画面も `BuyListViewModel` を用いてロジックを分離しています。
 
 ## 4. ルーティングの整理
 - 画面遷移が複雑になった場合は、Navigator 2.0 (Router API) を利用してルーティングを一元管理します。

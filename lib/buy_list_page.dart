@@ -8,6 +8,7 @@ import 'domain/entities/buy_item.dart';
 import 'domain/usecases/add_buy_item.dart';
 import 'domain/usecases/remove_buy_item.dart';
 import 'domain/usecases/watch_buy_items.dart';
+import 'presentation/viewmodels/buy_list_viewmodel.dart';
 
 import 'data/repositories/inventory_repository_impl.dart';
 import 'domain/repositories/inventory_repository.dart';
@@ -41,86 +42,43 @@ class BuyListPage extends StatefulWidget {
 
 /// BuyListPage の状態クラス。画面表示時や更新時の処理を行う
 class BuyListPageState extends State<BuyListPage> {
-  List<Category> _categories = [];
-  bool _loaded = false;
-  BuyListConditionSettings? _condition;
-  final BuyListRepositoryImpl _buyRepo = BuyListRepositoryImpl();
-  late final AddBuyItem _addUsecase = AddBuyItem(_buyRepo);
-  late final RemoveBuyItem _removeUsecase = RemoveBuyItem(_buyRepo);
-  late final WatchBuyItems _watchUsecase = WatchBuyItems(_buyRepo);
-  late final TextEditingController _itemController;
-  // 在庫一覧のストリームを購読し、買い物予報に反映する
-  StreamSubscription<List<Inventory>>? _invSub;
-
-  /// 設定画面から戻った際に呼び出され、カテゴリリストを更新する
-  void _updateCategories(List<Category> list) {
-    setState(() => _categories = List.from(list));
-  }
-
+  /// 画面状態を管理する ViewModel
+  late final BuyListViewModel _viewModel;
 
   @override
   void initState() {
     super.initState();
-    _itemController = TextEditingController();
-    _load();
-  }
-
-  // BuyListPage 起動時に呼び出し、カテゴリ一覧と条件設定を読み込む
-  Future<void> _load() async {
-    // 既存の購読がある場合は一度キャンセルする
-    await _invSub?.cancel();
-    // カテゴリが渡されており、件数が 1 件以上の場合のみそのまま使用
-    if (widget.categories != null && widget.categories!.isNotEmpty) {
-      // 設定画面から受け取ったカテゴリを並び順付きで保持
-      _categories = List.from(widget.categories!);
-      _categories = await applyCategoryOrder(_categories);
-    } else {
-      // カテゴリが空の場合は Firestore から取得
-      final snapshot = await userCollection('categories')
-          .orderBy('createdAt')
-          .get();
-      _categories = snapshot.docs.map((d) {
-        final data = d.data();
-        return Category(
-          id: data['id'] ?? 0,
-          name: data['name'] ?? '',
-          createdAt: parseDateTime(data['createdAt']),
-          color: data['color'],
-        );
-      }).toList();
-      // Firestore 取得時にも並び順を適用する
-      _categories = await applyCategoryOrder(_categories);
-    }
-    _condition = await loadBuyListConditionSettings();
-    setState(() => _loaded = true);
-    final strategy = createStrategy(_condition!);
-    // BuyListStrategy で条件に合致した在庫が通知されたらリストへ追加
-    _invSub = strategy.watch(widget.repository).listen((list) {
-      for (final inv in list) {
-        _addUsecase(BuyItem(inv.itemName, inv.category, inv.id));
-      }
+    final buyRepo = BuyListRepositoryImpl();
+    _viewModel = BuyListViewModel(
+      repository: widget.repository,
+      addUsecase: AddBuyItem(buyRepo),
+      removeUsecase: RemoveBuyItem(buyRepo),
+      watchUsecase: WatchBuyItems(buyRepo),
+    );
+    _viewModel.addListener(() {
+      if (mounted) setState(() {});
     });
+    _viewModel.load(initialCategories: widget.categories);
   }
 
   /// 画面が再表示されたときに最新情報を取得する
   Future<void> refresh() async {
-    await _load();
+    await _viewModel.refresh();
   }
 
   @override
   void dispose() {
-    _invSub?.cancel();
-    _itemController.dispose();
+    _viewModel.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!_loaded || _condition == null) {
+    if (!_viewModel.loaded || _viewModel.condition == null) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
     return StreamBuilder<List<BuyItem>>(
-      stream: _watchUsecase(),
+      stream: _viewModel.stream,
       builder: (context, snapshot) {
         final loc = AppLocalizations.of(context)!;
         if (!snapshot.hasData) {
@@ -132,11 +90,11 @@ class BuyListPageState extends State<BuyListPage> {
             title: Text(loc.buyList),
             actions: [
               SettingsMenuButton(
-                categories: _categories,
-                onCategoriesChanged: _updateCategories,
+                categories: _viewModel.categories,
+                onCategoriesChanged: _viewModel.updateCategories,
                 onLocaleChanged: (l) =>
                     context.findAncestorStateOfType<MyAppState>()?.updateLocale(l),
-                onConditionChanged: _load,
+                onConditionChanged: _viewModel.refresh,
               )
             ],
           ),
@@ -148,16 +106,13 @@ class BuyListPageState extends State<BuyListPage> {
                   children: [
                     Expanded(
                       child: TextField(
-                        controller: _itemController,
+                        controller: _viewModel.itemController,
                         decoration: InputDecoration(labelText: loc.enterItemName),
                       ),
                     ),
                     IconButton(
                       onPressed: () async {
-                        final text = _itemController.text.trim();
-                        if (text.isEmpty) return;
-                        await _addUsecase(BuyItem(text, ''));
-                        _itemController.clear();
+                        await _viewModel.addManualItem();
                         if (!mounted) return;
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text(loc.addedBuyItem)),
@@ -178,9 +133,9 @@ class BuyListPageState extends State<BuyListPage> {
                             // 買い物カードをリスト表示
                             BuyListCard(
                               item: item,
-                              categories: _categories,
+                              categories: _viewModel.categories,
                               repository: widget.repository,
-                              onRemove: _removeUsecase,
+                              onRemove: _viewModel.removeItem,
                             ),
                         ],
                       ),
