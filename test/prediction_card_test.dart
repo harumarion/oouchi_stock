@@ -6,10 +6,6 @@ import 'package:oouchi_stock/domain/entities/category.dart';
 import 'package:oouchi_stock/domain/entities/inventory.dart';
 import 'package:oouchi_stock/domain/entities/history_entry.dart';
 import 'package:oouchi_stock/domain/repositories/inventory_repository.dart';
-import 'package:oouchi_stock/domain/repositories/buy_list_repository.dart';
-import 'package:oouchi_stock/domain/repositories/buy_prediction_repository.dart';
-import 'package:oouchi_stock/domain/usecases/add_buy_item.dart';
-import 'package:oouchi_stock/domain/usecases/remove_prediction_item.dart';
 
 class _FakeInventoryRepository implements InventoryRepository {
   @override
@@ -45,23 +41,6 @@ class _FakeInventoryRepository implements InventoryRepository {
   Stream<List<HistoryEntry>> watchHistory(String inventoryId) => const Stream.empty();
 }
 
-class _DummyBuyListRepo implements BuyListRepository {
-  @override
-  Stream<List<BuyItem>> watchItems() => const Stream.empty();
-  @override
-  Future<void> addItem(BuyItem item) async {}
-  @override
-  Future<void> removeItem(BuyItem item) async {}
-}
-
-class _DummyPredictionRepo implements BuyPredictionRepository {
-  @override
-  Stream<List<BuyItem>> watchItems() => const Stream.empty();
-  @override
-  Future<void> addItem(BuyItem item) async {}
-  @override
-  Future<void> removeItem(BuyItem item) async {}
-}
 
 void main() {
   testWidgets('PredictionCard 表示テスト', (WidgetTester tester) async {
@@ -71,9 +50,9 @@ void main() {
       home: PredictionCard(
         item: item,
         categories: categories,
-        repository: _FakeInventoryRepository(),
-        addUsecase: AddBuyItem(_DummyBuyListRepo()),
-        removeUsecase: RemovePredictionItem(_DummyPredictionRepo()),
+        watchInventory: _FakeInventoryRepository().watchInventory,
+        addToBuyList: (_) async {},
+        removePrediction: (_) async {},
         calcDaysLeft: (_) async => 7,
       ),
     ));

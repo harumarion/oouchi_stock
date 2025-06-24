@@ -3,8 +3,6 @@ import 'package:oouchi_stock/i18n/app_localizations.dart';
 import 'util/firestore_refs.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'presentation/viewmodels/edit_category_viewmodel.dart';
-import 'domain/usecases/update_category.dart';
-import 'data/repositories/category_repository_impl.dart';
 
 import 'domain/entities/category.dart';
 
@@ -24,10 +22,7 @@ class _EditCategoryPageState extends State<EditCategoryPage> {
   @override
   void initState() {
     super.initState();
-    _viewModel = EditCategoryViewModel(
-      UpdateCategory(CategoryRepositoryImpl()),
-      widget.category,
-    );
+    _viewModel = EditCategoryViewModel(widget.category);
     _viewModel.addListener(() {
       if (mounted) setState(() {});
     });

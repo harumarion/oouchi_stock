@@ -9,6 +9,7 @@ import '../../domain/entities/category_order.dart';
 import '../../domain/entities/buy_list_condition_settings.dart';
 import '../../data/repositories/inventory_repository_impl.dart';
 import '../../domain/usecases/calculate_days_left.dart';
+import '../../domain/usecases/watch_inventory.dart';
 import '../../data/repositories/buy_list_repository_impl.dart';
 import '../../domain/usecases/add_buy_item.dart';
 import '../../data/repositories/buy_prediction_repository_impl.dart';
@@ -30,6 +31,7 @@ class HomePageViewModel extends ChangeNotifier {
 
   final CalculateDaysLeft _calcUsecase =
       CalculateDaysLeft(InventoryRepositoryImpl());
+  final WatchInventory _watchInventory = WatchInventory(InventoryRepositoryImpl());
   final AddBuyItem _addBuyItem = AddBuyItem(BuyListRepositoryImpl());
   final _predictionRepo = BuyPredictionRepositoryImpl();
   late final WatchPredictionItems watchPrediction =
@@ -39,6 +41,19 @@ class HomePageViewModel extends ChangeNotifier {
 
   /// 買い物リストへ商品を追加するユースケースを公開
   AddBuyItem get addBuyItem => _addBuyItem;
+
+  /// 予報アイテムを買い物リストへ追加
+  Future<void> addPredictionToBuyList(BuyItem item) async {
+    await _addBuyItem(item);
+  }
+
+  /// 予報アイテムを削除
+  Future<void> removePredictionItem(BuyItem item) async {
+    await removePrediction(item);
+  }
+
+  /// 在庫を監視
+  Stream<Inventory?> watchInventory(String id) => _watchInventory(id);
 
   /// 設定画面から戻った際などにカテゴリリストを更新する
   void updateCategories(List<Category> list) {

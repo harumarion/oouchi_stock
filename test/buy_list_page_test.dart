@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:oouchi_stock/buy_list_page.dart';
 import 'package:oouchi_stock/widgets/buy_list_card.dart';
 import 'package:oouchi_stock/domain/entities/category.dart';
+import 'package:oouchi_stock/presentation/viewmodels/buy_list_viewmodel.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:oouchi_stock/domain/entities/history_entry.dart';
 import 'package:oouchi_stock/domain/entities/inventory.dart';
@@ -85,7 +86,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: BuyListPage(
         categories: categories,
-        repository: _FakeRepository(),
+        viewModel: BuyListViewModel(repository: _FakeRepository()),
       ),
     ));
     await tester.pumpAndSettle();
@@ -101,7 +102,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: BuyListPage(
         categories: categories,
-        repository: _FakeRepository(),
+        viewModel: BuyListViewModel(repository: _FakeRepository()),
       ),
     ));
     await tester.pumpAndSettle();
