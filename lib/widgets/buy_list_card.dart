@@ -2,20 +2,27 @@ import 'package:flutter/material.dart';
 import '../domain/entities/buy_item.dart';
 import '../domain/entities/category.dart';
 import '../domain/entities/inventory.dart';
-import '../domain/usecases/calculate_days_left.dart';
-import '../domain/usecases/update_quantity.dart';
-import '../domain/repositories/inventory_repository.dart';
+// 残り日数計算や在庫監視などは外部から関数として受け取る
 import '../i18n/app_localizations.dart';
 import '../inventory_detail_page.dart';
 
-/// 買い物リストで表示するカードウィジェット
+/// BuyListPage で使用される、買い物リストを表示するカードウィジェット
 class BuyListCard extends StatelessWidget {
   /// 表示する買い物データ
   final BuyItem item;
   /// カテゴリ一覧。詳細画面遷移に利用する
   final List<Category> categories;
-  /// 在庫リポジトリ
-  final InventoryRepository repository;
+
+  /// 在庫監視関数
+  final Stream<Inventory?> Function(String id) watchInventory;
+
+  /// 残り日数計算関数
+  final Future<int> Function(Inventory inv) calcDaysLeft;
+
+  /// 在庫数を更新する関数
+  final Future<void> Function(String id, double amount, String type)
+      updateQuantity;
+
   /// 削除処理を実行するユースケース
   final void Function(BuyItem item) onRemove;
 
@@ -23,7 +30,12 @@ class BuyListCard extends StatelessWidget {
     super.key,
     required this.item,
     required this.categories,
-    required this.repository,
+    // 在庫情報をリアルタイムで取得する関数
+    required this.watchInventory,
+    // 在庫から残り日数を計算する関数
+    required this.calcDaysLeft,
+    // 在庫数量を更新する関数
+    required this.updateQuantity,
     required this.onRemove,
   });
 
@@ -88,7 +100,7 @@ class BuyListCard extends StatelessWidget {
       final v = await _inputAmountDialog(context);
       if (v == null) return false;
       try {
-        await UpdateQuantity(repository)(item.inventoryId!, v, 'bought');
+        await updateQuantity(item.inventoryId!, v, 'bought');
       } catch (_) {
         // 更新失敗時はスナックバーで通知
         ScaffoldMessenger.of(context)
@@ -125,7 +137,6 @@ class BuyListCard extends StatelessWidget {
         builder: (_) => InventoryDetailPage(
           inventoryId: item.inventoryId!,
           categories: categories,
-          repository: repository,
         ),
       ),
     );
@@ -150,7 +161,7 @@ class BuyListCard extends StatelessWidget {
         child: item.inventoryId == null
             ? ListTile(title: Text(item.name))
             : StreamBuilder<Inventory?>(
-                stream: repository.watchInventory(item.inventoryId!),
+                stream: watchInventory(item.inventoryId!),
                 builder: (context, snapshot) {
                   final trailingButton = IconButton(
                     icon: const Icon(Icons.info_outline),
@@ -161,7 +172,7 @@ class BuyListCard extends StatelessWidget {
                   }
                   final inv = snapshot.data!;
                   return FutureBuilder<int>(
-                    future: CalculateDaysLeft(repository)(inv),
+                    future: calcDaysLeft(inv),
                     builder: (context, daysSnapshot) {
                       final daysText = daysSnapshot.hasData
                           ? ' ・ ${loc.daysLeft(daysSnapshot.data!.toString())}'
