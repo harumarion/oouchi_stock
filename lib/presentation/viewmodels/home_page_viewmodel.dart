@@ -37,6 +37,16 @@ class HomePageViewModel extends ChangeNotifier {
   late final RemovePredictionItem removePrediction =
       RemovePredictionItem(_predictionRepo);
 
+  /// 買い物リストへ商品を追加するユースケースを公開
+  AddBuyItem get addBuyItem => _addBuyItem;
+
+  /// 設定画面から戻った際などにカテゴリリストを更新する
+  void updateCategories(List<Category> list) {
+    categories = List<Category>.from(list);
+    categoriesLoaded = true;
+    notifyListeners();
+  }
+
   /// カテゴリ情報を読み込む
   Future<void> loadCategories(List<Category>? initial) async {
     if (initial != null && initial.isNotEmpty) {
