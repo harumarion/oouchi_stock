@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:oouchi_stock/i18n/app_localizations.dart';
 
 import 'presentation/viewmodels/add_category_viewmodel.dart';
-import 'data/repositories/category_repository_impl.dart';
-import 'domain/usecases/add_category.dart';
 
 /// カテゴリを追加する画面。
 /// 入力されたカテゴリ名を Firestore の `categories` コレクションに保存する。
@@ -21,8 +19,7 @@ class _AddCategoryPageState extends State<AddCategoryPage> {
   @override
   void initState() {
     super.initState();
-    _viewModel =
-        AddCategoryViewModel(AddCategory(CategoryRepositoryImpl()));
+    _viewModel = AddCategoryViewModel();
     _viewModel.addListener(() {
       if (mounted) setState(() {});
     });

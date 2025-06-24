@@ -4,6 +4,7 @@ import 'package:flutter/material.dart' hide Category;
 import '../../domain/entities/inventory.dart';
 import '../../domain/entities/category.dart';
 import '../../domain/usecases/add_inventory.dart';
+import '../../data/repositories/inventory_repository_impl.dart';
 import '../../util/firestore_refs.dart';
 import '../../util/date_time_parser.dart';
 import '../../default_item_types.dart';
@@ -11,7 +12,7 @@ import '../../default_item_types.dart';
 /// 商品追加画面の状態を管理する ViewModel
 class AddInventoryViewModel extends ChangeNotifier {
   /// 在庫追加ユースケース
-  final AddInventory _usecase;
+  final AddInventory _usecase = AddInventory(InventoryRepositoryImpl());
 
   /// フォームキー
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
@@ -50,7 +51,7 @@ class AddInventoryViewModel extends ChangeNotifier {
   /// 単位の選択肢
   final List<String> units = ['個', '本', '袋', 'ロール'];
 
-  AddInventoryViewModel(this._usecase);
+  AddInventoryViewModel();
 
   /// 総容量を計算
   double get totalVolume => quantity * volume;
