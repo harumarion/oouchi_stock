@@ -46,4 +46,7 @@ class Inventory {
     this.monthlyConsumption = 0,
     required this.createdAt,
   });
+
+  /// 数量と容量から総容量を再計算
+  double calculateTotalVolume() => quantity * volume;
 }
