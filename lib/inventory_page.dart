@@ -20,6 +20,8 @@ import 'domain/usecases/delete_inventory.dart';
 import 'data/repositories/buy_list_repository_impl.dart';
 import 'domain/usecases/add_buy_item.dart';
 import 'domain/entities/buy_item.dart';
+import 'presentation/viewmodels/inventory_page_viewmodel.dart';
+import 'presentation/viewmodels/inventory_list_viewmodel.dart';
 
 /// 在庫一覧画面。カテゴリごとの在庫をタブ形式で表示する。
 class InventoryPage extends StatefulWidget {
@@ -33,79 +35,34 @@ class InventoryPage extends StatefulWidget {
 
 /// InventoryPage の状態クラス。タブ表示やリスト更新を制御する
 class InventoryPageState extends State<InventoryPage> {
-  /// Firestore から取得したカテゴリ一覧
-  List<Category> _categories = [];
-  /// カテゴリが読み込み済みかどうかのフラグ
-  bool _categoriesLoaded = false;
-  /// カテゴリコレクションを監視するストリーム購読
-  StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _catSub;
-
-  /// 設定画面から戻った際にカテゴリリストを更新する
-  void _updateCategories(List<Category> list) {
-    setState(() {
-      _categories = List.from(list);
-      _categoriesLoaded = true;
-    });
-  }
-
-  /// Firestore からカテゴリ一覧を読み込み、購読を開始する
-  void _initCategories() {
-    // 引数のカテゴリが存在し、件数が 1 件以上の場合のみ使用
-    if (widget.categories != null && widget.categories!.isNotEmpty) {
-      _categories = List.from(widget.categories!);
-      applyCategoryOrder(_categories).then((list) {
-        setState(() {
-          _categories = list;
-          _categoriesLoaded = true;
-        });
-      });
-    } else {
-      // Firestore を監視して常に最新のカテゴリを保持する
-      _catSub = userCollection('categories')
-          .orderBy('createdAt')
-          .snapshots()
-          .listen((snapshot) async {
-        var list = snapshot.docs.map((d) {
-          final data = d.data();
-          return Category(
-            id: data['id'] ?? 0,
-            name: data['name'] ?? '',
-            createdAt: parseDateTime(data['createdAt']),
-            color: data['color'],
-          );
-        }).toList();
-        list = await applyCategoryOrder(list);
-        setState(() {
-          _categories = list;
-          _categoriesLoaded = true;
-        });
-      });
-    }
-  }
+  /// 画面全体の状態を管理する ViewModel
+  late final InventoryPageViewModel _viewModel;
 
   /// 画面が再表示された際にカテゴリを最新化する
   Future<void> refresh() async {
-    await _catSub?.cancel();
-    _categoriesLoaded = false;
-    _initCategories();
+    await _viewModel.refresh();
   }
 
   @override
   void initState() {
     super.initState();
-    _initCategories();
+    _viewModel = InventoryPageViewModel();
+    _viewModel.addListener(() {
+      if (mounted) setState(() {});
+    });
+    _viewModel.loadCategories(widget.categories);
   }
 
   @override
   void dispose() {
-    _catSub?.cancel();
+    _viewModel.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     // 画面描画。カテゴリが読み込まれるまではローディングを表示
-    if (!_categoriesLoaded) {
+    if (!_viewModel.categoriesLoaded) {
       return Scaffold(
         // 画面名を在庫一覧に固定
         appBar: AppBar(title: Text(AppLocalizations.of(context)!.inventoryList)),
@@ -113,7 +70,7 @@ class InventoryPageState extends State<InventoryPage> {
       );
     }
     // カテゴリがまだ存在しない場合は案内テキストと追加ボタンを表示
-    if (_categories.isEmpty) {
+    if (_viewModel.categories.isEmpty) {
       return Scaffold(
         // 画面名を在庫一覧に固定
         appBar: AppBar(title: Text(AppLocalizations.of(context)!.inventoryList)),
@@ -140,7 +97,7 @@ class InventoryPageState extends State<InventoryPage> {
       );
     }
     return DefaultTabController(
-      length: _categories.length,
+      length: _viewModel.categories.length,
       child: Scaffold(
           appBar: AppBar(
             // 上部タイトルを在庫一覧にする
@@ -150,7 +107,7 @@ class InventoryPageState extends State<InventoryPage> {
             bottom: TabBar(
               isScrollable: true,
               tabs: [
-                for (final c in _categories)
+                for (final c in _viewModel.categories)
                   SizedBox(
                     width: MediaQuery.of(context).size.width / 3,
                     child: Tab(text: c.name),
@@ -160,8 +117,8 @@ class InventoryPageState extends State<InventoryPage> {
             actions: [
               // 設定のみを表示する統一メニュー
               SettingsMenuButton(
-                categories: _categories,
-                onCategoriesChanged: _updateCategories,
+                categories: _viewModel.categories,
+                onCategoriesChanged: _viewModel.updateCategories,
                 onLocaleChanged: (l) =>
                     context.findAncestorStateOfType<MyAppState>()?.updateLocale(l),
                 onConditionChanged: () {},
@@ -170,8 +127,8 @@ class InventoryPageState extends State<InventoryPage> {
           ),
           body: TabBarView(
             children: [
-              for (final c in _categories)
-                InventoryList(category: c.name, categories: _categories)
+              for (final c in _viewModel.categories)
+                InventoryList(category: c.name, categories: _viewModel.categories)
             ],
           ),
           // 画面右下のプラスボタンを押すと商品追加画面を開く
@@ -182,7 +139,7 @@ class InventoryPageState extends State<InventoryPage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => AddInventoryPage(categories: _categories),
+                  builder: (_) => AddInventoryPage(categories: _viewModel.categories),
                 ),
               );
             },
@@ -204,22 +161,30 @@ class InventoryList extends StatefulWidget {
 }
 
 class _InventoryListState extends State<InventoryList> {
-  String _search = '';
-  String _sort = 'updated';
-  final TextEditingController _controller = TextEditingController();
-  // 買い物リストへ商品を追加するユースケース
-  final AddBuyItem _addBuyItem = AddBuyItem(BuyListRepositoryImpl());
+  /// リスト表示を制御する ViewModel
+  late final InventoryListViewModel _viewModel;
 
   @override
   void dispose() {
-    _controller.dispose();
+    _viewModel.dispose();
     super.dispose();
   }
 
   @override
+  void initState() {
+    super.initState();
+    _viewModel = InventoryListViewModel(
+      category: widget.category,
+      watchUsecase: WatchInventories(InventoryRepositoryImpl()),
+      deleteUsecase: DeleteInventory(InventoryRepositoryImpl()),
+      addUsecase: AddBuyItem(BuyListRepositoryImpl()),
+    )..addListener(() {
+        if (mounted) setState(() {});
+      });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final watchUsecase = WatchInventories(InventoryRepositoryImpl());
-    final deleteUsecase = DeleteInventory(InventoryRepositoryImpl());
     return Column(
       children: [
         Padding(
@@ -228,19 +193,21 @@ class _InventoryListState extends State<InventoryList> {
             children: [
               Expanded(
                 child: TextField(
-                  controller: _controller,
+                  controller: _viewModel.controller,
                   decoration: InputDecoration(
                     labelText: AppLocalizations.of(context)!.searchHint,
                   ),
                   // 入力文字列が変わるたびにリストを再検索
-                  onChanged: (v) => setState(() => _search = v),
+                  onChanged: _viewModel.setSearch,
                 ),
               ),
               const SizedBox(width: 8),
               // 並び替えドロップダウン。選択が変わるとリストを更新
               DropdownButton<String>(
-                value: _sort,
-                onChanged: (v) => setState(() => _sort = v!),
+                value: _viewModel.sort,
+                onChanged: (v) {
+                  if (v != null) _viewModel.setSort(v);
+                },
                 items: [
                   DropdownMenuItem(
                     value: 'alphabet',
@@ -257,7 +224,7 @@ class _InventoryListState extends State<InventoryList> {
         ),
         Expanded(
           child: StreamBuilder<List<Inventory>>(
-            stream: watchUsecase(widget.category),
+            stream: _viewModel.stream,
             builder: (context, snapshot) {
               if (snapshot.hasError) {
                 final err = snapshot.error?.toString() ?? 'unknown';
@@ -271,12 +238,12 @@ class _InventoryListState extends State<InventoryList> {
               // 商品名だけでなくカテゴリ名・品種名も検索対象とする
               var list = snapshot.data!
                   .where((inv) =>
-                      inv.itemName.contains(_search) ||
-                      inv.category.contains(_search) ||
-                      inv.itemType.contains(_search))
+                      inv.itemName.contains(_viewModel.search) ||
+                      inv.category.contains(_viewModel.search) ||
+                      inv.itemType.contains(_viewModel.search))
                   .toList();
               // ドロップダウンの選択に応じて並び替えを実施
-              if (_sort == 'alphabet') {
+              if (_viewModel.sort == 'alphabet') {
                 list.sort((a, b) => a.itemName.compareTo(b.itemName));
               } else {
                 list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
@@ -321,7 +288,7 @@ class _InventoryListState extends State<InventoryList> {
                       );
                       if (result == 'delete') {
                         try {
-                          await deleteUsecase(inv.id);
+                          await _viewModel.delete(inv.id);
                         } catch (e) {
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
@@ -356,7 +323,7 @@ class _InventoryListState extends State<InventoryList> {
                     child: InventoryCard(
                       inventory: inv,
                       onAddToList: () async {
-                        await _addBuyItem(BuyItem(inv.itemName, inv.category, inv.id));
+                        await _viewModel.addToBuyList(inv);
                         if (mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text(AppLocalizations.of(context)!.addedBuyItem)),
