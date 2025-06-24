@@ -12,6 +12,11 @@ import '../../domain/services/buy_list_strategy.dart';
 import '../../domain/usecases/add_buy_item.dart';
 import '../../domain/usecases/remove_buy_item.dart';
 import '../../domain/usecases/watch_buy_items.dart';
+import '../../domain/usecases/update_quantity.dart';
+import '../../domain/usecases/watch_inventory.dart';
+import '../../domain/usecases/calculate_days_left.dart';
+import '../../data/repositories/inventory_repository_impl.dart';
+import '../../data/repositories/buy_list_repository_impl.dart';
 import '../../util/date_time_parser.dart';
 import '../../util/firestore_refs.dart';
 
@@ -26,6 +31,12 @@ class BuyListViewModel extends ChangeNotifier {
   final RemoveBuyItem removeUsecase;
   /// 買い物リスト監視ユースケース
   final WatchBuyItems watchUsecase;
+  /// 在庫数量更新ユースケース
+  final UpdateQuantity _updateQuantity;
+  /// 在庫監視ユースケース
+  final WatchInventory _watchInventory;
+  /// 残り日数計算ユースケース
+  final CalculateDaysLeft _calcDaysLeft;
 
   /// 追加テキスト入力用コントローラ
   final TextEditingController itemController = TextEditingController();
@@ -40,11 +51,20 @@ class BuyListViewModel extends ChangeNotifier {
   StreamSubscription<List<Inventory>>? _invSub;
 
   BuyListViewModel({
-    required this.repository,
-    required this.addUsecase,
-    required this.removeUsecase,
-    required this.watchUsecase,
-  });
+    InventoryRepository? repository,
+    AddBuyItem? addUsecase,
+    RemoveBuyItem? removeUsecase,
+    WatchBuyItems? watchUsecase,
+    UpdateQuantity? updateQuantity,
+    WatchInventory? watchInventory,
+    CalculateDaysLeft? calcDaysLeft,
+  })  : repository = repository ?? InventoryRepositoryImpl(),
+        addUsecase = addUsecase ?? AddBuyItem(BuyListRepositoryImpl()),
+        removeUsecase = removeUsecase ?? RemoveBuyItem(BuyListRepositoryImpl()),
+        watchUsecase = watchUsecase ?? WatchBuyItems(BuyListRepositoryImpl()),
+        _updateQuantity = updateQuantity ?? UpdateQuantity(InventoryRepositoryImpl()),
+        _watchInventory = watchInventory ?? WatchInventory(InventoryRepositoryImpl()),
+        _calcDaysLeft = calcDaysLeft ?? CalculateDaysLeft(InventoryRepositoryImpl());
 
   /// 買い物リストストリーム
   Stream<List<BuyItem>> get stream => watchUsecase();
@@ -100,6 +120,17 @@ class BuyListViewModel extends ChangeNotifier {
     await addUsecase(BuyItem(text, ''));
     itemController.clear();
   }
+
+  /// 在庫数量を更新
+  Future<void> updateQuantity(String id, double amount, String type) async {
+    await _updateQuantity(id, amount, type);
+  }
+
+  /// 在庫を監視
+  Stream<Inventory?> watchInventory(String id) => _watchInventory(id);
+
+  /// 残り日数を計算
+  Future<int> calcDaysLeft(Inventory inv) => _calcDaysLeft(inv);
 
   /// アイテム削除処理
   Future<void> removeItem(BuyItem item) async {

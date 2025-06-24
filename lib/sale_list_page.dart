@@ -78,7 +78,7 @@ class _SaleListPageState extends State<SaleListPage> {
                 final item = sorted[index];
                 return SaleItemCard(
                   item: item,
-                  addUsecase: _viewModel.addBuyItem,
+                  onAdd: _viewModel.addToBuyList,
                 );
               },
             ),

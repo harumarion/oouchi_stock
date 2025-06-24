@@ -6,6 +6,8 @@ import '../../domain/entities/buy_item.dart';
 import '../../domain/usecases/watch_inventories.dart';
 import '../../domain/usecases/delete_inventory.dart';
 import '../../domain/usecases/add_buy_item.dart';
+import '../../domain/usecases/update_quantity.dart';
+import '../../domain/usecases/stocktake.dart';
 import '../../data/repositories/inventory_repository_impl.dart';
 import '../../data/repositories/buy_list_repository_impl.dart';
 
@@ -19,6 +21,10 @@ class InventoryListViewModel extends ChangeNotifier {
   final DeleteInventory deleteUsecase =
       DeleteInventory(InventoryRepositoryImpl());
   final AddBuyItem addUsecase = AddBuyItem(BuyListRepositoryImpl());
+  final UpdateQuantity updateQuantityUsecase =
+      UpdateQuantity(InventoryRepositoryImpl());
+  final Stocktake stocktakeUsecase =
+      Stocktake(InventoryRepositoryImpl());
 
   /// 検索文字列
   String search = '';
@@ -49,6 +55,16 @@ class InventoryListViewModel extends ChangeNotifier {
   /// 在庫を買い物リストへ追加
   Future<void> addToBuyList(Inventory inv) async {
     await addUsecase(BuyItem(inv.itemName, inv.category, inv.id));
+  }
+
+  /// 在庫数量を更新
+  Future<void> updateQuantity(String id, double amount, String type) async {
+    await updateQuantityUsecase(id, amount, type);
+  }
+
+  /// 棚卸しを記録
+  Future<void> stocktake(String id, double before, double after, double diff) async {
+    await stocktakeUsecase(id, before, after, diff);
   }
 
   /// 在庫を削除

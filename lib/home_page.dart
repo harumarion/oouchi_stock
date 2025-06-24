@@ -125,9 +125,9 @@ class _HomePageState extends State<HomePage> {
                               PredictionCard(
                                 item: item,
                                 categories: _viewModel.categories,
-                                repository: InventoryRepositoryImpl(),
-                                addUsecase: _viewModel.addBuyItem,
-                                removeUsecase: _viewModel.removePrediction,
+                                watchInventory: _viewModel.watchInventory,
+                                addToBuyList: _viewModel.addPredictionToBuyList,
+                                removePrediction: _viewModel.removePredictionItem,
                                 calcDaysLeft: _viewModel.calcDaysLeft,
                               ),
                           ],
