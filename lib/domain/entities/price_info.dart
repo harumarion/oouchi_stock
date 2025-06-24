@@ -70,4 +70,7 @@ class PriceInfo {
     required this.unitPrice,
     required this.expiry,
   });
+
+  /// セール期限が [date] より前かどうか判定
+  bool isExpired(DateTime date) => expiry.isBefore(date);
 }

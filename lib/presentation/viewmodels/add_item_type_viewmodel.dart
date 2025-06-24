@@ -1,0 +1,40 @@
+import 'dart:math';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+
+import '../../domain/entities/category.dart';
+import '../../domain/entities/item_type.dart';
+import '../../domain/usecases/add_item_type.dart';
+
+/// 品種追加画面の状態を管理する ViewModel
+class AddItemTypeViewModel extends ChangeNotifier {
+  /// 品種追加ユースケース
+  final AddItemType _usecase;
+
+  /// フォームキー
+  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+
+  /// 品種名
+  String name = '';
+
+  /// 選択中のカテゴリ
+  Category? category;
+
+  /// 選択可能なカテゴリ一覧
+  final List<Category> categories;
+
+  AddItemTypeViewModel(this._usecase, this.categories) {
+    if (categories.isNotEmpty) category = categories.first;
+  }
+
+  /// 品種保存
+  Future<void> save() async {
+    final itemType = ItemType(
+      id: Random().nextInt(0xffffffff),
+      category: category?.name ?? '',
+      name: name,
+      createdAt: DateTime.now(),
+    );
+    await _usecase(itemType);
+  }
+}

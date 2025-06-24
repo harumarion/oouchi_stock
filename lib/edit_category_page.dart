@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:oouchi_stock/i18n/app_localizations.dart';
 import 'util/firestore_refs.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'presentation/viewmodels/edit_category_viewmodel.dart';
+import 'domain/usecases/update_category.dart';
+import 'data/repositories/category_repository_impl.dart';
 
 import 'domain/entities/category.dart';
 
@@ -15,56 +18,19 @@ class EditCategoryPage extends StatefulWidget {
 }
 
 class _EditCategoryPageState extends State<EditCategoryPage> {
-  final _formKey = GlobalKey<FormState>();
-  late String _name;
-  Color? _color;
-  final _colors = [
-    Colors.red,
-    Colors.green,
-    Colors.blue,
-    Colors.orange,
-    Colors.purple,
-    Colors.brown,
-    Colors.pink,
-    Colors.cyan,
-  ];
+  /// 画面状態を管理する ViewModel
+  late final EditCategoryViewModel _viewModel;
 
   @override
   void initState() {
     super.initState();
-    _name = widget.category.name;
-    if (widget.category.color != null) {
-      final value = int.tryParse(widget.category.color!.replaceFirst('#', ''), radix: 16);
-      if (value != null) _color = Color(0xFF000000 | value);
-    }
-  }
-
-  /// 保存ボタンの処理
-  Future<void> _save() async {
-    try {
-      final snapshot = await userCollection('categories')
-          .where('id', isEqualTo: widget.category.id)
-          .get();
-      for (final doc in snapshot.docs) {
-        await doc.reference.update({
-          'name': _name,
-          if (_color != null)
-            'color': '#${_color!.value.toRadixString(16).padLeft(8, '0').substring(2)}'
-          else
-            'color': FieldValue.delete(),
-        });
-      }
-      if (!mounted) return;
-      await ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.saved)))
-          .closed;
-      if (mounted) Navigator.pop(context, _name);
-    } catch (_) {
-      if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.saveFailed)));
-      }
-    }
+    _viewModel = EditCategoryViewModel(
+      UpdateCategory(CategoryRepositoryImpl()),
+      widget.category,
+    );
+    _viewModel.addListener(() {
+      if (mounted) setState(() {});
+    });
   }
 
   @override
@@ -74,13 +40,13 @@ class _EditCategoryPageState extends State<EditCategoryPage> {
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Form(
-          key: _formKey,
+          key: _viewModel.formKey,
           child: Column(
             children: [
               TextFormField(
-                initialValue: _name,
+                initialValue: _viewModel.name,
                 decoration: InputDecoration(labelText: AppLocalizations.of(context)!.categoryName),
-                onChanged: (v) => _name = v,
+                onChanged: (v) => _viewModel.name = v,
                 validator: (v) => v == null || v.isEmpty ? AppLocalizations.of(context)!.required : null,
               ),
               const SizedBox(height: 16),
@@ -94,9 +60,9 @@ class _EditCategoryPageState extends State<EditCategoryPage> {
                 child: ListView(
                   scrollDirection: Axis.horizontal,
                   children: [
-                    for (final c in _colors)
+                    for (final c in _viewModel.colors)
                       GestureDetector(
-                        onTap: () => setState(() => _color = c),
+                        onTap: () => setState(() => _viewModel.color = c),
                         child: Container(
                           margin: const EdgeInsets.symmetric(horizontal: 4),
                           width: 40,
@@ -104,7 +70,7 @@ class _EditCategoryPageState extends State<EditCategoryPage> {
                             color: c,
                             shape: BoxShape.circle,
                             border: Border.all(
-                              color: _color == c ? Colors.black : Colors.transparent,
+                              color: _viewModel.color == c ? Colors.black : Colors.transparent,
                               width: 3,
                             ),
                           ),
@@ -117,8 +83,22 @@ class _EditCategoryPageState extends State<EditCategoryPage> {
               // 保存ボタンをタップしたときにカテゴリ名を更新
               ElevatedButton(
                 onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    _save();
+                  if (_viewModel.formKey.currentState!.validate()) {
+                    () async {
+                      try {
+                        await _viewModel.save();
+                        if (!mounted) return;
+                        await ScaffoldMessenger.of(context)
+                            .showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.saved)))
+                            .closed;
+                        if (mounted) Navigator.pop(context, _viewModel.name);
+                      } catch (_) {
+                        if (mounted) {
+                          ScaffoldMessenger.of(context)
+                              .showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.saveFailed)));
+                        }
+                      }
+                    }();
                   }
                 },
                 child: Text(AppLocalizations.of(context)!.save),
