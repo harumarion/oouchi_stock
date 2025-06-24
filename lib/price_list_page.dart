@@ -1,23 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:oouchi_stock/i18n/app_localizations.dart';
-
-import 'util/firestore_refs.dart';
-import 'util/date_time_parser.dart';
-
 import 'add_price_page.dart';
 import 'add_category_page.dart';
 import 'widgets/settings_menu_button.dart';
-import 'data/repositories/price_repository_impl.dart';
-import 'domain/entities/category.dart';
-import 'domain/entities/price_info.dart';
-import 'domain/entities/category_order.dart';
-import 'domain/usecases/watch_price_by_category.dart';
+import 'presentation/viewmodels/price_list_viewmodel.dart';
+import 'presentation/viewmodels/price_category_list_viewmodel.dart';
 import 'price_detail_page.dart';
 import 'main.dart';
 import 'widgets/scrolling_text.dart';
 
-// セール情報管理画面
-
+/// セール情報管理画面
 class PriceListPage extends StatefulWidget {
   const PriceListPage({super.key});
 
@@ -26,62 +18,41 @@ class PriceListPage extends StatefulWidget {
 }
 
 class _PriceListPageState extends State<PriceListPage> {
-  // カテゴリ一覧を保持する _categories
-  List<Category> _categories = [];
-  // Firestore からの読み込み完了状態を示す _loaded
-  bool _loaded = false;
+  late final PriceListViewModel _viewModel;
 
   @override
   void initState() {
     super.initState();
-    userCollection('categories')
-        .orderBy('createdAt')
-        .snapshots()
-        .listen((snapshot) async {
-      var list = snapshot.docs.map((d) {
-        final data = d.data();
-        return Category(
-          id: data['id'] ?? 0,
-          name: data['name'] ?? '',
-          createdAt: parseDateTime(data['createdAt']),
-        );
-      }).toList();
-      list = await applyCategoryOrder(list);
-      setState(() {
-        _categories = list;
-        _loaded = true;
-      });
-    }, onError: (_) {
-      if (mounted) {
-        setState(() {
-          _loaded = true;
-        });
-      }
-    });
+    _viewModel = PriceListViewModel();
+    _viewModel.addListener(() { if (mounted) setState(() {}); });
+    _viewModel.load();
+  }
+
+  @override
+  void dispose() {
+    _viewModel.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!_loaded) {
+    if (!_viewModel.loaded) {
       return Scaffold(
         appBar: AppBar(title: Text(AppLocalizations.of(context)!.priceManagementTitle)),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
-    // カテゴリが存在しない場合は追加ボタンと案内テキストを表示
-    if (_categories.isEmpty) {
+    if (_viewModel.categories.isEmpty) {
       return Scaffold(
         appBar: AppBar(title: Text(AppLocalizations.of(context)!.priceManagementTitle)),
         body: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // カテゴリ未登録メッセージ
               Text(AppLocalizations.of(context)!.noCategories),
               const SizedBox(height: 8),
               ElevatedButton(
                 onPressed: () {
-                  // カテゴリ追加画面へ遷移
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (_) => const AddCategoryPage()),
@@ -95,25 +66,22 @@ class _PriceListPageState extends State<PriceListPage> {
       );
     }
     return DefaultTabController(
-      length: _categories.length,
+      length: _viewModel.categories.length,
       child: Scaffold(
         appBar: AppBar(
           title: Text(AppLocalizations.of(context)!.priceManagementTitle),
           actions: [
-            // 共通の設定メニューボタンを使用
             SettingsMenuButton(
-              categories: _categories,
+              categories: _viewModel.categories,
               onCategoriesChanged: (l) {},
-              onLocaleChanged: (l) =>
-                  context.findAncestorStateOfType<MyAppState>()?.updateLocale(l),
+              onLocaleChanged: (l) => context.findAncestorStateOfType<MyAppState>()?.updateLocale(l),
               onConditionChanged: () {},
             )
           ],
           bottom: TabBar(
             isScrollable: true,
             tabs: [
-              for (final c in _categories)
-                // 最大3件までを幅いっぱいに表示
+              for (final c in _viewModel.categories)
                 SizedBox(
                   width: MediaQuery.of(context).size.width / 3,
                   child: Tab(text: c.name),
@@ -123,14 +91,12 @@ class _PriceListPageState extends State<PriceListPage> {
         ),
         body: TabBarView(
           children: [
-            for (final c in _categories) PriceCategoryList(category: c.name)
+            for (final c in _viewModel.categories) PriceCategoryList(category: c.name)
           ],
         ),
         floatingActionButton: FloatingActionButton(
-          // セール情報管理画面専用のヒーロータグ
           heroTag: 'priceListFab',
           onPressed: () {
-            // セール情報追加画面を開く
             Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const AddPricePage()),
@@ -143,65 +109,53 @@ class _PriceListPageState extends State<PriceListPage> {
   }
 }
 
-// セール情報管理画面の各タブに表示される
-// カテゴリ別セール一覧ウィジェット
+/// カテゴリ別セール一覧ウィジェット
 class PriceCategoryList extends StatefulWidget {
-  final String category; // 表示対象カテゴリ名
-  final WatchPriceByCategory _watch; // セール情報取得ユースケース
-
-  /// [watch] はテスト用に差し替え可能
-  PriceCategoryList({
-    super.key,
-    required this.category,
-    WatchPriceByCategory? watch,
-  }) : _watch = watch ?? WatchPriceByCategory(PriceRepositoryImpl());
+  final String category;
+  final WatchPriceByCategory? watch;
+  const PriceCategoryList({super.key, required this.category, this.watch});
 
   @override
   State<PriceCategoryList> createState() => _PriceCategoryListState();
 }
 
 class _PriceCategoryListState extends State<PriceCategoryList> {
-  // 検索文字列を保持する _search
-  String _search = '';
-  // 並び替え条件を表す _sort。デフォルトは最終更新順
-  String _sort = 'updated';
-  // 検索欄のテキストコントローラー _controller
-  final TextEditingController _controller = TextEditingController();
-  // 期限切れも表示するかどうかを示す _showExpired
-  bool _showExpired = false;
+  late final PriceCategoryListViewModel _viewModel;
+
+  @override
+  void initState() {
+    super.initState();
+    _viewModel = PriceCategoryListViewModel(category: widget.category, watch: widget.watch)
+      ..addListener(() { if (mounted) setState(() {}); });
+  }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _viewModel.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // ユースケースからセール情報を取得して表示
-    final watch = widget._watch;
     return Column(
       children: [
         Padding(
           padding: const EdgeInsets.all(8),
           child: Row(
             children: [
-              // 検索バー
               Expanded(
                 child: TextField(
-                  controller: _controller,
+                  controller: _viewModel.controller,
                   decoration: InputDecoration(
                     labelText: AppLocalizations.of(context)!.searchHint,
                   ),
-                  // 入力文字列に応じてリストをフィルタリング
-                  onChanged: (v) => setState(() => _search = v),
+                  onChanged: _viewModel.setSearch,
                 ),
               ),
               const SizedBox(width: 8),
-              // 並び替えドロップダウン。選択変更で並び替えを実行
               DropdownButton<String>(
-                value: _sort,
-                onChanged: (v) => setState(() => _sort = v!),
+                value: _viewModel.sort,
+                onChanged: (v) { if (v != null) _viewModel.setSort(v); },
                 items: [
                   DropdownMenuItem(
                     value: 'alphabet',
@@ -222,8 +176,8 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
                 children: [
                   Text(AppLocalizations.of(context)!.showExpired),
                   Switch(
-                    value: _showExpired,
-                    onChanged: (v) => setState(() => _showExpired = v),
+                    value: _viewModel.showExpired,
+                    onChanged: _viewModel.setShowExpired,
                   ),
                 ],
               ),
@@ -232,40 +186,29 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
         ),
         Expanded(
           child: StreamBuilder<List<PriceInfo>>(
-            stream: watch(widget.category),
+            stream: _viewModel.stream,
             builder: (context, snapshot) {
               if (snapshot.hasError) {
                 final err = snapshot.error?.toString() ?? 'unknown';
-                return Center(
-                    child: Text(AppLocalizations.of(context)!.loadError(err)));
+                return Center(child: Text(AppLocalizations.of(context)!.loadError(err)));
               }
               if (!snapshot.hasData) {
                 return const Center(child: CircularProgressIndicator());
               }
-              final list = snapshot.data!;
-              // 検索条件と期限切れ表示設定を適用
-              // 取得したセール情報から検索条件と期限を適用
-              var items = list
-                  .where((e) =>
-                      e.itemName.contains(_search) ||
-                      e.category.contains(_search) ||
-                      e.itemType.contains(_search))
-                  .where((e) =>
-                      _showExpired ||
-                      e.expiry
-                          .isAfter(DateTime.now().subtract(const Duration(days: 1))))
+              var items = snapshot.data!
+                  .where((e) => e.itemName.contains(_viewModel.search) ||
+                      e.category.contains(_viewModel.search) ||
+                      e.itemType.contains(_viewModel.search))
+                  .where((e) => _viewModel.showExpired || e.expiry.isAfter(DateTime.now().subtract(const Duration(days: 1))))
                   .toList();
-              // 選択された並び替え順に従ってソート
-              // 並び替えの条件に応じてソートを実行
-              if (_sort == 'alphabet') {
+              if (_viewModel.sort == 'alphabet') {
                 items.sort((a, b) => a.itemType.compareTo(b.itemType));
-              } else if (_sort == 'unitPrice') {
+              } else if (_viewModel.sort == 'unitPrice') {
                 items.sort((a, b) => a.unitPrice.compareTo(b.unitPrice));
               } else {
                 items.sort((a, b) => b.checkedAt.compareTo(a.checkedAt));
               }
               return ListView.builder(
-                // カード型リストでセール情報を表示
                 itemCount: items.length,
                 itemBuilder: (context, index) {
                   final p = items[index];
@@ -279,7 +222,6 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
                         children: [
                           Row(
                             children: [
-                              // 品種/商品名を1行で表示
                               Expanded(
                                 child: ScrollingText(
                                   '${p.itemType} / ${p.itemName}',
@@ -289,12 +231,9 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
                               IconButton(
                                 icon: const Icon(Icons.info_outline),
                                 onPressed: () {
-                                  // i アイコン押下でセール詳細情報画面へ遷移
                                   Navigator.push(
                                     context,
-                                    MaterialPageRoute(
-                                      builder: (_) => PriceDetailPage(info: p),
-                                    ),
+                                    MaterialPageRoute(builder: (_) => PriceDetailPage(info: p)),
                                   );
                                 },
                               ),
@@ -319,7 +258,6 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
     );
   }
 
-  // 日付を表示用の文字列に変換
   String _formatDate(DateTime d) {
     return '${d.year}/${d.month}/${d.day}';
   }
