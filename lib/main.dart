@@ -1,25 +1,11 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:oouchi_stock/i18n/app_localizations.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'firebase_options.dart'; // ← 自動生成された設定ファイル
 import 'domain/entities/category.dart';
-import 'notification_service.dart';
 import 'login_page.dart';
 import 'root_navigation_page.dart';
 import 'theme.dart';
-import 'data/repositories/inventory_repository_impl.dart';
-import 'data/repositories/price_repository_impl.dart';
-import 'data/repositories/buy_prediction_repository_impl.dart';
-import 'domain/usecases/add_prediction_item.dart';
-import 'domain/services/auto_prediction_list_service.dart';
-import 'domain/services/purchase_decision_service.dart';
+import 'presentation/viewmodels/main_viewmodel.dart';
 
 // アプリのエントリーポイント。初期化処理中はローディング画面を表示する。
 
@@ -36,73 +22,34 @@ class AppLoader extends StatefulWidget {
 }
 
 class _AppLoaderState extends State<AppLoader> {
-  bool _initialized = false;
-  bool _loggedIn = false;
+  /// 画面全体の状態を保持する ViewModel
+  late final MainViewModel _viewModel;
 
   @override
   void initState() {
     super.initState();
-    _init();
+    _viewModel = MainViewModel()
+      ..addListener(() {
+        if (mounted) setState(() {});
+      })
+      ..init();
   }
 
-  Future<void> _init() async {
-    WidgetsFlutterBinding.ensureInitialized(); // Flutter エンジンの初期化
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    ); // Firebase の初期設定
-    // AdMob SDK の初期化
-    await MobileAds.instance.initialize();
-    // 起動時の端末言語を FirebaseAuth に反映する
-    final systemLocale = WidgetsBinding.instance.platformDispatcher.locale;
-    FirebaseAuth.instance.setLanguageCode(systemLocale.languageCode);
-    FirebaseFirestore.instance.settings = const Settings(persistenceEnabled: true);
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      await _setupNotification();
-      await _runAutoPrediction();
-      _loggedIn = true;
-    }
-    setState(() => _initialized = true);
-  }
-
-  Future<void> _setupNotification() async {
-    final locale = WidgetsBinding.instance.platformDispatcher.locale;
-    final loc = await AppLocalizations.delegate.load(locale);
-    final notification = NotificationService();
-    await notification.init();
-    await notification.scheduleWeekly(
-      id: 0,
-      title: loc.buyListNotificationTitle,
-      body: loc.buyListNotificationBody,
-    );
-  }
-
-  /// 在庫と価格情報を評価して予報リストを更新する
-  Future<void> _runAutoPrediction() async {
-    final invRepo = InventoryRepositoryImpl();
-    final priceRepo = PriceRepositoryImpl();
-    final service = AutoPredictionListService(
-      AddPredictionItem(BuyPredictionRepositoryImpl()),
-      PurchaseDecisionService(2),
-    );
-    final list = await invRepo.fetchAll();
-    for (final inv in list) {
-      final prices =
-          await priceRepo.watchByType(inv.category, inv.itemType).first;
-      final price = prices.isNotEmpty ? prices.first : null;
-      await service.process(inv, price);
-    }
+  @override
+  void dispose() {
+    _viewModel.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!_initialized) {
+    if (!_viewModel.initialized) {
       // 初期化中はローディング画面を表示
       return const MaterialApp(
         home: Scaffold(body: Center(child: CircularProgressIndicator())),
       );
     }
-    if (!_loggedIn) {
+    if (!_viewModel.loggedIn) {
       // 未ログインならログイン画面を表示
       return MaterialApp(
         // アプリ名などのローカライズに必要なデリゲートを設定
@@ -117,89 +64,53 @@ class _AppLoaderState extends State<AppLoader> {
         // 共通のテーマ設定を適用
         theme: AppTheme.lightTheme,
         home: LoginPage(onLoggedIn: () async {
-          await _setupNotification();
-          setState(() => _loggedIn = true);
+          await _viewModel.onLoggedIn();
         }),
       );
     }
-    return const MyApp();
+    return MyApp(viewModel: _viewModel);
   }
 }
 
 // アプリのルートウィジェット
 class MyApp extends StatefulWidget {
   final List<Category>? initialCategories;
-  const MyApp({super.key, this.initialCategories});
+  final MainViewModel viewModel;
+  const MyApp({super.key, this.initialCategories, required this.viewModel});
 
   @override
   State<MyApp> createState() => MyAppState();
 }
 
 class MyAppState extends State<MyApp> {
-  Locale? _locale;
-  final _messengerKey = GlobalKey<ScaffoldMessengerState>();
-  // 接続状態の変化を監視するためのストリーム購読
-  // 全画面共通で利用し、通信状況が変わるたびにスナックバーで通知する
-  StreamSubscription<List<ConnectivityResult>>? _connSub;
+  late final MainViewModel _viewModel;
+  late final VoidCallback _listener;
 
   @override
   void initState() {
     super.initState();
-    _loadLocale();
-    // 初期フレーム描画後に接続監視を開始する
-    // initState 内では Localizations がまだ取得できない場合があるため
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      // 接続状態が変わった際にオンライン/オフラインのメッセージを表示
-      // onConnectivityChanged は複数の接続結果を返すようになったため
-      // すべて none であればオフラインと判断する
-      _connSub = Connectivity().onConnectivityChanged.listen((results) {
-        final offline =
-            results.every((r) => r == ConnectivityResult.none);
-        final contextForLocale = _messengerKey.currentContext;
-        if (contextForLocale == null) return;
-        final text = offline
-            ? AppLocalizations.of(contextForLocale)!.offline
-            : AppLocalizations.of(contextForLocale)!.online;
-        _messengerKey.currentState?.showSnackBar(
-          SnackBar(content: Text(text)),
-        );
-      });
-    });
+    _viewModel = widget.viewModel;
+    _listener = () {
+      if (mounted) setState(() {});
+    };
+    _viewModel.addListener(_listener);
+    _viewModel.startConnectivityWatch();
   }
 
-  Future<void> _loadLocale() async {
-    final prefs = await SharedPreferences.getInstance();
-    final code = prefs.getString('locale');
-    if (code != null) {
-      // 保存済みの言語設定を FirebaseAuth に適用
-      FirebaseAuth.instance.setLanguageCode(code);
-      setState(() => _locale = Locale(code));
-    }
-  }
-
-  /// アプリ全体の言語設定を更新する
-  ///
-  /// [locale] 新しく設定するロケール
   Future<void> updateLocale(Locale locale) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('locale', locale.languageCode);
-    // 設定画面で言語変更が行われた際に呼び出される
-    // FirebaseAuth にも同じロケールを設定する
-    FirebaseAuth.instance.setLanguageCode(locale.languageCode);
-    setState(() => _locale = locale);
+    await _viewModel.updateLocale(locale);
   }
 
   @override
   void dispose() {
-    // ストリーム購読を解除してリソースを解放
-    _connSub?.cancel();
+    _viewModel.removeListener(_listener);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      scaffoldMessengerKey: _messengerKey,
+      scaffoldMessengerKey: _viewModel.messengerKey,
       onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
       localizationsDelegates: const [
         AppLocalizations.delegate,
@@ -208,7 +119,7 @@ class MyAppState extends State<MyApp> {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: AppLocalizations.supportedLocales,
-      locale: _locale,
+      locale: _viewModel.locale,
       // 共通のテーマ設定を適用
       theme: AppTheme.lightTheme,
       // 画面下部のメニューで各機能へ移動できる RootNavigationPage を表示

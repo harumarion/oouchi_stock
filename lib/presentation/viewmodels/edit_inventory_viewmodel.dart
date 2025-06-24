@@ -4,6 +4,7 @@ import 'package:flutter/material.dart' hide Category;
 import '../../domain/entities/inventory.dart';
 import '../../domain/entities/category.dart';
 import '../../domain/usecases/update_inventory.dart';
+import '../../data/repositories/inventory_repository_impl.dart';
 import '../../util/firestore_refs.dart';
 import '../../util/date_time_parser.dart';
 import '../../default_item_types.dart';
@@ -11,7 +12,7 @@ import '../../default_item_types.dart';
 /// 在庫編集画面の状態を管理する ViewModel
 class EditInventoryViewModel extends ChangeNotifier {
   /// 在庫更新ユースケース
-  final UpdateInventory _usecase;
+  final UpdateInventory _usecase = UpdateInventory(InventoryRepositoryImpl());
 
   /// フォームキー
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
@@ -42,7 +43,7 @@ class EditInventoryViewModel extends ChangeNotifier {
   /// 単位の選択肢
   final List<String> units = const ['個', '本', '袋', 'ロール'];
 
-  EditInventoryViewModel(this._usecase);
+  EditInventoryViewModel();
 
   /// 初期データを読み込む
   void load({required String id, required String itemName, required Category category, required String itemType, required String unit, required String note, List<Category>? initialCategories}) {

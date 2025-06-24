@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
-import 'util/firestore_refs.dart';
-
 import 'domain/entities/item_type.dart';
 import 'domain/entities/category.dart';
 import 'package:oouchi_stock/i18n/app_localizations.dart';
 import 'presentation/viewmodels/edit_item_type_viewmodel.dart';
-import 'domain/usecases/update_item_type.dart';
-import 'data/repositories/item_type_repository_impl.dart';
 
 /// アイテム種別を編集する画面
 
@@ -31,7 +27,6 @@ class _EditItemTypePageState extends State<EditItemTypePage> {
   void initState() {
     super.initState();
     _viewModel = EditItemTypeViewModel(
-      UpdateItemType(ItemTypeRepositoryImpl()),
       widget.itemType,
       widget.categories,
     );

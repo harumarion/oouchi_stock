@@ -1,8 +1,4 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'util/firestore_refs.dart';
-import 'util/date_time_parser.dart';
 import 'package:oouchi_stock/i18n/app_localizations.dart';
 import 'add_category_page.dart';
 import 'add_inventory_page.dart';
@@ -11,15 +7,8 @@ import 'edit_inventory_page.dart';
 import 'widgets/inventory_card.dart';
 import 'widgets/settings_menu_button.dart';
 import 'main.dart';
-import 'data/repositories/inventory_repository_impl.dart';
 import 'domain/entities/category.dart';
 import 'domain/entities/inventory.dart';
-import 'domain/entities/category_order.dart';
-import 'domain/usecases/watch_inventories.dart';
-import 'domain/usecases/delete_inventory.dart';
-import 'data/repositories/buy_list_repository_impl.dart';
-import 'domain/usecases/add_buy_item.dart';
-import 'domain/entities/buy_item.dart';
 import 'presentation/viewmodels/inventory_page_viewmodel.dart';
 import 'presentation/viewmodels/inventory_list_viewmodel.dart';
 
@@ -173,12 +162,8 @@ class _InventoryListState extends State<InventoryList> {
   @override
   void initState() {
     super.initState();
-    _viewModel = InventoryListViewModel(
-      category: widget.category,
-      watchUsecase: WatchInventories(InventoryRepositoryImpl()),
-      deleteUsecase: DeleteInventory(InventoryRepositoryImpl()),
-      addUsecase: AddBuyItem(BuyListRepositoryImpl()),
-    )..addListener(() {
+    _viewModel = InventoryListViewModel(category: widget.category)
+      ..addListener(() {
         if (mounted) setState(() {});
       });
   }
