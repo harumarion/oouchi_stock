@@ -15,8 +15,12 @@ void main() {
       monthlyConsumption: 0,
       createdAt: DateTime.now(),
     );
-    await tester
-        .pumpWidget(MaterialApp(home: InventoryCard(inventory: inv)));
+    await tester.pumpWidget(MaterialApp(
+        home: InventoryCard(
+      inventory: inv,
+      updateQuantity: (_, __, ___) async {},
+      stocktake: (_, __, ___, ____) async {},
+    )));
     expect(find.textContaining('ティッシュ'), findsOneWidget);
   });
 
@@ -32,8 +36,13 @@ void main() {
       monthlyConsumption: 0,
       createdAt: DateTime.now(),
     );
-    await tester
-        .pumpWidget(MaterialApp(home: InventoryCard(inventory: inv, buyOnly: true)));
+    await tester.pumpWidget(MaterialApp(
+        home: InventoryCard(
+      inventory: inv,
+      updateQuantity: (_, __, ___) async {},
+      stocktake: (_, __, ___, ____) async {},
+      buyOnly: true,
+    )));
     expect(find.byType(IconButton), findsOneWidget);
   });
 
@@ -48,7 +57,12 @@ void main() {
       monthlyConsumption: 0,
       createdAt: DateTime.now(),
     );
-    await tester.pumpWidget(MaterialApp(home: InventoryCard(inventory: inv)));
+    await tester.pumpWidget(MaterialApp(
+        home: InventoryCard(
+      inventory: inv,
+      updateQuantity: (_, __, ___) async {},
+      stocktake: (_, __, ___, ____) async {},
+    )));
     expect(find.byType(SingleChildScrollView), findsOneWidget);
   });
 }

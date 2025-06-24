@@ -2,15 +2,15 @@ import "package:flutter/material.dart";
 import "../i18n/app_localizations.dart";
 import "scrolling_text.dart"; // 長いテキストを流すウィジェット
 import "../domain/entities/inventory.dart";
-import "../domain/usecases/update_quantity.dart";
-import "../domain/usecases/stocktake.dart";
-import "../data/repositories/inventory_repository_impl.dart";
+
 // 在庫カードウィジェット
 // ホーム画面で1つの商品を表示し、数量操作などのボタンを提供する
 class InventoryCard extends StatelessWidget {
   final Inventory inventory;
-  final UpdateQuantity _update = UpdateQuantity(InventoryRepositoryImpl());
-  final Stocktake _stocktake = Stocktake(InventoryRepositoryImpl());
+  /// 数量更新コールバック
+  final Future<void> Function(String id, double amount, String type) updateQuantity;
+  /// 棚卸しコールバック
+  final Future<void> Function(String id, double before, double after, double diff) stocktake;
   final VoidCallback? onTap;
   // 購入ボタンのみ表示するかどうか
   final bool buyOnly;
@@ -20,6 +20,8 @@ class InventoryCard extends StatelessWidget {
   InventoryCard({
     super.key,
     required this.inventory,
+    required this.updateQuantity,
+    required this.stocktake,
     this.onTap,
     this.buyOnly = false,
     this.onAddToList,
@@ -82,7 +84,7 @@ class InventoryCard extends StatelessWidget {
     String type,
   ) async {
     try {
-      await _update(inventory.id, amount, type);
+      await updateQuantity(inventory.id, amount, type);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(AppLocalizations.of(context)!.updateFailed)),
@@ -119,7 +121,7 @@ class InventoryCard extends StatelessWidget {
     );
     if (v == null) return;
     try {
-      await _stocktake(inventory.id, inventory.quantity, v, v - inventory.quantity);
+      await stocktake(inventory.id, inventory.quantity, v, v - inventory.quantity);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(AppLocalizations.of(context)!.updateFailed)),

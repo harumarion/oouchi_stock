@@ -20,6 +20,7 @@
 ## 3. MVVM などのパターン
 - Clean Architecture をベースに、プレゼンテーション層では MVVM や Presenter パターンを採用する方法もあります。
 - ViewModel が UseCase を呼び出し、画面は ViewModel を監視するだけにすると見通しが良くなります。
+- ウィジェットでは UseCase や Repository を直接扱わず、処理はすべて ViewModel 経由で行います。
 - 例として `AddInventoryPage` をはじめ、カテゴリの追加・編集画面やセール情報追加画面も
   ViewModel (`AddCategoryViewModel`, `EditCategoryViewModel`, `EditInventoryViewModel` など) で状態管理するようリファクタリングしました。
   さらに在庫一覧画面でも `InventoryPageViewModel` と `InventoryListViewModel` を導入し、

@@ -3,11 +3,12 @@ import 'package:flutter/material.dart' hide Category;
 
 import '../../domain/entities/category.dart';
 import '../../domain/usecases/update_category.dart';
+import '../../data/repositories/category_repository_impl.dart';
 
 /// カテゴリ編集画面の状態を管理する ViewModel
 class EditCategoryViewModel extends ChangeNotifier {
   /// カテゴリ更新ユースケース
-  final UpdateCategory _usecase;
+  final UpdateCategory _usecase = UpdateCategory(CategoryRepositoryImpl());
 
   /// フォームキー
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
@@ -33,7 +34,7 @@ class EditCategoryViewModel extends ChangeNotifier {
     Colors.cyan,
   ];
 
-  EditCategoryViewModel(this._usecase, this.original)
+  EditCategoryViewModel(this.original)
       : name = original.name,
         color = original.color != null
             ? Color(0xFF000000 | int.parse(original.color!.substring(1), radix: 16))

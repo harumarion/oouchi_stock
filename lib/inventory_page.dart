@@ -307,6 +307,8 @@ class _InventoryListState extends State<InventoryList> {
                     },
                     child: InventoryCard(
                       inventory: inv,
+                      updateQuantity: _viewModel.updateQuantity,
+                      stocktake: _viewModel.stocktake,
                       onAddToList: () async {
                         await _viewModel.addToBuyList(inv);
                         if (mounted) {

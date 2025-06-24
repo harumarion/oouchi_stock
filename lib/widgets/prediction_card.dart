@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 import '../domain/entities/buy_item.dart';
 import '../domain/entities/category.dart';
 import '../domain/entities/inventory.dart';
-import '../domain/repositories/inventory_repository.dart';
-import '../domain/usecases/add_buy_item.dart';
-import '../domain/usecases/remove_prediction_item.dart';
 import '../i18n/app_localizations.dart';
 import '../inventory_detail_page.dart';
 
@@ -15,12 +12,12 @@ class PredictionCard extends StatelessWidget {
   final BuyItem item;
   /// カテゴリ一覧。詳細画面遷移に利用する
   final List<Category> categories;
-  /// 在庫リポジトリ
-  final InventoryRepository repository;
-  /// 買い物リスト追加ユースケース
-  final AddBuyItem addUsecase;
-  /// 予報リスト削除ユースケース
-  final RemovePredictionItem removeUsecase;
+  /// 在庫監視ストリーム取得
+  final Stream<Inventory?> Function(String id) watchInventory;
+  /// 買い物リストへ追加する処理
+  final Future<void> Function(BuyItem item) addToBuyList;
+  /// 予報リストから削除する処理
+  final Future<void> Function(BuyItem item) removePrediction;
   /// 残り日数計算処理
   final Future<int> Function(Inventory inv) calcDaysLeft;
 
@@ -28,9 +25,9 @@ class PredictionCard extends StatelessWidget {
     super.key,
     required this.item,
     required this.categories,
-    required this.repository,
-    required this.addUsecase,
-    required this.removeUsecase,
+    required this.watchInventory,
+    required this.addToBuyList,
+    required this.removePrediction,
     required this.calcDaysLeft,
   });
 
@@ -53,7 +50,7 @@ class PredictionCard extends StatelessWidget {
     return Dismissible(
       key: ValueKey(item.key),
       direction: DismissDirection.startToEnd,
-      onDismissed: (_) => removeUsecase(item),
+      onDismissed: (_) => removePrediction(item),
       background: Container(
         color: Colors.red,
         alignment: Alignment.centerLeft,
@@ -61,7 +58,7 @@ class PredictionCard extends StatelessWidget {
         child: const Icon(Icons.delete, color: Colors.white),
       ),
       child: StreamBuilder<Inventory?>(
-        stream: repository.watchInventory(item.inventoryId!),
+        stream: watchInventory(item.inventoryId!),
         builder: (context, snapshot) {
           final detailButton = IconButton(
             icon: const Icon(Icons.info_outline),
@@ -95,9 +92,9 @@ class PredictionCard extends StatelessWidget {
                       IconButton(
                         icon: const Icon(Icons.playlist_add),
                         onPressed: () async {
-                          await addUsecase(
+                          await addToBuyList(
                               BuyItem(inv.itemName, inv.category, inv.id));
-                          await removeUsecase(item);
+                          await removePrediction(item);
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(content: Text(loc.addedBuyItem)),

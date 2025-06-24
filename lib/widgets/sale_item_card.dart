@@ -1,6 +1,5 @@
 import "../i18n/app_localizations.dart";
 import 'package:flutter/material.dart';
-import '../domain/usecases/add_buy_item.dart';
 import '../domain/entities/buy_item.dart';
 import '../models/sale_item.dart';
 import '../util/localization_extensions.dart';
@@ -9,13 +8,13 @@ import '../util/localization_extensions.dart';
 class SaleItemCard extends StatelessWidget {
   /// 表示するセール情報
   final SaleItem item;
-  /// 買い物リスト追加ユースケース
-  final AddBuyItem addUsecase;
+  /// 買い物リストへ追加する処理
+  final Future<void> Function(BuyItem item) onAdd;
 
   const SaleItemCard({
     super.key,
     required this.item,
-    required this.addUsecase,
+    required this.onAdd,
   });
 
   @override
@@ -70,7 +69,7 @@ class SaleItemCard extends StatelessWidget {
               alignment: Alignment.centerRight,
               child: ElevatedButton(
                 onPressed: () async {
-                  await addUsecase(BuyItem(item.name, ''));
+                  await onAdd(BuyItem(item.name, ''));
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text(loc.addedBuyItem)),

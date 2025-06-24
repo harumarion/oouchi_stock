@@ -1,22 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'util/firestore_refs.dart';
-import 'util/date_time_parser.dart';
 import 'package:oouchi_stock/i18n/app_localizations.dart';
-import 'data/repositories/buy_list_repository_impl.dart';
-import 'domain/entities/buy_item.dart';
-import 'domain/usecases/add_buy_item.dart';
-import 'domain/usecases/remove_buy_item.dart';
-import 'domain/usecases/watch_buy_items.dart';
 import 'presentation/viewmodels/buy_list_viewmodel.dart';
-
-import 'data/repositories/inventory_repository_impl.dart';
-import 'domain/repositories/inventory_repository.dart';
+import 'domain/entities/buy_item.dart';
 import 'domain/entities/category.dart';
-import 'domain/entities/inventory.dart';
-import 'domain/entities/buy_list_condition_settings.dart';
-import 'domain/services/buy_list_strategy.dart';
-import 'domain/entities/category_order.dart';
 import 'widgets/settings_menu_button.dart';
 import 'widgets/buy_list_card.dart';
 // 言語変更時にアプリ全体のロケールを更新するため MyAppState を参照
@@ -27,14 +14,14 @@ import 'main.dart';
 class BuyListPage extends StatefulWidget {
   /// 外部から渡されるカテゴリ一覧
   final List<Category>? categories;
-  /// 在庫データ取得用リポジトリ
-  final InventoryRepository repository;
+  /// テスト用に ViewModel を差し替え可能
+  final BuyListViewModel? viewModel;
 
   BuyListPage({
     super.key,
     this.categories,
-    InventoryRepository? repository,
-  }) : repository = repository ?? InventoryRepositoryImpl();
+    this.viewModel,
+  });
 
   @override
   State<BuyListPage> createState() => BuyListPageState();
@@ -48,13 +35,7 @@ class BuyListPageState extends State<BuyListPage> {
   @override
   void initState() {
     super.initState();
-    final buyRepo = BuyListRepositoryImpl();
-    _viewModel = BuyListViewModel(
-      repository: widget.repository,
-      addUsecase: AddBuyItem(buyRepo),
-      removeUsecase: RemoveBuyItem(buyRepo),
-      watchUsecase: WatchBuyItems(buyRepo),
-    );
+    _viewModel = widget.viewModel ?? BuyListViewModel();
     _viewModel.addListener(() {
       if (mounted) setState(() {});
     });
@@ -134,7 +115,9 @@ class BuyListPageState extends State<BuyListPage> {
                             BuyListCard(
                               item: item,
                               categories: _viewModel.categories,
-                              repository: widget.repository,
+                              watchInventory: _viewModel.watchInventory,
+                              calcDaysLeft: _viewModel.calcDaysLeft,
+                              updateQuantity: _viewModel.updateQuantity,
                               onRemove: _viewModel.removeItem,
                             ),
                         ],
