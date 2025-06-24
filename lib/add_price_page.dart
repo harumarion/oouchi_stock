@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:oouchi_stock/i18n/app_localizations.dart';
 
-import 'data/repositories/inventory_repository_impl.dart';
-import 'data/repositories/price_repository_impl.dart';
 import 'domain/entities/inventory.dart';
-import 'domain/usecases/add_price_info.dart';
-import 'domain/usecases/fetch_all_inventory.dart';
 import 'presentation/viewmodels/add_price_viewmodel.dart';
 import 'util/input_validators.dart';
 import 'add_inventory_page.dart';
@@ -27,10 +23,7 @@ class _AddPricePageState extends State<AddPricePage> {
   void initState() {
     super.initState();
     // 初期表示時にセール終了日のデフォルトを設定
-    _viewModel = AddPriceViewModel(
-      AddPriceInfo(PriceRepositoryImpl()),
-      FetchAllInventory(InventoryRepositoryImpl()),
-    );
+    _viewModel = AddPriceViewModel();
     _viewModel.addListener(() {
       if (mounted) setState(() {});
     });

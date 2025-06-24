@@ -1,15 +1,7 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:oouchi_stock/i18n/app_localizations.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'util/firestore_refs.dart';
-import 'util/date_time_parser.dart';
-import 'domain/entities/inventory.dart';
 import 'domain/entities/category.dart';
-import 'domain/usecases/update_inventory.dart';
-import 'data/repositories/inventory_repository_impl.dart';
 import 'add_category_page.dart';
-import 'default_item_types.dart';
 import 'presentation/viewmodels/edit_inventory_viewmodel.dart';
 
 /// 商品を編集する画面のウィジェット
@@ -41,9 +33,8 @@ class _EditInventoryPageState extends State<EditInventoryPage> {
   @override
   void initState() {
     super.initState();
-    _viewModel = EditInventoryViewModel(
-      UpdateInventory(InventoryRepositoryImpl()),
-    )..load(
+    _viewModel = EditInventoryViewModel()
+      ..load(
         id: widget.id,
         itemName: widget.itemName,
         category: widget.category,

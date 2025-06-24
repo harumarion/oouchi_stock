@@ -4,11 +4,12 @@ import 'package:flutter/material.dart' hide Category;
 import '../../domain/entities/item_type.dart';
 import '../../domain/entities/category.dart';
 import '../../domain/usecases/update_item_type.dart';
+import '../../data/repositories/item_type_repository_impl.dart';
 
 /// 品種編集画面の状態を管理する ViewModel
 class EditItemTypeViewModel extends ChangeNotifier {
   /// 品種更新ユースケース
-  final UpdateItemType _usecase;
+  final UpdateItemType _usecase = UpdateItemType(ItemTypeRepositoryImpl());
 
   /// フォームキー
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
@@ -25,7 +26,7 @@ class EditItemTypeViewModel extends ChangeNotifier {
   /// 選択可能なカテゴリ一覧
   final List<Category> categories;
 
-  EditItemTypeViewModel(this._usecase, this.original, this.categories)
+  EditItemTypeViewModel(this.original, this.categories)
       : name = original.name {
     if (categories.isNotEmpty) {
       category = categories.firstWhere(

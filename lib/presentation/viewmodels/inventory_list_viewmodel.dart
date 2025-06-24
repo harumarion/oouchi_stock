@@ -6,15 +6,19 @@ import '../../domain/entities/buy_item.dart';
 import '../../domain/usecases/watch_inventories.dart';
 import '../../domain/usecases/delete_inventory.dart';
 import '../../domain/usecases/add_buy_item.dart';
+import '../../data/repositories/inventory_repository_impl.dart';
+import '../../data/repositories/buy_list_repository_impl.dart';
 
 /// 在庫一覧の1タブ分の状態を管理する ViewModel
 /// 検索ワードや並び替え条件を保持し、在庫データのストリームを提供する
 class InventoryListViewModel extends ChangeNotifier {
   /// 表示対象カテゴリ名
   final String category;
-  final WatchInventories watchUsecase;
-  final DeleteInventory deleteUsecase;
-  final AddBuyItem addUsecase;
+  final WatchInventories watchUsecase =
+      WatchInventories(InventoryRepositoryImpl());
+  final DeleteInventory deleteUsecase =
+      DeleteInventory(InventoryRepositoryImpl());
+  final AddBuyItem addUsecase = AddBuyItem(BuyListRepositoryImpl());
 
   /// 検索文字列
   String search = '';
@@ -25,12 +29,7 @@ class InventoryListViewModel extends ChangeNotifier {
   /// 検索バーのコントローラ
   final TextEditingController controller = TextEditingController();
 
-  InventoryListViewModel({
-    required this.category,
-    required this.watchUsecase,
-    required this.deleteUsecase,
-    required this.addUsecase,
-  });
+  InventoryListViewModel({required this.category});
 
   /// 在庫ストリームを取得
   Stream<List<Inventory>> get stream => watchUsecase(category);

@@ -1,14 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:oouchi_stock/i18n/app_localizations.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'util/firestore_refs.dart';
-import 'util/date_time_parser.dart';
-import 'domain/entities/inventory.dart';
 import 'domain/entities/category.dart';
-import 'default_item_types.dart';
-import 'domain/usecases/add_inventory.dart';
-import 'data/repositories/inventory_repository_impl.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'widgets/settings_menu_button.dart';
 import 'main.dart';
 import 'add_category_page.dart';
@@ -31,9 +24,7 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
   @override
   void initState() {
     super.initState();
-    _viewModel =
-        AddInventoryViewModel(AddInventory(InventoryRepositoryImpl()))
-          ..load(widget.categories);
+    _viewModel = AddInventoryViewModel()..load(widget.categories);
     _viewModel.addListener(() {
       if (mounted) setState(() {});
     });

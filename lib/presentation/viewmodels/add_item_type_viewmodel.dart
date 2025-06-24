@@ -5,11 +5,12 @@ import 'package:flutter/material.dart' hide Category;
 import '../../domain/entities/category.dart';
 import '../../domain/entities/item_type.dart';
 import '../../domain/usecases/add_item_type.dart';
+import '../../data/repositories/item_type_repository_impl.dart';
 
 /// 品種追加画面の状態を管理する ViewModel
 class AddItemTypeViewModel extends ChangeNotifier {
   /// 品種追加ユースケース
-  final AddItemType _usecase;
+  final AddItemType _usecase = AddItemType(ItemTypeRepositoryImpl());
 
   /// フォームキー
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
@@ -23,7 +24,7 @@ class AddItemTypeViewModel extends ChangeNotifier {
   /// 選択可能なカテゴリ一覧
   final List<Category> categories;
 
-  AddItemTypeViewModel(this._usecase, this.categories) {
+  AddItemTypeViewModel(this.categories) {
     if (categories.isNotEmpty) category = categories.first;
   }
 

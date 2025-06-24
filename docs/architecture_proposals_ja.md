@@ -25,6 +25,8 @@
   さらに在庫一覧画面でも `InventoryPageViewModel` と `InventoryListViewModel` を導入し、
   画面の状態遷移を ViewModel に集約しました。
   買い物予報画面も `BuyListViewModel` を用いてロジックを分離しています。
+  また、アプリ起動時の初期化処理は `MainViewModel` にまとめ、
+  `main.dart` は ViewModel を利用するだけの形に変更しました。
 
 ## 4. ルーティングの整理
 - 画面遷移が複雑になった場合は、Navigator 2.0 (Router API) を利用してルーティングを一元管理します。

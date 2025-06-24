@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'presentation/viewmodels/add_item_type_viewmodel.dart';
-import 'data/repositories/item_type_repository_impl.dart';
-import 'domain/usecases/add_item_type.dart';
 
 import 'domain/entities/category.dart';
 import 'package:oouchi_stock/i18n/app_localizations.dart';
@@ -21,10 +19,7 @@ class _AddItemTypePageState extends State<AddItemTypePage> {
   @override
   void initState() {
     super.initState();
-    _viewModel = AddItemTypeViewModel(
-      AddItemType(ItemTypeRepositoryImpl()),
-      widget.categories,
-    );
+    _viewModel = AddItemTypeViewModel(widget.categories);
     _viewModel.addListener(() {
       if (mounted) setState(() {});
     });
