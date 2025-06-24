@@ -8,6 +8,8 @@ import 'presentation/viewmodels/price_category_list_viewmodel.dart';
 import 'price_detail_page.dart';
 import 'main.dart';
 import 'widgets/scrolling_text.dart';
+import 'domain/entities/price_info.dart';
+import 'domain/usecases/watch_price_by_category.dart';
 
 /// セール情報管理画面
 class PriceListPage extends StatefulWidget {
