@@ -13,7 +13,6 @@ import 'widgets/settings_menu_button.dart';
 import 'main.dart';
 import 'add_category_page.dart';
 import 'presentation/viewmodels/add_inventory_viewmodel.dart';
-import 'presentation/viewmodels/add_inventory_viewmodel.dart';
 
 // 商品を追加する画面のウィジェット
 
