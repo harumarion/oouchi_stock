@@ -9,7 +9,6 @@ import 'price_detail_page.dart';
 import 'main.dart';
 import 'widgets/scrolling_text.dart';
 import 'domain/entities/price_info.dart';
-import 'domain/usecases/watch_price_by_category.dart';
 
 /// セール情報管理画面
 class PriceListPage extends StatefulWidget {
@@ -113,22 +112,28 @@ class _PriceListPageState extends State<PriceListPage> {
 
 /// カテゴリ別セール一覧ウィジェット
 class PriceCategoryList extends StatefulWidget {
+  /// 表示対象のカテゴリ名
   final String category;
-  final WatchPriceByCategory? watch;
-  const PriceCategoryList({super.key, required this.category, this.watch});
+
+  /// テスト用に注入する ViewModel (通常は null)
+  final PriceCategoryListViewModel? viewModel;
+
+  const PriceCategoryList({super.key, required this.category, this.viewModel});
 
   @override
   State<PriceCategoryList> createState() => _PriceCategoryListState();
 }
 
 class _PriceCategoryListState extends State<PriceCategoryList> {
+  /// カテゴリリストを管理する ViewModel
   late final PriceCategoryListViewModel _viewModel;
 
   @override
   void initState() {
     super.initState();
-    _viewModel = PriceCategoryListViewModel(category: widget.category, watch: widget.watch)
-      ..addListener(() { if (mounted) setState(() {}); });
+    _viewModel = widget.viewModel ??
+        PriceCategoryListViewModel(category: widget.category);
+    _viewModel.addListener(() { if (mounted) setState(() {}); });
   }
 
   @override
