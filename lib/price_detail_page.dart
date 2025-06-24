@@ -1,20 +1,19 @@
 import 'package:flutter/material.dart';
 import 'i18n/app_localizations.dart';
-import 'domain/entities/price_info.dart';
+import 'presentation/viewmodels/price_detail_viewmodel.dart';
+import "domain/entities/price_info.dart";
 
 /// セール詳細情報表示画面
 class PriceDetailPage extends StatelessWidget {
-  /// 表示するセール情報
-  final PriceInfo info;
-
-  const PriceDetailPage({super.key, required this.info});
+  final PriceDetailViewModel viewModel;
+  PriceDetailPage({super.key, required PriceInfo info}) : viewModel = PriceDetailViewModel(info);
 
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
+    final info = viewModel.info;
     final textStyle = Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 18);
     return Scaffold(
-      // タイトルには商品名があれば商品名、なければ品種名を使用
       appBar: AppBar(title: Text(info.itemName.isNotEmpty ? info.itemName : info.itemType)),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -38,10 +37,8 @@ class PriceDetailPage extends StatelessWidget {
     );
   }
 
-  /// 日付を yyyy/MM/dd 形式で返す
   String _formatDate(DateTime d) => '${d.year}/${d.month}/${d.day}';
 
-  /// 項目名と値を左右に表示する行を生成
   Widget _buildRow(String label, String value, [TextStyle? style]) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
