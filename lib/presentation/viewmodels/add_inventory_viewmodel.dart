@@ -150,6 +150,15 @@ class AddInventoryViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// 入力フォームの内容を初期化
+  void resetFields() {
+    itemName = '';
+    note = '';
+    quantity = 1.0;
+    volume = 1.0;
+    notifyListeners();
+  }
+
   /// メモ設定処理
   void setNote(String v) {
     note = v;
