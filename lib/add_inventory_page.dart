@@ -197,11 +197,7 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
                         // ルート画面から商品追加した場合はフォームをリセットする
                         setState(() {
                           _viewModel.formKey.currentState?.reset();
-                          _viewModel.setItemName('');
-                          _viewModel.setNote('');
-                          _viewModel.quantity = 1.0;
-                          _viewModel.volume = 1.0;
-                          _viewModel.notifyListeners();
+                          _viewModel.resetForm();
                         });
                       }
                     } on FirebaseException catch (e) {
