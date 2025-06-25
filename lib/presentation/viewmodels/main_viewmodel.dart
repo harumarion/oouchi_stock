@@ -37,7 +37,14 @@ class MainViewModel extends ChangeNotifier {
   Future<void> init() async {
     WidgetsFlutterBinding.ensureInitialized();
     await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-    await MobileAds.instance.initialize();
+    try {
+      // Google Mobile Ads SDK の初期化
+      // ホーム画面で広告を表示するため、アプリ起動時に実行する
+      await MobileAds.instance.initialize();
+    } catch (e, s) {
+      // WebView が無効などの理由で初期化に失敗してもアプリが落ちないようログのみ出力
+      debugPrint('MobileAds initialize failed: $e\n$s');
+    }
     final systemLocale = WidgetsBinding.instance.platformDispatcher.locale;
     FirebaseAuth.instance.setLanguageCode(systemLocale.languageCode);
     FirebaseFirestore.instance.settings = const Settings(persistenceEnabled: true);
