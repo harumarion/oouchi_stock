@@ -62,7 +62,9 @@ dependencies {
     // 画面が表示されるタイミングでロードされる
     // Flutter エンジンが想定している Window ライブラリのバージョンに合わせる
     // 画面が表示されるときに折りたたみ端末の情報を取得するために利用
-    implementation("androidx.window:window:1.1.0")
+    // Flutter エンジンが期待する古い Sidecar API へ対応するため
+    // バージョン 1.0.0 を指定して SidecarInterface の欠落エラーを回避
+    implementation("androidx.window:window:1.0.0")
     // Desugaring library required when using Java 8+ APIs on lower API levels
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
 }
