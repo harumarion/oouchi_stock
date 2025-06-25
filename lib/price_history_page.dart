@@ -1,13 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:oouchi_stock/i18n/app_localizations.dart';
 import 'presentation/viewmodels/price_history_viewmodel.dart';
+import 'domain/entities/price_info.dart';
+import 'domain/usecases/delete_price_info.dart';
+import 'domain/usecases/watch_price_by_type.dart';
 
 /// セール情報履歴画面
 class PriceHistoryPage extends StatefulWidget {
+  /// 選択中カテゴリ名
   final String category;
+  /// 選択中品種名
   final String itemType;
+  /// 商品名 (任意)
   final String? itemName;
+  /// セール情報取得ユースケース
   final WatchPriceByType? watch;
+  /// セール情報削除ユースケース
   final DeletePriceInfo? deleter;
   const PriceHistoryPage({
     super.key,
@@ -23,6 +31,7 @@ class PriceHistoryPage extends StatefulWidget {
 }
 
 class _PriceHistoryPageState extends State<PriceHistoryPage> {
+  /// 画面状態を管理する ViewModel
   late final PriceHistoryViewModel _viewModel;
 
   @override
@@ -59,6 +68,7 @@ class _PriceHistoryPageState extends State<PriceHistoryPage> {
                 Card(
                   margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: InkWell(
+                    // 行を長押ししたときに削除メニューを表示
                     onLongPress: () async {
                       final res = await showModalBottomSheet<String>(
                         context: context,
@@ -105,8 +115,10 @@ class _PriceHistoryPageState extends State<PriceHistoryPage> {
     );
   }
 
+  /// 日付を YYYY/M/D 形式に変換
   String _formatDate(DateTime d) => '${d.year}/${d.month}/${d.day}';
 
+  /// 項目ラベルと値を横並びで表示する行
   Widget _buildRow(String label, String value, [TextStyle? style]) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
