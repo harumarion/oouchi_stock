@@ -78,6 +78,7 @@ class _SaleListPageState extends State<SaleListPage> {
                 final item = sorted[index];
                 return SaleItemCard(
                   item: item,
+                  // カードの「買い物リストに追加」ボタン押下時の処理を指定
                   onAdd: _viewModel.addToBuyList,
                 );
               },
