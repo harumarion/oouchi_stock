@@ -55,8 +55,11 @@ class SettingsViewModel extends ChangeNotifier {
   }
 
   /// データをバックアップする
+  ///
+  /// ログインしていない場合は処理を中断する
   Future<void> backup() async {
-    final uid = FirebaseAuth.instance.currentUser!.uid;
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
     final prefs = await SharedPreferences.getInstance();
     final catSnap = await userCollection('categories').get();
     final invSnap = await userCollection('inventory').get();
@@ -82,13 +85,16 @@ class SettingsViewModel extends ChangeNotifier {
   }
 
   /// バックアップデータから復元する
-  Future<DateTime> restore() async {
-    final uid = FirebaseAuth.instance.currentUser!.uid;
+  ///
+  /// データが存在しない場合は null を返す
+  Future<DateTime?> restore() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return null;
     final prefs = await SharedPreferences.getInstance();
     final text = prefs.getString('backup_$uid');
     final timeStr = prefs.getString('backup_time_$uid');
     if (text == null || timeStr == null) {
-      throw Exception('no backup');
+      return null;
     }
     final backupTime = DateTime.parse(timeStr);
     final data = jsonDecode(text);
