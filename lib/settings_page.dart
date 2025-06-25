@@ -86,19 +86,18 @@ class _SettingsPageState extends State<SettingsPage> {
       ),
     );
     if (confirm != true) return;
-    try {
-      final time = await _viewModel.restore();
-      if (!mounted) return;
-      final t = DateFormat('yyyy/MM/dd HH:mm').format(time);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(loc.restoreDoneWithTime(t))),
-      );
-    } catch (e) {
-      if (!mounted) return;
+    final time = await _viewModel.restore();
+    if (!mounted) return;
+    if (time == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(loc.noBackupData)),
       );
+      return;
     }
+    final t = DateFormat('yyyy/MM/dd HH:mm').format(time);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(loc.restoreDoneWithTime(t))),
+    );
   }
 
   @override
