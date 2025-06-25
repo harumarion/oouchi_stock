@@ -1,7 +1,7 @@
 # 買い物予報
 
 天気予報のように在庫とセール情報をもとに買っておくべき商品を提案するFlutterアプリです。
-広告表示には `google_mobile_ads` (>=4.0.0) を利用しています。
+広告表示には `google_mobile_ads` (>=5.0.0) を利用しています。
 
 ユーザー向けの操作説明は[取扱説明書](docs/user_manual_ja.md)をご覧ください。
 開発者向けの設計方針は[アーキテクチャ案](docs/architecture_proposals_ja.md)を参照してください。
@@ -27,7 +27,10 @@ Android ビルドを行う場合は JDK 17 が必要です。`JAVA_HOME` が JDK
 
 折りたたみ端末などの最新機種に対応するため、AndroidX Window ライブラリを利用しています。
 Flutter エンジンと互換性のある `1.1.x` 系を使用しており、`android/app/build.gradle.kts` では `1.1.0` を指定しています。
-ビルド時にエラーが発生する場合は `androidx.window:window` が正しいバージョンで取得できているか確認してください。
+一部の端末ではサイドカー API が読み込めず `NoClassDefFoundError` が出るため、
+`androidx.window:window-sidecar` も依存関係に追加しています。
+ビルド時にエラーが発生する場合は `androidx.window:window` と `window-sidecar`
+が正しいバージョンで取得できているか確認してください。
 
 ## Firebase の設定
 

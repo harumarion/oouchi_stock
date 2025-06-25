@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import '../../util/webview_checker.dart';
 import '../../firebase_options.dart';
 import '../../notification_service.dart';
 import '../../i18n/app_localizations.dart';
@@ -38,11 +39,15 @@ class MainViewModel extends ChangeNotifier {
     WidgetsFlutterBinding.ensureInitialized();
     await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
     try {
-      // Google Mobile Ads SDK の初期化
-      // ホーム画面で広告を表示するため、アプリ起動時に実行する
-      await MobileAds.instance.initialize();
+      // WebView が利用可能なときのみ広告 SDK を初期化
+      // WebView が無効な端末で PacProcessor 例外が出るのを防ぐ
+      if (await WebViewChecker.isAvailable()) {
+        await MobileAds.instance.initialize();
+      } else {
+        debugPrint('WebView not available, skip MobileAds initialization');
+      }
     } catch (e, s) {
-      // WebView が無効などの理由で初期化に失敗してもアプリが落ちないようログのみ出力
+      // 予期せぬ理由で初期化に失敗してもアプリが落ちないようログのみ出力
       debugPrint('MobileAds initialize failed: $e\n$s');
     }
     final systemLocale = WidgetsBinding.instance.platformDispatcher.locale;
