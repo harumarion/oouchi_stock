@@ -65,6 +65,10 @@ dependencies {
     // Flutter エンジンが期待する古い Sidecar API へ対応するため
     // バージョン 1.0.0 を指定して SidecarInterface の欠落エラーを回避
     implementation("androidx.window:window:1.0.0")
+    // 折りたたみ端末向けサイドカー API のクラスが読み込めず
+    // NoClassDefFoundError が発生することへの対策として sidecar 依存も追加
+    // ログイン画面やホーム画面を表示する際に FlutterView が参照する
+    implementation("androidx.window:window-sidecar:1.1.0")
     // Desugaring library required when using Java 8+ APIs on lower API levels
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
 }
