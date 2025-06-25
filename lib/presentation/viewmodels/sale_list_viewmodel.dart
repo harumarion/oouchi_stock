@@ -47,9 +47,10 @@ class SaleListViewModel extends ChangeNotifier {
 
   final AddBuyItem addBuyItem = AddBuyItem(BuyListRepositoryImpl());
 
-  /// 買い物リストへ追加
-  Future<void> addToBuyList(SaleItem item) async {
-    await addBuyItem(BuyItem(item.name, ''));
+  /// セール一覧画面で「買い物リストに追加」ボタンを押したときの処理
+  /// [item] 追加する買い物リストアイテム
+  Future<void> addToBuyList(BuyItem item) async {
+    await addBuyItem(item);
   }
 
   /// 並び替え後のリストを取得
