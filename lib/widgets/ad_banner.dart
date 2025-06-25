@@ -34,20 +34,29 @@ class _AdBannerState extends State<AdBanner> {
   Future<void> _initAd() async {
     // 広告表示設定を読み込み、無効な場合は処理を中断
     _enabled = await _loadUsecase();
-    if (!_enabled) return;
-    final banner = BannerAd(
-      size: AdSize.banner,
-      adUnitId: _adUnitId,
-      listener: BannerAdListener(
-        onAdLoaded: (_) => setState(() {}),
-        onAdFailedToLoad: (ad, error) {
-          ad.dispose();
-        },
-      ),
-      request: const AdRequest(),
-    );
-    await banner.load();
-    if (mounted) setState(() => _ad = banner);
+    // Android と iOS 以外では広告を表示しない
+    if (!_enabled || (!Platform.isAndroid && !Platform.isIOS)) {
+      _enabled = false;
+      return;
+    }
+    try {
+      final banner = BannerAd(
+        size: AdSize.banner,
+        adUnitId: _adUnitId,
+        listener: BannerAdListener(
+          onAdLoaded: (_) => setState(() {}),
+          onAdFailedToLoad: (ad, error) {
+            ad.dispose();
+          },
+        ),
+        request: const AdRequest(),
+      );
+      await banner.load();
+      if (mounted) setState(() => _ad = banner);
+    } catch (e, s) {
+      // 非対応プラットフォームなどで例外が発生した場合はログのみ出力
+      debugPrint('AdBanner init failed: $e\n$s');
+    }
   }
 
   // 広告ユニットIDを取得する
