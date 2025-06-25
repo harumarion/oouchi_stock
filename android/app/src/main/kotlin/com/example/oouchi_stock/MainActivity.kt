@@ -6,11 +6,16 @@ import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.security.ProviderInstaller
 import io.flutter.embedding.android.FlutterActivity
+import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.plugin.common.MethodChannel
 
 /// アプリ起動時に最初に表示される画面をホストする Activity
 /// 各 Flutter 画面 (ホーム、在庫一覧など) はここから生成される
 
+// メインアクティビティ。ホーム画面など Flutter 画面を生成する
 class MainActivity : FlutterActivity(), ProviderInstaller.ProviderInstallListener {
+
+    private val CHANNEL = "com.example.oouchi_stock/webview"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,6 +29,29 @@ class MainActivity : FlutterActivity(), ProviderInstaller.ProviderInstallListene
             ProviderInstaller.installIfNeededAsync(this, this)
         } else if (availability.isUserResolvableError(result)) {
             availability.showErrorDialogFragment(this, result, 0)
+        }
+    }
+
+    // Flutter エンジン初期化時にメソッドチャネルを登録
+    override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
+        super.configureFlutterEngine(flutterEngine)
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL)
+            .setMethodCallHandler { call, result ->
+                if (call.method == "isWebViewAvailable") {
+                    result.success(isWebViewAvailable())
+                } else {
+                    result.notImplemented()
+                }
+            }
+    }
+
+    // PacProcessor クラスが利用可能かチェックし WebView の有無を判定
+    private fun isWebViewAvailable(): Boolean {
+        return try {
+            Class.forName("android.webkit.PacProcessor")
+            true
+        } catch (e: Exception) {
+            false
         }
     }
 
