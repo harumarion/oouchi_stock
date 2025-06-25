@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:oouchi_stock/widgets/ad_banner.dart';
 
 void main() {
+  // AdBanner ウィジェットが正常に構築されるか確認するテスト
   testWidgets('AdBanner 初期表示', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(home: AdBanner()));
     // 端末によっては広告が読み込めないため、とりあえずウィジェットが存在するか確認

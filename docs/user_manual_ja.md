@@ -6,6 +6,7 @@
 なお、広告表示機能には `google_mobile_ads` パッケージのバージョン 4.0.0 以上が必要です。
 また、動作させるには AndroidManifest と iOS の Info.plist にそれぞれ有効な AdMob の
 App ID を設定しておく必要があります。テスト用途であればサンプル ID を利用できます。
+デスクトップ環境などモバイル以外で実行した場合も、テスト ID を利用して広告初期化が行われるため、UnsupportedError は発生しません。
 WebView が無効、またはインストールされていない端末では広告初期化時にエラーログが表示されます。広告機能を利用するには Android System WebView もしくは Chrome を有効にしてください。
 また、AndroidManifest.xml を編集する際は XML 形式を崩さないよう注意し、コメントはタグの外側に記述してください。
 
