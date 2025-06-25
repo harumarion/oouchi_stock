@@ -26,6 +26,7 @@
   さらに在庫一覧画面でも `InventoryPageViewModel` と `InventoryListViewModel` を導入し、
   画面の状態遷移を ViewModel に集約しました。
  買い物予報画面も `BuyListViewModel` を用いてロジックを分離しています。
+ セール情報履歴画面も `PriceHistoryViewModel` を導入し、一覧取得と削除処理を ViewModel に集約しました。
   また、アプリ起動時の初期化処理は `MainViewModel` にまとめ、
   `main.dart` は ViewModel を利用するだけの形に変更しました。
 
