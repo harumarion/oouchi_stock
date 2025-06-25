@@ -26,9 +26,9 @@ Android ビルドを行う場合は JDK 17 が必要です。`JAVA_HOME` が JDK
 ることを確認してください。
 
 折りたたみ端末などの最新機種に対応するため、AndroidX Window ライブラリを利用しています。
-Flutter エンジンと互換性のある `1.1.x` 系を使用しており、`android/app/build.gradle.kts` では `1.1.0` を指定しています。
+Flutter エンジンと互換性のある `1.0.x` 系を使用しており、`android/app/build.gradle.kts` では `1.0.0` を指定しています。
 一部の端末ではサイドカー API が読み込めず `NoClassDefFoundError` が出るため、
-`androidx.window:window-sidecar` も依存関係に追加しています。
+`androidx.window:window-sidecar` も依存関係に追加しています。取得可能な最新バージョンは `0.1.0` のため、これを指定しています。
 ビルド時にエラーが発生する場合は `androidx.window:window` と `window-sidecar`
 が正しいバージョンで取得できているか確認してください。
 

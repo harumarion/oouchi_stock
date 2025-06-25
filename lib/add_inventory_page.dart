@@ -182,45 +182,43 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
                 onPressed: () async {
                   // フォームの入力が正しいか確認
                   if (_viewModel.formKey.currentState!.validate()) {
+                    // build メソッドの context を保持
+                    final ctx = context;
                     try {
                       await _viewModel.save();
-                      if (!mounted) return;
-                      final snackBar = ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(AppLocalizations.of(context)!.saved)),
+                      if (!ctx.mounted) return;
+                      final snackBar = ScaffoldMessenger.of(ctx).showSnackBar(
+                        SnackBar(content: Text(AppLocalizations.of(ctx)!.saved)),
                       );
                       await snackBar.closed;
-                      if (!mounted) return;
+                      if (!ctx.mounted) return;
                       // 画面がスタックに積まれている場合のみ前の画面へ戻る
-                      if (Navigator.of(context).canPop()) {
-                        Navigator.pop(context);
+                      if (Navigator.of(ctx).canPop()) {
+                        Navigator.pop(ctx);
                       } else {
                         // ルート画面から商品追加した場合はフォームをリセットする
                         setState(() {
                           _viewModel.formKey.currentState?.reset();
-                          _viewModel.setItemName('');
-                          _viewModel.setNote('');
-                          _viewModel.quantity = 1.0;
-                          _viewModel.volume = 1.0;
-                          _viewModel.notifyListeners();
+                          _viewModel.resetFields();
                         });
                       }
                     } on FirebaseException catch (e) {
                       // Firestore からの例外をログに出力
                       debugPrint('在庫保存失敗: ${e.message ?? e.code}');
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
+                      if (ctx.mounted) {
+                        ScaffoldMessenger.of(ctx).showSnackBar(
                           SnackBar(
                             content: Text(
-                                '${AppLocalizations.of(context)!.saveFailed}: ${e.message ?? e.code}'),
+                                '${AppLocalizations.of(ctx)!.saveFailed}: ${e.message ?? e.code}'),
                           ),
                         );
                       }
                     } catch (e) {
                       // その他の例外をログに出力
                       debugPrint('在庫保存失敗: $e');
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(AppLocalizations.of(context)!.saveFailed)),
+                      if (ctx.mounted) {
+                        ScaffoldMessenger.of(ctx).showSnackBar(
+                          SnackBar(content: Text(AppLocalizations.of(ctx)!.saveFailed)),
                         );
                       }
                     }

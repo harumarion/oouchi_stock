@@ -8,19 +8,33 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:oouchi_stock/main.dart';
+import 'package:oouchi_stock/presentation/viewmodels/main_viewmodel.dart';
 import 'package:oouchi_stock/add_category_page.dart';
 import 'package:oouchi_stock/domain/entities/category.dart';
 import 'package:oouchi_stock/theme.dart';
+import 'firebase_test_utils.dart';
+
+/// テスト用のダミー MainViewModel。通信や初期化処理を行わない。
+class _DummyMainViewModel extends MainViewModel {
+  @override
+  void startConnectivityWatch() {
+    // 接続監視を無効化
+  }
+}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   // アプリを起動した際、タイトルが表示されるかどうかを確認
   testWidgets('アプリが起動する', (WidgetTester tester) async {
+    // Firebase の初期化をモック
+    await setupFirebaseCoreMocks();
+    final vm = _DummyMainViewModel()..locale = const Locale('ja');
     final categories = [
       Category(id: 1, name: '日用品', createdAt: DateTime.now())
     ];
-    await tester.pumpWidget(MyApp(initialCategories: categories));
+    // MyApp 起動。画面タイトルが表示されることを確認
+    await tester.pumpWidget(MyApp(initialCategories: categories, viewModel: vm));
     expect(find.text('買い物予報'), findsOneWidget);
   });
 
