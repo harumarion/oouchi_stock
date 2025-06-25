@@ -1,8 +1,13 @@
 /// 買い物リストの1項目を表すエンティティ
 /// [inventoryId] が存在する場合、在庫データとの関連を示す
 class BuyItem {
+  /// 商品名
   final String name;
+
+  /// カテゴリ名
   final String category;
+
+  /// 紐づく在庫ID
   final String? inventoryId;
 
   const BuyItem(this.name, this.category, [this.inventoryId]);
