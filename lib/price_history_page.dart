@@ -4,11 +4,19 @@ import 'presentation/viewmodels/price_history_viewmodel.dart';
 
 /// セール情報履歴画面
 class PriceHistoryPage extends StatefulWidget {
+  /// 表示するカテゴリ名
   final String category;
+  /// 表示する品種名
   final String itemType;
+  /// 任意の商品名。指定がない場合は品種名をタイトルに使用
   final String? itemName;
+  /// Firestore 監視ユースケース（テスト用）
   final WatchPriceByType? watch;
+  /// 削除ユースケース（テスト用）
   final DeletePriceInfo? deleter;
+  /// 外部から注入する ViewModel（テスト用）
+  final PriceHistoryViewModel? viewModel;
+
   const PriceHistoryPage({
     super.key,
     required this.category,
@@ -16,6 +24,7 @@ class PriceHistoryPage extends StatefulWidget {
     this.itemName,
     this.watch,
     this.deleter,
+    this.viewModel,
   });
 
   @override
@@ -23,17 +32,20 @@ class PriceHistoryPage extends StatefulWidget {
 }
 
 class _PriceHistoryPageState extends State<PriceHistoryPage> {
+  /// 画面の状態を管理する ViewModel
   late final PriceHistoryViewModel _viewModel;
 
   @override
   void initState() {
     super.initState();
-    _viewModel = PriceHistoryViewModel(
-      category: widget.category,
-      itemType: widget.itemType,
-      watch: widget.watch,
-      deleter: widget.deleter,
-    );
+    // 指定があれば外部提供の ViewModel を利用し、なければ新規作成
+    _viewModel = widget.viewModel ??
+        PriceHistoryViewModel(
+          category: widget.category,
+          itemType: widget.itemType,
+          watch: widget.watch,
+          deleter: widget.deleter,
+        );
   }
 
   @override
@@ -59,6 +71,7 @@ class _PriceHistoryPageState extends State<PriceHistoryPage> {
                 Card(
                   margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: InkWell(
+                    // 履歴カードを長押しした際の削除メニュー表示
                     onLongPress: () async {
                       final res = await showModalBottomSheet<String>(
                         context: context,
@@ -105,8 +118,10 @@ class _PriceHistoryPageState extends State<PriceHistoryPage> {
     );
   }
 
+  /// 日付を YYYY/M/D 形式に整形
   String _formatDate(DateTime d) => '${d.year}/${d.month}/${d.day}';
 
+  /// ラベルと値を左右に並べて表示する共通行ウィジェット
   Widget _buildRow(String label, String value, [TextStyle? style]) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:oouchi_stock/price_history_page.dart';
+import 'package:oouchi_stock/presentation/viewmodels/price_history_viewmodel.dart';
 import 'package:oouchi_stock/domain/entities/price_info.dart';
 import 'package:oouchi_stock/domain/repositories/price_repository.dart';
 import 'package:oouchi_stock/domain/usecases/delete_price_info.dart';
@@ -31,6 +32,39 @@ void main() {
     await tester.pump();
     final text = tester.widget<Text>(find.text('テスト商品'));
     expect(text.style?.fontSize, 18);
+  });
+
+  testWidgets('外部 ViewModel を注入できる', (WidgetTester tester) async {
+    final vm = _FakeViewModel(Stream.value([
+      PriceInfo(
+        id: '1',
+        inventoryId: '1',
+        checkedAt: DateTime(2023, 1, 1),
+        category: 'c',
+        itemType: 't',
+        itemName: 'テスト商品',
+        count: 1,
+        unit: '個',
+        volume: 1,
+        totalVolume: 1,
+        regularPrice: 200,
+        salePrice: 150,
+        shop: '店',
+        approvalUrl: '',
+        memo: '',
+        unitPrice: 150,
+        expiry: DateTime(2023, 1, 2),
+      )
+    ]));
+    await tester.pumpWidget(MaterialApp(
+      home: PriceHistoryPage(
+        category: 'c',
+        itemType: 't',
+        viewModel: vm,
+      ),
+    ));
+    await tester.pump();
+    expect(find.text('テスト商品'), findsOneWidget);
   });
 }
 
@@ -67,4 +101,13 @@ class _FakeRepository implements PriceRepository {
 
   @override
   Future<void> deletePriceInfo(String id) async {}
+}
+
+class _FakeViewModel extends PriceHistoryViewModel {
+  final Stream<List<PriceInfo>> _stream;
+  _FakeViewModel(this._stream)
+      : super(category: 'c', itemType: 't', watch: WatchPriceByType(_FakeRepository()), deleter: DeletePriceInfo(_FakeRepository()));
+
+  @override
+  Stream<List<PriceInfo>> stream() => _stream;
 }
