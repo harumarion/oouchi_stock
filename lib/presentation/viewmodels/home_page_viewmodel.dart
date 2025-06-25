@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import '../../domain/entities/buy_item.dart';
 import '../../util/firestore_refs.dart';
 import '../../util/date_time_parser.dart';
 import '../../domain/entities/inventory.dart';

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:oouchi_stock/i18n/app_localizations.dart';
+import 'domain/entities/price_info.dart';
 import 'presentation/viewmodels/price_history_viewmodel.dart';
 
 /// セール情報履歴画面

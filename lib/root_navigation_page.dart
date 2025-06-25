@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'buy_list_page.dart';
 import 'inventory_page.dart';
 import 'home_page.dart';
-import 'add_inventory_page.dart';
-import 'add_price_page.dart'; // セール情報追加画面
 import 'price_list_page.dart'; // セール情報管理画面
 import 'i18n/app_localizations.dart';
 import 'widgets/ad_banner.dart';

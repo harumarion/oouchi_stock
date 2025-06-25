@@ -4,11 +4,8 @@ import 'add_category_page.dart';
 import "domain/entities/category.dart";
 import "domain/entities/buy_item.dart";
 import 'widgets/settings_menu_button.dart';
-import 'widgets/inventory_card.dart';
 import 'widgets/prediction_card.dart';
-import 'inventory_detail_page.dart';
 import 'main.dart';
-import 'data/repositories/inventory_repository_impl.dart';
 import 'presentation/viewmodels/home_page_viewmodel.dart';
 
 /// ホーム画面。起動時に表示され、買い物リストを管理する。

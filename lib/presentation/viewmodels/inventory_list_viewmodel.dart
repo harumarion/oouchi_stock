@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../domain/entities/inventory.dart';
-import '../../domain/entities/category.dart';
 import '../../domain/entities/buy_item.dart';
 import '../../domain/usecases/watch_inventories.dart';
 import '../../domain/usecases/delete_inventory.dart';

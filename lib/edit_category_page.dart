@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:oouchi_stock/i18n/app_localizations.dart';
-import 'util/firestore_refs.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'presentation/viewmodels/edit_category_viewmodel.dart';
 
 import 'domain/entities/category.dart';
