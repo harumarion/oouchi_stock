@@ -160,6 +160,17 @@ class AddInventoryViewModel extends ChangeNotifier {
     itemName = v;
   }
 
+  /// フォームを初期状態に戻す処理
+  ///
+  /// 商品追加画面で保存後に入力内容をクリアするために使用する
+  void resetForm() {
+    itemName = '';
+    note = '';
+    quantity = 1.0;
+    volume = 1.0;
+    notifyListeners();
+  }
+
   /// 在庫保存
   Future<void> save() async {
     final item = Inventory(
