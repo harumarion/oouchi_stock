@@ -68,7 +68,9 @@ dependencies {
     // 折りたたみ端末向けサイドカー API のクラスが読み込めず
     // NoClassDefFoundError が発生することへの対策として sidecar 依存も追加
     // ログイン画面やホーム画面を表示する際に FlutterView が参照する
-    implementation("androidx.window:window-sidecar:1.1.0")
+    // 現在入手可能な最新のサイドカー API ライブラリは 0.1.0 のため
+    // 1.1.0 では取得に失敗しビルドエラーとなるためバージョンを修正
+    implementation("androidx.window:window-sidecar:0.1.0")
     // Desugaring library required when using Java 8+ APIs on lower API levels
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
 }
