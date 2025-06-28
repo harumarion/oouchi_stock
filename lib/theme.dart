@@ -6,15 +6,15 @@ class AppTheme {
   // アクションに使用するメインカラー
   static const Color primaryColor = Color(0xFF4A90E2);
   // 画面の背景色
-  static const Color scaffoldBackgroundColor = Color(0xFFF5F5F5);
+  static const Color scaffoldBackgroundColor = Color(0xFFEFF6FD);
   // セール表示に利用する色
-  static const Color saleColor = Color(0xFFD0021B);
+  static const Color saleColor = Color(0xFFE65100);
   // 成功や推奨を示す色
-  static const Color successColor = Color(0xFF7ED321);
+  static const Color successColor = Color(0xFF43A047);
   // メインテキストの色
-  static const Color textColor = Color(0xFF333333);
+  static const Color textColor = Color(0xFF212121);
   // 補助テキストの色
-  static const Color subTextColor = Color(0xFF888888);
+  static const Color subTextColor = Color(0xFF616161);
 
   /// ライトテーマの定義
   /// MaterialApp の `theme` に設定され、全画面で利用されます。

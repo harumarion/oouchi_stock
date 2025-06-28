@@ -12,6 +12,7 @@ import 'package:oouchi_stock/presentation/viewmodels/main_viewmodel.dart';
 import 'package:oouchi_stock/add_category_page.dart';
 import 'package:oouchi_stock/domain/entities/category.dart';
 import 'package:oouchi_stock/theme.dart';
+import 'package:oouchi_stock/widgets/splash_screen.dart';
 import 'firebase_test_utils.dart';
 
 /// テスト用のダミー MainViewModel。通信や初期化処理を行わない。
@@ -50,5 +51,13 @@ void main() {
   test('AppTheme のプライマリカラーが設定されている', () {
     final theme = AppTheme.lightTheme;
     expect(theme.colorScheme.primary, AppTheme.primaryColor);
+  });
+
+  // スプラッシュ画面でアイコン画像が表示されるかを確認
+  testWidgets('スプラッシュ画面にアイコンが表示される', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(home: SplashScreen()));
+    final image = tester.widget<Image>(find.byType(Image));
+    // 画像アセットのパスが正しいか検証
+    expect((image.image as AssetImage).assetName, 'web/icons/Icon-512.png');
   });
 }
