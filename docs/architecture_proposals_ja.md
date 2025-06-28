@@ -32,8 +32,7 @@
 
 ## 5. AndroidX Window ライブラリの利用
 - 折りたたみ端末対応のため `androidx.window:window` を使用します。
-- 一部端末で `SidecarInterface` クラスが見つからず実行時に `NoClassDefFoundError`
-  が発生するため、 `window-sidecar` も `build.gradle.kts` で明示的に依存させています。
+- 以前は `SidecarInterface` の欠落に対応するため `window-sidecar` を追加していましたが、現在は `window` ライブラリのみで対応可能です。
 
 ## 4. ルーティングの整理
 - 画面遷移が複雑になった場合は、Navigator 2.0 (Router API) を利用してルーティングを一元管理します。
