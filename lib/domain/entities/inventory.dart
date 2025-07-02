@@ -47,6 +47,15 @@ class Inventory {
     required this.createdAt,
   });
 
+  // ID を利用して等価比較を行う
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Inventory && runtimeType == other.runtimeType && id == other.id;
+
+  @override
+  int get hashCode => id.hashCode;
+
   /// 数量と容量から総容量を再計算
   double calculateTotalVolume() => quantity * volume;
 }
