@@ -12,6 +12,9 @@ class EditInventoryPage extends StatefulWidget {
   final String itemType;
   final String unit;
   final String note;
+  // テスト用に初期カテゴリを差し込めるようにする
+  final List<Category>? categories;
+
   const EditInventoryPage({
     super.key,
     required this.id,
@@ -20,6 +23,7 @@ class EditInventoryPage extends StatefulWidget {
     required this.itemType,
     required this.unit,
     required this.note,
+    this.categories,
   });
 
   @override
@@ -41,7 +45,8 @@ class _EditInventoryPageState extends State<EditInventoryPage> {
         itemType: widget.itemType,
         unit: widget.unit,
         note: widget.note,
-        initialCategories: null,
+        // テストから渡されたカテゴリ一覧を利用
+        initialCategories: widget.categories,
       );
     _viewModel.addListener(() {
       if (mounted) setState(() {});
@@ -128,15 +133,21 @@ class _EditInventoryPageState extends State<EditInventoryPage> {
                 // 選択中カテゴリに該当する品種リストを取得
                 final itemTypes =
                     _viewModel.typesMap[_viewModel.category?.name] ?? ['その他'];
-                // 初回描画時に選択中の品種がリストに無ければ自動で変更する
-                if (!itemTypes.contains(_viewModel.itemType)) {
+                // 品種リストに現在の値が無ければ自動的に先頭に切り替える
+                final selectedType = itemTypes.contains(_viewModel.itemType)
+                    ? _viewModel.itemType
+                    : itemTypes.first;
+                if (selectedType != _viewModel.itemType) {
+                  // ビルド完了後に状態を更新する
                   WidgetsBinding.instance.addPostFrameCallback((_) {
-                    _viewModel.changeItemType(itemTypes.first);
+                    _viewModel.changeItemType(selectedType);
                   });
                 }
                 return DropdownButtonFormField<String>(
-                  decoration: InputDecoration(labelText: AppLocalizations.of(context)!.itemType),
-                  value: _viewModel.itemType,
+                  decoration: InputDecoration(
+                      labelText: AppLocalizations.of(context)!.itemType),
+                  value:
+                      itemTypes.contains(_viewModel.itemType) ? _viewModel.itemType : null,
                   items: itemTypes
                       .map((t) => DropdownMenuItem(value: t, child: Text(t)))
                       .toList(),
