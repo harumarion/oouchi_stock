@@ -34,4 +34,26 @@ void main() {
     // 初期状態ではローディングが表示される
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
   });
+
+  testWidgets('品種リストに無い初期値は自動で先頭に変更される',
+      (WidgetTester tester) async {
+    final cat = Category(id: 1, name: '日用品', createdAt: DateTime.now());
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditInventoryPage(
+          id: '1',
+          itemName: 'ティッシュ',
+          category: cat,
+          itemType: '存在しない品種',
+          unit: '個',
+          note: '',
+          categories: [cat],
+        ),
+      ),
+    );
+    await tester.pump();
+    final dropdown = tester.widget<DropdownButtonFormField<String>>(
+        find.byType(DropdownButtonFormField<String>).first);
+    expect(dropdown.initialValue ?? dropdown.value, 'その他');
+  });
 }
