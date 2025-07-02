@@ -128,8 +128,11 @@ class _EditInventoryPageState extends State<EditInventoryPage> {
                 // 選択中カテゴリに該当する品種リストを取得
                 final itemTypes =
                     _viewModel.typesMap[_viewModel.category?.name] ?? ['その他'];
+                // 初回描画時に選択中の品種がリストに無ければ自動で変更する
                 if (!itemTypes.contains(_viewModel.itemType)) {
-                  _viewModel.changeItemType(itemTypes.first);
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    _viewModel.changeItemType(itemTypes.first);
+                  });
                 }
                 return DropdownButtonFormField<String>(
                   decoration: InputDecoration(labelText: AppLocalizations.of(context)!.itemType),
