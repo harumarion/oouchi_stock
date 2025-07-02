@@ -117,5 +117,9 @@
   "selectColor": "Select color",
   "showAds": "Show Ads",
   "noCategories": "No categories registered",
-  "noItems": "No items registered"
+  "noItems": "No items registered",
+  "purchaseDecisionSettings": "Purchase Decision Settings",
+  "cautiousDaysLabel": "Cautious days",
+  "bestDaysLabel": "Best time days",
+  "discountPercentLabel": "Discount percent(%)"
 }

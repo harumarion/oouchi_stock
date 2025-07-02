@@ -4,6 +4,7 @@ import 'category_settings_page.dart';
 import 'item_type_settings_page.dart';
 import 'language_settings_page.dart';
 import 'buy_list_condition_settings_page.dart';
+import 'purchase_decision_settings_page.dart';
 import 'package:intl/intl.dart';
 import 'presentation/viewmodels/settings_viewmodel.dart';
 import 'domain/entities/category.dart';
@@ -156,6 +157,18 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
               );
               if (changed == true) widget.onConditionChanged();
+            },
+          ),
+          // 購入判定設定画面へ遷移するタイル
+          ListTile(
+            title: Text(AppLocalizations.of(context)!.purchaseDecisionSettings),
+            onTap: () async {
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const PurchaseDecisionSettingsPage(),
+                ),
+              );
             },
           ),
           SwitchListTile(
