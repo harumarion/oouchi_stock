@@ -6,8 +6,9 @@ import 'login_page.dart';
 import 'root_navigation_page.dart';
 import 'theme.dart';
 import 'presentation/viewmodels/main_viewmodel.dart';
+import 'widgets/splash_screen.dart';
 
-// アプリのエントリーポイント。初期化処理中はローディング画面を表示する。
+// アプリのエントリーポイント。初期化処理中はスプラッシュ画面を表示する。
 
 void main() {
   runApp(const AppLoader());
@@ -44,9 +45,9 @@ class _AppLoaderState extends State<AppLoader> {
   @override
   Widget build(BuildContext context) {
     if (!_viewModel.initialized) {
-      // 初期化中はローディング画面を表示
+      // 初期化中はスプラッシュ画面を表示
       return const MaterialApp(
-        home: Scaffold(body: Center(child: CircularProgressIndicator())),
+        home: SplashScreen(),
       );
     }
     if (!_viewModel.loggedIn) {
