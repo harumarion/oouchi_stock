@@ -15,6 +15,7 @@ import '../../data/repositories/buy_prediction_repository_impl.dart';
 import '../../domain/usecases/add_prediction_item.dart';
 import '../../domain/services/auto_prediction_list_service.dart';
 import '../../domain/services/purchase_decision_service.dart';
+import '../../domain/entities/purchase_decision_settings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// アプリ全体の状態を管理する ViewModel
@@ -78,12 +79,20 @@ class MainViewModel extends ChangeNotifier {
   }
 
   /// 在庫と価格を評価し買い物予報を更新
+  // アプリ起動時に在庫を評価して買い物予報を更新する
   Future<void> _runAutoPrediction() async {
     final invRepo = InventoryRepositoryImpl();
     final priceRepo = PriceRepositoryImpl();
+    // 保存された購入判定設定を読み込む
+    final decisionSettings = await loadPurchaseDecisionSettings();
     final service = AutoPredictionListService(
       AddPredictionItem(BuyPredictionRepositoryImpl()),
-      PurchaseDecisionService(2),
+      PurchaseDecisionService(
+        2,
+        cautiousDays: decisionSettings.cautiousDays,
+        bestTimeDays: decisionSettings.bestTimeDays,
+        discountPercent: decisionSettings.discountPercent,
+      ),
     );
     final list = await invRepo.fetchAll();
     for (final inv in list) {

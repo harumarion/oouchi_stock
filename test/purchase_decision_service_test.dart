@@ -27,14 +27,20 @@ class _FakeRepo implements BuyPredictionRepository {
 
 void main() {
   // 購入判定サービスのテスト
-  final service = PurchaseDecisionService(2);
+  final service = PurchaseDecisionService(
+    2,
+    cautiousDays: 3,
+    bestTimeDays: 3,
+    discountPercent: 10,
+  );
 
-  Inventory invWith(double q) => Inventory(
+  Inventory invWith(double q, {double consumption = 30}) => Inventory(
         id: 'id',
         itemName: 'name',
         category: 'cat',
         itemType: 'type',
         quantity: q,
+        monthlyConsumption: consumption,
         unit: '個',
         createdAt: DateTime.now(),
       );
@@ -64,8 +70,8 @@ void main() {
         PurchaseDecisionType.emergency);
   });
 
-  test('在庫少で価格高めは安心対応', () {
-    expect(service.decide(invWith(1), price(sale: 150, regular: 100)),
+  test('残り日数少なら慎重対応', () {
+    expect(service.decide(invWith(1, consumption: 10), price()),
         PurchaseDecisionType.cautious);
   });
 
@@ -74,8 +80,10 @@ void main() {
         PurchaseDecisionType.bulkOpportunity);
   });
 
-  test('在庫少でセール中は最も買い時', () {
-    expect(service.decide(invWith(1), price(sale: 80, regular: 100)),
+  test('日数少かつ十分値引きなら最も買い時', () {
+    expect(
+        service.decide(invWith(1, consumption: 10),
+            price(sale: 80, regular: 100)),
         PurchaseDecisionType.bestTime);
   });
 

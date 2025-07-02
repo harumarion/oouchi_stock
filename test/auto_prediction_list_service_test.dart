@@ -25,12 +25,13 @@ class _FakeRepo implements BuyPredictionRepository {
   }
 }
 
-Inventory inv(double q) => Inventory(
+Inventory inv(double q, {double consumption = 30}) => Inventory(
       id: 'i',
       itemName: 'name',
       category: 'cat',
       itemType: 'type',
       quantity: q,
+      monthlyConsumption: consumption,
       unit: '個',
       createdAt: DateTime.now(),
     );
@@ -59,8 +60,10 @@ void main() {
   test('慎重またはまとめ買い判定で自動追加される', () async {
     final repo = _FakeRepo();
     final service = AutoPredictionListService(
-        AddPredictionItem(repo), PurchaseDecisionService(2));
-    await service.process(inv(1), price(150, 100));
+        AddPredictionItem(repo),
+        PurchaseDecisionService(2,
+            cautiousDays: 3, bestTimeDays: 3, discountPercent: 10));
+    await service.process(inv(1, consumption: 10), price(150, 100));
     expect(repo.items.length, 1);
     await service.process(inv(3), price(80, 100));
     expect(repo.items.length, 2);
@@ -69,9 +72,11 @@ void main() {
   test('緊急や買い時判定では追加されない', () async {
     final repo = _FakeRepo();
     final service = AutoPredictionListService(
-        AddPredictionItem(repo), PurchaseDecisionService(2));
+        AddPredictionItem(repo),
+        PurchaseDecisionService(2,
+            cautiousDays: 3, bestTimeDays: 3, discountPercent: 10));
     await service.process(inv(0), price(100, 120));
-    await service.process(inv(1), price(80, 100));
+    await service.process(inv(1, consumption: 10), price(80, 100));
     expect(repo.items.isEmpty, true);
   });
 }

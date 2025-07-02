@@ -117,5 +117,9 @@
   "selectColor": "色を選択",
   "showAds": "広告を表示",
   "noCategories": "カテゴリが登録されていません",
-  "noItems": "商品が登録されていません"
+  "noItems": "商品が登録されていません",
+  "purchaseDecisionSettings": "購入判定設定",
+  "cautiousDaysLabel": "慎重判定日数",
+  "bestDaysLabel": "買い時判定日数",
+  "discountPercentLabel": "値引き率(%)"
 }
