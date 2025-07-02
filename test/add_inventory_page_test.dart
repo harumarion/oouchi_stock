@@ -67,6 +67,21 @@ void main() {
     expect(find.text('総容量: 2.0'), findsOneWidget);
   });
 
+  testWidgets('品種リストに無い初期値は自動で先頭に変更される',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: AddInventoryPage(
+          categories: [Category(id: 1, name: '日用品', createdAt: DateTime.now())],
+        ),
+      ),
+    );
+    await tester.pump();
+    final dropdown = tester.widget<DropdownButtonFormField<String>>(
+        find.byType(DropdownButtonFormField<String>).first);
+    expect(dropdown.initialValue ?? dropdown.value, 'その他');
+  });
+
   // Navigator.canPop が false の場合でも画面が消えないことを確認するテスト
   testWidgets('保存後も画面が残る', (WidgetTester tester) async {
     await tester.pumpWidget(

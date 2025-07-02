@@ -115,7 +115,10 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
                 final itemTypes =
                     _viewModel.typesMap[_viewModel.category?.name] ?? ['その他'];
                 if (!itemTypes.contains(_viewModel.itemType)) {
-                  _viewModel.changeItemType(itemTypes.first);
+                  // ビルド中に状態変更すると例外が出るためフレーム後に変更する
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    _viewModel.changeItemType(itemTypes.first);
+                  });
                 }
                 return DropdownButtonFormField<String>(
                   decoration: InputDecoration(labelText: AppLocalizations.of(context)!.itemType),
