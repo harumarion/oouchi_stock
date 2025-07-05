@@ -1,3 +1,4 @@
+// 購入予測を計算するユースケース群
 import '../entities/history_entry.dart';
 
 /// 購入予測日を計算するストラテジー

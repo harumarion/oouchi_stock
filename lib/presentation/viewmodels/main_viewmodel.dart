@@ -13,8 +13,8 @@ import '../../data/repositories/inventory_repository_impl.dart';
 import '../../data/repositories/price_repository_impl.dart';
 import '../../data/repositories/buy_prediction_repository_impl.dart';
 import '../../domain/usecases/add_prediction_item.dart';
-import '../../domain/services/auto_prediction_list_service.dart';
-import '../../domain/services/purchase_decision_service.dart';
+import '../../domain/usecases/auto_add_prediction_item.dart';
+import '../../domain/usecases/purchase_decision.dart';
 import '../../domain/entities/purchase_decision_settings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -85,9 +85,9 @@ class MainViewModel extends ChangeNotifier {
     final priceRepo = PriceRepositoryImpl();
     // 保存された購入判定設定を読み込む
     final decisionSettings = await loadPurchaseDecisionSettings();
-    final service = AutoPredictionListService(
+    final auto = AutoAddPredictionItem(
       AddPredictionItem(BuyPredictionRepositoryImpl()),
-      PurchaseDecisionService(
+      PurchaseDecision(
         2,
         cautiousDays: decisionSettings.cautiousDays,
         bestTimeDays: decisionSettings.bestTimeDays,
@@ -98,7 +98,7 @@ class MainViewModel extends ChangeNotifier {
     for (final inv in list) {
       final prices = await priceRepo.watchByType(inv.category, inv.itemType).first;
       final price = prices.isNotEmpty ? prices.first : null;
-      await service.process(inv, price);
+      await auto(inv, price);
     }
   }
 
