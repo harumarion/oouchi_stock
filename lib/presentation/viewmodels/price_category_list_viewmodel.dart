@@ -2,14 +2,23 @@ import 'package:flutter/material.dart';
 import '../../data/repositories/price_repository_impl.dart';
 import '../../domain/entities/price_info.dart';
 import '../../domain/usecases/watch_price_by_category.dart';
+import '../../domain/usecases/delete_price_info.dart';
 
 /// セール情報管理画面のカテゴリタブを管理する ViewModel
 class PriceCategoryListViewModel extends ChangeNotifier {
+  /// 対象カテゴリ名
   final String category;
+  /// セール情報監視用ユースケース
   final WatchPriceByCategory _watch;
+  /// セール情報削除用ユースケース
+  final DeletePriceInfo _delete;
 
-  PriceCategoryListViewModel({required this.category, WatchPriceByCategory? watch})
-      : _watch = watch ?? WatchPriceByCategory(PriceRepositoryImpl());
+  PriceCategoryListViewModel({
+    required this.category,
+    WatchPriceByCategory? watch,
+    DeletePriceInfo? delete,
+  })  : _watch = watch ?? WatchPriceByCategory(PriceRepositoryImpl()),
+        _delete = delete ?? DeletePriceInfo(PriceRepositoryImpl());
 
   /// 検索文字列
   String search = '';
@@ -42,6 +51,11 @@ class PriceCategoryListViewModel extends ChangeNotifier {
   void setShowExpired(bool v) {
     showExpired = v;
     notifyListeners();
+  }
+
+  /// セール情報を削除
+  Future<void> delete(String id) async {
+    await _delete(id);
   }
 
   @override

@@ -21,6 +21,7 @@
   "delete": "Delete",
   "deleted": "Deleted",
   "deleteFailed": "Failed to delete",
+  "deleteConfirm": "Delete this item?",
   "reorder": "Reorder",
   "itemNameRequired": "Item name is required",
   "required": "Required",

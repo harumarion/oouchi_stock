@@ -21,6 +21,7 @@
   "delete": "削除",
   "deleted": "削除しました",
   "deleteFailed": "削除に失敗しました",
+  "deleteConfirm": "削除しますか?",
   "reorder": "並び替え",
   "itemNameRequired": "商品名は必須です",
   "required": "必須項目です",
