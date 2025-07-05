@@ -4,8 +4,8 @@ import 'package:oouchi_stock/domain/entities/price_info.dart';
 import 'package:oouchi_stock/domain/entities/buy_item.dart';
 import 'package:oouchi_stock/domain/repositories/buy_list_repository.dart';
 import 'package:oouchi_stock/domain/usecases/add_buy_item.dart';
-import 'package:oouchi_stock/domain/services/auto_buy_list_service.dart';
-import 'package:oouchi_stock/domain/services/purchase_decision_service.dart';
+import 'package:oouchi_stock/domain/usecases/auto_add_buy_item.dart';
+import 'package:oouchi_stock/domain/usecases/purchase_decision.dart';
 
 class _FakeRepo implements BuyListRepository {
   final List<BuyItem> items = [];
@@ -58,17 +58,17 @@ PriceInfo price(double sale, double regular) => PriceInfo(
 void main() {
   test('緊急在庫は自動追加される', () async {
     final repo = _FakeRepo();
-    final service = AutoBuyListService(
-        AddBuyItem(repo), PurchaseDecisionService(2));
-    await service.process(inv(0), price(100, 120));
+    final uc = AutoAddBuyItem(AddBuyItem(repo), PurchaseDecision(2,
+        cautiousDays: 3, bestTimeDays: 3, discountPercent: 10));
+    await uc(inv(0), price(100, 120));
     expect(repo.items.length, 1);
   });
 
   test('在庫十分でセール中は自動追加されない', () async {
     final repo = _FakeRepo();
-    final service = AutoBuyListService(
-        AddBuyItem(repo), PurchaseDecisionService(2));
-    await service.process(inv(5), price(80, 100));
+    final uc = AutoAddBuyItem(AddBuyItem(repo), PurchaseDecision(2,
+        cautiousDays: 3, bestTimeDays: 3, discountPercent: 10));
+    await uc(inv(5), price(80, 100));
     expect(repo.items.isEmpty, true);
   });
 }

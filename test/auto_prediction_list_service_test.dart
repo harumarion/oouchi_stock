@@ -4,8 +4,8 @@ import 'package:oouchi_stock/domain/entities/price_info.dart';
 import 'package:oouchi_stock/domain/entities/buy_item.dart';
 import 'package:oouchi_stock/domain/repositories/buy_prediction_repository.dart';
 import 'package:oouchi_stock/domain/usecases/add_prediction_item.dart';
-import 'package:oouchi_stock/domain/services/auto_prediction_list_service.dart';
-import 'package:oouchi_stock/domain/services/purchase_decision_service.dart';
+import 'package:oouchi_stock/domain/usecases/auto_add_prediction_item.dart';
+import 'package:oouchi_stock/domain/usecases/purchase_decision.dart';
 
 class _FakeRepo implements BuyPredictionRepository {
   final List<BuyItem> items = [];
@@ -59,24 +59,24 @@ PriceInfo price(double sale, double regular) => PriceInfo(
 void main() {
   test('慎重またはまとめ買い判定で自動追加される', () async {
     final repo = _FakeRepo();
-    final service = AutoPredictionListService(
+    final uc = AutoAddPredictionItem(
         AddPredictionItem(repo),
-        PurchaseDecisionService(2,
+        PurchaseDecision(2,
             cautiousDays: 3, bestTimeDays: 3, discountPercent: 10));
-    await service.process(inv(1, consumption: 10), price(150, 100));
+    await uc(inv(1, consumption: 10), price(150, 100));
     expect(repo.items.length, 1);
-    await service.process(inv(3), price(80, 100));
+    await uc(inv(3), price(80, 100));
     expect(repo.items.length, 2);
   });
 
   test('緊急や買い時判定では追加されない', () async {
     final repo = _FakeRepo();
-    final service = AutoPredictionListService(
+    final uc = AutoAddPredictionItem(
         AddPredictionItem(repo),
-        PurchaseDecisionService(2,
+        PurchaseDecision(2,
             cautiousDays: 3, bestTimeDays: 3, discountPercent: 10));
-    await service.process(inv(0), price(100, 120));
-    await service.process(inv(1, consumption: 10), price(80, 100));
+    await uc(inv(0), price(100, 120));
+    await uc(inv(1, consumption: 10), price(80, 100));
     expect(repo.items.isEmpty, true);
   });
 }

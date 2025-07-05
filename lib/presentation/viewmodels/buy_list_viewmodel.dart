@@ -7,7 +7,6 @@ import '../../domain/entities/category.dart';
 import '../../domain/entities/category_order.dart';
 import '../../domain/entities/inventory.dart';
 import '../../domain/repositories/inventory_repository.dart';
-import '../../domain/services/buy_list_strategy.dart';
 import '../../domain/usecases/add_buy_item.dart';
 import '../../domain/usecases/remove_buy_item.dart';
 import '../../domain/usecases/watch_buy_items.dart';

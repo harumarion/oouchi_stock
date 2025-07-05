@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:oouchi_stock/domain/services/purchase_prediction_strategy.dart';
+import 'package:oouchi_stock/domain/usecases/purchase_prediction_strategy.dart';
 import 'package:oouchi_stock/domain/entities/history_entry.dart';
 
 void main() {
