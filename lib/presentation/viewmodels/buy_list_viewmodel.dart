@@ -7,6 +7,7 @@ import '../../domain/entities/category.dart';
 import '../../domain/entities/category_order.dart';
 import '../../domain/entities/inventory.dart';
 import '../../domain/repositories/inventory_repository.dart';
+import '../../domain/repositories/buy_list_repository.dart';
 import '../../domain/usecases/add_buy_item.dart';
 import '../../domain/usecases/remove_buy_item.dart';
 import '../../domain/usecases/watch_buy_items.dart';
@@ -36,6 +37,9 @@ class BuyListViewModel extends ChangeNotifier {
   /// 残り日数計算ユースケース
   final CalculateDaysLeft _calcDaysLeft;
 
+  /// 買い物リストを保存するリポジトリ
+  final BuyListRepository _buyRepository;
+
   /// 追加テキスト入力用コントローラ
   final TextEditingController itemController = TextEditingController();
 
@@ -48,24 +52,55 @@ class BuyListViewModel extends ChangeNotifier {
 
   StreamSubscription<List<Inventory>>? _invSub;
 
-  BuyListViewModel({
+  /// 手動削除した在庫ID一覧
+  Set<String> _ignoredIds = {};
+
+  factory BuyListViewModel({
     InventoryRepository? repository,
+    BuyListRepository? buyRepository,
     AddBuyItem? addUsecase,
     RemoveBuyItem? removeUsecase,
     WatchBuyItems? watchUsecase,
     UpdateQuantity? updateQuantity,
     WatchInventory? watchInventory,
     CalculateDaysLeft? calcDaysLeft,
-  })  : repository = repository ?? InventoryRepositoryImpl(),
-        addUsecase = addUsecase ?? AddBuyItem(BuyListRepositoryImpl()),
-        removeUsecase = removeUsecase ?? RemoveBuyItem(BuyListRepositoryImpl()),
-        watchUsecase = watchUsecase ?? WatchBuyItems(BuyListRepositoryImpl()),
-        _updateQuantity = updateQuantity ?? UpdateQuantity(InventoryRepositoryImpl()),
-        _watchInventory = watchInventory ?? WatchInventory(InventoryRepositoryImpl()),
-        _calcDaysLeft = calcDaysLeft ?? CalculateDaysLeft(InventoryRepositoryImpl());
+  }) {
+    final invRepo = repository ?? InventoryRepositoryImpl();
+    final buyRepo = buyRepository ?? BuyListRepositoryImpl();
+    return BuyListViewModel._(
+      repository: invRepo,
+      buyRepository: buyRepo,
+      addUsecase: addUsecase ?? AddBuyItem(buyRepo),
+      removeUsecase: removeUsecase ?? RemoveBuyItem(buyRepo),
+      watchUsecase: watchUsecase ?? WatchBuyItems(buyRepo),
+      updateQuantity: updateQuantity ?? UpdateQuantity(invRepo),
+      watchInventory: watchInventory ?? WatchInventory(invRepo),
+      calcDaysLeft: calcDaysLeft ?? CalculateDaysLeft(invRepo),
+    );
+  }
+
+  BuyListViewModel._({
+    required this.repository,
+    required BuyListRepository buyRepository,
+    required this.addUsecase,
+    required this.removeUsecase,
+    required this.watchUsecase,
+    required UpdateQuantity updateQuantity,
+    required WatchInventory watchInventory,
+    required CalculateDaysLeft calcDaysLeft,
+  })  : _buyRepository = buyRepository,
+        _updateQuantity = updateQuantity,
+        _watchInventory = watchInventory,
+        _calcDaysLeft = calcDaysLeft;
 
   /// 買い物リストストリーム
   Stream<List<BuyItem>> get stream => watchUsecase();
+
+  /// 手動削除した在庫ID一覧を読み込む
+  Future<void> _loadIgnored() async {
+    final ids = await _buyRepository.loadIgnoredIds();
+    _ignoredIds = ids.toSet();
+  }
 
   /// 初期データを読み込む
   Future<void> load({List<Category>? initialCategories}) async {
@@ -88,11 +123,15 @@ class BuyListViewModel extends ChangeNotifier {
       categories = await applyCategoryOrder(categories);
     }
     condition = await loadBuyListConditionSettings();
+    await _loadIgnored();
     loaded = true;
     notifyListeners();
     final strategy = createStrategy(condition!);
+    // 条件に合致した在庫を監視し、買い物リストへ自動追加
     _invSub = strategy.watch(repository).listen((list) {
       for (final inv in list) {
+        // ユーザーが削除した在庫IDは追加しない
+        if (_ignoredIds.contains(inv.id)) continue;
         addUsecase(BuyItem(inv.itemName, inv.category, inv.id));
       }
     });
@@ -119,9 +158,11 @@ class BuyListViewModel extends ChangeNotifier {
     itemController.clear();
   }
 
-  /// 在庫数量を更新
+  /// 在庫詳細画面やカード操作で数量を変更したときに呼ばれる
   Future<void> updateQuantity(String id, double amount, String type) async {
     await _updateQuantity(id, amount, type);
+    await _buyRepository.removeIgnoredId(id);
+    _ignoredIds.remove(id);
   }
 
   /// 在庫を監視
@@ -130,9 +171,13 @@ class BuyListViewModel extends ChangeNotifier {
   /// 残り日数を計算
   Future<int> calcDaysLeft(Inventory inv) => _calcDaysLeft(inv);
 
-  /// アイテム削除処理
+  /// BuyListPage でカードをスワイプして削除したときの処理
   Future<void> removeItem(BuyItem item) async {
     await removeUsecase(item);
+    if (item.inventoryId != null) {
+      await _buyRepository.addIgnoredId(item.inventoryId!);
+      _ignoredIds.add(item.inventoryId!);
+    }
   }
 
   @override

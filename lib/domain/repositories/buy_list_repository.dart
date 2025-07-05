@@ -10,4 +10,13 @@ abstract class BuyListRepository {
 
   /// アイテムを削除する
   Future<void> removeItem(BuyItem item);
+
+  /// 手動削除した在庫IDを保存する
+  Future<void> addIgnoredId(String id);
+
+  /// 手動削除状態を解除する
+  Future<void> removeIgnoredId(String id);
+
+  /// 保存された削除済み在庫ID一覧を取得する
+  Future<List<String>> loadIgnoredIds();
 }
