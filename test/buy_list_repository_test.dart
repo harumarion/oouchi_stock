@@ -15,4 +15,15 @@ void main() {
     list = await repo.watchItems().first;
     expect(list.isEmpty, true);
   });
+
+  test('ignored id functions', () async {
+    SharedPreferences.setMockInitialValues({});
+    final repo = BuyListRepositoryImpl();
+    await repo.addIgnoredId('id1');
+    var ids = await repo.loadIgnoredIds();
+    expect(ids.contains('id1'), true);
+    await repo.removeIgnoredId('id1');
+    ids = await repo.loadIgnoredIds();
+    expect(ids.contains('id1'), false);
+  });
 }
