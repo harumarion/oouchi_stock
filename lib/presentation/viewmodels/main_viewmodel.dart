@@ -12,8 +12,11 @@ import '../../i18n/app_localizations.dart';
 import '../../data/repositories/inventory_repository_impl.dart';
 import '../../data/repositories/price_repository_impl.dart';
 import '../../data/repositories/buy_prediction_repository_impl.dart';
+import '../../data/repositories/buy_list_repository_impl.dart';
 import '../../domain/usecases/add_prediction_item.dart';
 import '../../domain/usecases/auto_add_prediction_item.dart';
+import '../../domain/usecases/add_buy_item.dart';
+import '../../domain/usecases/auto_add_buy_item.dart';
 import '../../domain/usecases/purchase_decision.dart';
 import '../../domain/entities/purchase_decision_settings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -58,6 +61,8 @@ class MainViewModel extends ChangeNotifier {
     if (user != null) {
       await _setupNotification();
       await _runAutoPrediction();
+      // 起動時に在庫を評価し、必要なら買い物リストへ自動登録
+      await _runAutoBuyList();
       loggedIn = true;
     }
     await _loadLocale();
@@ -87,6 +92,29 @@ class MainViewModel extends ChangeNotifier {
     final decisionSettings = await loadPurchaseDecisionSettings();
     final auto = AutoAddPredictionItem(
       AddPredictionItem(BuyPredictionRepositoryImpl()),
+      PurchaseDecision(
+        2,
+        cautiousDays: decisionSettings.cautiousDays,
+        bestTimeDays: decisionSettings.bestTimeDays,
+        discountPercent: decisionSettings.discountPercent,
+      ),
+    );
+    final list = await invRepo.fetchAll();
+    for (final inv in list) {
+      final prices = await priceRepo.watchByType(inv.category, inv.itemType).first;
+      final price = prices.isNotEmpty ? prices.first : null;
+      await auto(inv, price);
+    }
+  }
+
+  /// 在庫と価格を評価し買い物リストを更新する
+  /// アプリ起動時に在庫を評価して買い物リストへ自動追加を試みる
+  Future<void> _runAutoBuyList() async {
+    final invRepo = InventoryRepositoryImpl();
+    final priceRepo = PriceRepositoryImpl();
+    final decisionSettings = await loadPurchaseDecisionSettings();
+    final auto = AutoAddBuyItem(
+      AddBuyItem(BuyListRepositoryImpl()),
       PurchaseDecision(
         2,
         cautiousDays: decisionSettings.cautiousDays,

@@ -8,8 +8,11 @@ import '../../domain/usecases/fetch_all_inventory.dart';
 import '../../data/repositories/price_repository_impl.dart';
 import '../../data/repositories/inventory_repository_impl.dart';
 import '../../data/repositories/buy_prediction_repository_impl.dart';
+import '../../data/repositories/buy_list_repository_impl.dart';
 import '../../domain/usecases/add_prediction_item.dart';
 import '../../domain/usecases/auto_add_prediction_item.dart';
+import '../../domain/usecases/add_buy_item.dart';
+import '../../domain/usecases/auto_add_buy_item.dart';
 import '../../domain/usecases/purchase_decision.dart';
 import '../../domain/entities/purchase_decision_settings.dart';
 
@@ -88,9 +91,9 @@ class AddPriceViewModel extends ChangeNotifier {
       expiry: expiry,
     );
     await _usecase(info);
-    // セール情報登録後、買い物予報リストへの自動追加を評価
+    // セール情報登録後、買い物予報・買い物リストへの自動追加を評価
     final settings = await loadPurchaseDecisionSettings();
-    final auto = AutoAddPredictionItem(
+    final prediction = AutoAddPredictionItem(
       AddPredictionItem(BuyPredictionRepositoryImpl()),
       PurchaseDecision(
         2,
@@ -99,6 +102,17 @@ class AddPriceViewModel extends ChangeNotifier {
         discountPercent: settings.discountPercent,
       ),
     );
-    await auto(inventory!, info);
+    await prediction(inventory!, info);
+    // セール登録後、買い物リストへの自動追加も評価
+    final buy = AutoAddBuyItem(
+      AddBuyItem(BuyListRepositoryImpl()),
+      PurchaseDecision(
+        2,
+        cautiousDays: settings.cautiousDays,
+        bestTimeDays: settings.bestTimeDays,
+        discountPercent: settings.discountPercent,
+      ),
+    );
+    await buy(inventory!, info);
   }
 }

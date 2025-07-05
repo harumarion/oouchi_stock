@@ -15,6 +15,7 @@ import '../../domain/usecases/watch_inventory.dart';
 import '../../domain/usecases/watch_price_by_type.dart';
 import '../../domain/usecases/add_prediction_item.dart';
 import '../../domain/usecases/auto_add_prediction_item.dart';
+import '../../domain/usecases/auto_add_buy_item.dart';
 import '../../domain/usecases/purchase_decision.dart';
 import '../../domain/entities/purchase_decision_settings.dart';
 
@@ -73,7 +74,7 @@ class InventoryListViewModel extends ChangeNotifier {
       final prices = await WatchPriceByType(PriceRepositoryImpl())(inv.category, inv.itemType).first;
       final price = prices.isNotEmpty ? prices.first : null;
       final settings = await loadPurchaseDecisionSettings();
-      final auto = AutoAddPredictionItem(
+      final prediction = AutoAddPredictionItem(
         AddPredictionItem(BuyPredictionRepositoryImpl()),
         PurchaseDecision(
           2,
@@ -82,7 +83,18 @@ class InventoryListViewModel extends ChangeNotifier {
           discountPercent: settings.discountPercent,
         ),
       );
-      await auto(inv, price);
+      await prediction(inv, price);
+      // 在庫一覧画面で数量を変更した後、買い物リストへの自動追加も評価
+      final buy = AutoAddBuyItem(
+        AddBuyItem(BuyListRepositoryImpl()),
+        PurchaseDecision(
+          2,
+          cautiousDays: settings.cautiousDays,
+          bestTimeDays: settings.bestTimeDays,
+          discountPercent: settings.discountPercent,
+        ),
+      );
+      await buy(inv, price);
     } catch (e) {
       // 自動追加失敗時はログのみ
       debugPrint('auto add prediction failed: $e');
@@ -98,7 +110,7 @@ class InventoryListViewModel extends ChangeNotifier {
       final prices = await WatchPriceByType(PriceRepositoryImpl())(inv.category, inv.itemType).first;
       final price = prices.isNotEmpty ? prices.first : null;
       final settings = await loadPurchaseDecisionSettings();
-      final auto = AutoAddPredictionItem(
+      final prediction = AutoAddPredictionItem(
         AddPredictionItem(BuyPredictionRepositoryImpl()),
         PurchaseDecision(
           2,
@@ -107,7 +119,18 @@ class InventoryListViewModel extends ChangeNotifier {
           discountPercent: settings.discountPercent,
         ),
       );
-      await auto(inv, price);
+      await prediction(inv, price);
+      // 棚卸し後も買い物リストへの自動追加を評価
+      final buy = AutoAddBuyItem(
+        AddBuyItem(BuyListRepositoryImpl()),
+        PurchaseDecision(
+          2,
+          cautiousDays: settings.cautiousDays,
+          bestTimeDays: settings.bestTimeDays,
+          discountPercent: settings.discountPercent,
+        ),
+      );
+      await buy(inv, price);
     } catch (e) {
       debugPrint('auto add prediction failed: $e');
     }
