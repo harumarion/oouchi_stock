@@ -61,21 +61,22 @@ class _RootNavigationPageState extends State<RootNavigationPage> {
         items: [
           // 買い物リスト
           BottomNavigationBarItem(
-            icon: const Icon(Icons.list_alt),
+            // アイコンサイズを大きめに設定
+            icon: const Icon(Icons.list_alt, size: 36),
             label: AppLocalizations.of(context)!.buyList,
           ),
           // 在庫一覧
           BottomNavigationBarItem(
-            icon: const Icon(Icons.inventory_2),
+            icon: const Icon(Icons.inventory_2, size: 36),
             label: AppLocalizations.of(context)!.inventoryList,
           ),
           // 買い物予報
           BottomNavigationBarItem(
-            icon: const Icon(Icons.event_note),
+            icon: const Icon(Icons.event_note, size: 36),
             label: AppLocalizations.of(context)!.buyListTitle,
           ),
           BottomNavigationBarItem(
-            icon: const Icon(Icons.price_change),
+            icon: const Icon(Icons.price_change, size: 36),
             label: AppLocalizations.of(context)!.saleInfo,
           ),
         ],

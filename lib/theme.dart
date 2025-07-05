@@ -72,6 +72,9 @@ class AppTheme {
       colorScheme: colorScheme,
       scaffoldBackgroundColor: scaffoldBackgroundColor,
       textTheme: baseTextTheme,
+      // アプリ全体で表示するアイコンの基本サイズを1.5倍に設定
+      // Android端末でアイコンが小さく見える問題への対応
+      iconTheme: const IconThemeData(size: 36),
       appBarTheme: AppBarTheme(
         backgroundColor: primaryColor,
         foregroundColor: Colors.white,
