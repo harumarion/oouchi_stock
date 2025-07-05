@@ -6,38 +6,8 @@ import '../../models/sale_item.dart';
 
 /// 買い得リスト画面の状態を管理する ViewModel
 class SaleListViewModel extends ChangeNotifier {
-  /// 表示するセール情報一覧
-  final List<SaleItem> items = [
-    SaleItem(
-      name: 'コーヒー豆 200g',
-      shop: 'Amazon',
-      regularPrice: 1200,
-      salePrice: 980,
-      start: DateTime.now().subtract(const Duration(days: 1)),
-      end: DateTime.now().add(const Duration(days: 2)),
-      stock: 5,
-      recommended: true,
-      lowest: true,
-    ),
-    SaleItem(
-      name: 'トイレットペーパー 12ロール',
-      shop: '楽天',
-      regularPrice: 600,
-      salePrice: 480,
-      start: DateTime.now(),
-      end: DateTime.now().add(const Duration(days: 5)),
-      stock: 20,
-    ),
-    SaleItem(
-      name: '洗剤 詰め替え用',
-      shop: '近所のスーパー',
-      regularPrice: 350,
-      salePrice: 300,
-      start: DateTime.now().subtract(const Duration(days: 2)),
-      end: DateTime.now().add(const Duration(days: 1)),
-      stock: 1,
-    ),
-  ];
+  /// 表示するセール情報一覧（現在は未使用のため空リスト）
+  final List<SaleItem> items = [];
 
   /// 通知オン/オフ
   bool notify = true;
