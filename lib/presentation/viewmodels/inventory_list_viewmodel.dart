@@ -9,6 +9,14 @@ import '../../domain/usecases/update_quantity.dart';
 import '../../domain/usecases/stocktake.dart';
 import '../../data/repositories/inventory_repository_impl.dart';
 import '../../data/repositories/buy_list_repository_impl.dart';
+import '../../data/repositories/price_repository_impl.dart';
+import '../../data/repositories/buy_prediction_repository_impl.dart';
+import '../../domain/usecases/watch_inventory.dart';
+import '../../domain/usecases/watch_price_by_type.dart';
+import '../../domain/usecases/add_prediction_item.dart';
+import '../../domain/usecases/auto_add_prediction_item.dart';
+import '../../domain/usecases/purchase_decision.dart';
+import '../../domain/entities/purchase_decision_settings.dart';
 
 /// 在庫一覧の1タブ分の状態を管理する ViewModel
 /// 検索ワードや並び替え条件を保持し、在庫データのストリームを提供する
@@ -59,11 +67,50 @@ class InventoryListViewModel extends ChangeNotifier {
   /// 在庫数量を更新
   Future<void> updateQuantity(String id, double amount, String type) async {
     await updateQuantityUsecase(id, amount, type);
+    try {
+      final inv = await WatchInventory(InventoryRepositoryImpl())(id).first;
+      if (inv == null) return;
+      final prices = await WatchPriceByType(PriceRepositoryImpl())(inv.category, inv.itemType).first;
+      final price = prices.isNotEmpty ? prices.first : null;
+      final settings = await loadPurchaseDecisionSettings();
+      final auto = AutoAddPredictionItem(
+        AddPredictionItem(BuyPredictionRepositoryImpl()),
+        PurchaseDecision(
+          2,
+          cautiousDays: settings.cautiousDays,
+          bestTimeDays: settings.bestTimeDays,
+          discountPercent: settings.discountPercent,
+        ),
+      );
+      await auto(inv, price);
+    } catch (e) {
+      // 自動追加失敗時はログのみ
+      debugPrint('auto add prediction failed: $e');
+    }
   }
 
   /// 棚卸しを記録
   Future<void> stocktake(String id, double before, double after, double diff) async {
     await stocktakeUsecase(id, before, after, diff);
+    try {
+      final inv = await WatchInventory(InventoryRepositoryImpl())(id).first;
+      if (inv == null) return;
+      final prices = await WatchPriceByType(PriceRepositoryImpl())(inv.category, inv.itemType).first;
+      final price = prices.isNotEmpty ? prices.first : null;
+      final settings = await loadPurchaseDecisionSettings();
+      final auto = AutoAddPredictionItem(
+        AddPredictionItem(BuyPredictionRepositoryImpl()),
+        PurchaseDecision(
+          2,
+          cautiousDays: settings.cautiousDays,
+          bestTimeDays: settings.bestTimeDays,
+          discountPercent: settings.discountPercent,
+        ),
+      );
+      await auto(inv, price);
+    } catch (e) {
+      debugPrint('auto add prediction failed: $e');
+    }
   }
 
   /// 在庫を削除

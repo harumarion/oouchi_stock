@@ -7,6 +7,11 @@ import '../../domain/usecases/add_price_info.dart';
 import '../../domain/usecases/fetch_all_inventory.dart';
 import '../../data/repositories/price_repository_impl.dart';
 import '../../data/repositories/inventory_repository_impl.dart';
+import '../../data/repositories/buy_prediction_repository_impl.dart';
+import '../../domain/usecases/add_prediction_item.dart';
+import '../../domain/usecases/auto_add_prediction_item.dart';
+import '../../domain/usecases/purchase_decision.dart';
+import '../../domain/entities/purchase_decision_settings.dart';
 
 /// セール情報追加画面の状態を管理する ViewModel
 class AddPriceViewModel extends ChangeNotifier {
@@ -83,5 +88,17 @@ class AddPriceViewModel extends ChangeNotifier {
       expiry: expiry,
     );
     await _usecase(info);
+    // セール情報登録後、買い物予報リストへの自動追加を評価
+    final settings = await loadPurchaseDecisionSettings();
+    final auto = AutoAddPredictionItem(
+      AddPredictionItem(BuyPredictionRepositoryImpl()),
+      PurchaseDecision(
+        2,
+        cautiousDays: settings.cautiousDays,
+        bestTimeDays: settings.bestTimeDays,
+        discountPercent: settings.discountPercent,
+      ),
+    );
+    await auto(inventory!, info);
   }
 }

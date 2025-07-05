@@ -69,6 +69,21 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(PriceDetailPage), findsOneWidget);
   });
+
+  testWidgets('削除アイコンが表示される', (WidgetTester tester) async {
+    final repo = _FakeRepository();
+    await tester.pumpWidget(MaterialApp(
+      home: PriceCategoryList(
+        category: '日用品',
+        viewModel: PriceCategoryListViewModel(
+          category: '日用品',
+          watch: WatchPriceByCategory(repo),
+        ),
+      ),
+    ));
+    await tester.pump();
+    expect(find.byIcon(Icons.delete), findsWidgets);
+  });
 }
 
 class _FakeRepository implements PriceRepository {
