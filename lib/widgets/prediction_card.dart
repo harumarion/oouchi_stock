@@ -60,16 +60,15 @@ class PredictionCard extends StatelessWidget {
       child: StreamBuilder<Inventory?>(
         stream: watchInventory(item.inventoryId!),
         builder: (context, snapshot) {
-          final detailButton = IconButton(
-            icon: const Icon(Icons.info_outline),
-            onPressed: () => _openDetail(context),
-          );
           // 在庫がまだ取得できない場合もカードとして表示する
           if (!snapshot.hasData) {
             return Card(
               margin: const EdgeInsets.only(bottom: 12),
-              // 在庫未取得時は商品名のみ表示
-              child: ListTile(title: Text(item.name), trailing: detailButton),
+              child: ListTile(
+                title: Text(item.name),
+                // 詳細画面へ遷移するタップイベント
+                onTap: () => _openDetail(context),
+              ),
             );
           }
           final inv = snapshot.data!;
@@ -89,24 +88,19 @@ class PredictionCard extends StatelessWidget {
                   // 商品名の後に品種を表示する
                   title: Text('${inv.itemName} / ${inv.itemType}'),
                   subtitle: Text(subtitle),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.playlist_add),
-                        onPressed: () async {
-                          await addToBuyList(
-                              BuyItem(inv.itemName, inv.category, inv.id));
-                          await removePrediction(item);
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(loc.addedBuyItem)),
-                            );
-                          }
-                        },
-                      ),
-                      detailButton,
-                    ],
+                  onTap: () => _openDetail(context),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.playlist_add),
+                    onPressed: () async {
+                      await addToBuyList(
+                          BuyItem(inv.itemName, inv.category, inv.id));
+                      await removePrediction(item);
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(loc.addedBuyItem)),
+                        );
+                      }
+                    },
                   ),
                 ),
               );

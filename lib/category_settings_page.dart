@@ -103,12 +103,42 @@ class _CategorySettingsPageState extends State<CategorySettingsPage> {
       body: ListView(
         children: [
           for (final c in _list)
-            ListTile(
-              leading: c.color == null
-                  ? null
-                  : Container(
-                      width: 16,
-                      height: 16,
+            Dismissible(
+              key: ValueKey(c.id),
+              direction: DismissDirection.startToEnd,
+              confirmDismiss: (_) async {
+                final loc = AppLocalizations.of(context)!;
+                final res = await showDialog<bool>(
+                  context: context,
+                  builder: (_) => AlertDialog(
+                    content: Text(loc.deleteConfirm),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, false),
+                        child: Text(loc.cancel),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, true),
+                        child: Text(loc.delete),
+                      ),
+                    ],
+                  ),
+                );
+                return res ?? false;
+              },
+              onDismissed: (_) => _deleteCategory(c),
+              background: Container(
+                color: Colors.red,
+                alignment: Alignment.centerLeft,
+                padding: const EdgeInsets.only(left: 16),
+                child: const Icon(Icons.delete, color: Colors.white),
+              ),
+              child: ListTile(
+                leading: c.color == null
+                    ? null
+                    : Container(
+                        width: 16,
+                        height: 16,
                       decoration: BoxDecoration(
                         color: Color(
                           int.parse(
@@ -120,44 +150,13 @@ class _CategorySettingsPageState extends State<CategorySettingsPage> {
                       ),
                     ),
               title: Text(c.name),
-              onLongPress: () async {
-                final result = await showModalBottomSheet<String>(
-                  context: context,
-                  builder: (_) => SafeArea(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        ListTile(
-                          leading: const Icon(Icons.edit),
-                          title: Text(AppLocalizations.of(context)!.categoryEditTitle),
-                          onTap: () => Navigator.pop(context, 'edit'),
-                        ),
-                        ListTile(
-                          leading: const Icon(Icons.delete),
-                          title: Text(AppLocalizations.of(context)!.delete),
-                          onTap: () => Navigator.pop(context, 'delete'),
-                        ),
-                        ListTile(
-                          leading: const Icon(Icons.swap_vert),
-                          title: Text(AppLocalizations.of(context)!.reorder),
-                          onTap: () => Navigator.pop(context, 'reorder'),
-                        ),
-                      ],
-                    ),
+              onTap: () async {
+                await Navigator.push<String>(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => EditCategoryPage(category: c),
                   ),
                 );
-                if (result == 'delete') {
-                  _deleteCategory(c);
-                } else if (result == 'edit') {
-                  await Navigator.push<String>(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => EditCategoryPage(category: c),
-                    ),
-                  );
-                } else if (result == 'reorder') {
-                  await _openReorder();
-                }
               },
             ),
         ],

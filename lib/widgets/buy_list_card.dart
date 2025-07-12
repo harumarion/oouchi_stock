@@ -164,15 +164,12 @@ class BuyListCard extends StatelessWidget {
             : StreamBuilder<Inventory?>(
                 stream: watchInventory(item.inventoryId!),
                 builder: (context, snapshot) {
-                  final trailingButton = IconButton(
-                    icon: const Icon(Icons.info_outline),
-                    onPressed: () => _openDetail(context),
-                  );
                   if (!snapshot.hasData) {
                     return ListTile(
-                        // 在庫取得前は商品名のみ表示
-                        title: Text(item.name),
-                        trailing: trailingButton);
+                      title: Text(item.name),
+                      // 詳細画面へ遷移するタップイベント
+                      onTap: () => _openDetail(context),
+                    );
                   }
                   final inv = snapshot.data!;
                   return FutureBuilder<int>(
@@ -188,7 +185,7 @@ class BuyListCard extends StatelessWidget {
                         // 商品名の後ろに品種を表示
                         title: Text('${inv.itemName} / ${inv.itemType}'),
                         subtitle: Text(subtitle),
-                        trailing: trailingButton,
+                        onTap: () => _openDetail(context),
                       );
                     },
                   );

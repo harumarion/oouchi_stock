@@ -236,78 +236,60 @@ class _InventoryListState extends State<InventoryList> {
               return ListView(
                 padding: const EdgeInsets.all(16),
                 children: list.map((inv) {
-                  return GestureDetector(
-                    onTap: () {
-                      // 在庫カードをタップすると詳細画面へ
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => InventoryDetailPage(
-                            inventoryId: inv.id,
-                            categories: widget.categories,
-                          ),
-                        ),
-                      );
-                    },
-                    onLongPress: () async {
-                      // 長押しで編集・削除メニューを表示
-                      final result = await showModalBottomSheet<String>(
+                  return Dismissible(
+                    key: ValueKey(inv.id),
+                    direction: DismissDirection.startToEnd,
+                    confirmDismiss: (_) async {
+                      final loc = AppLocalizations.of(context)!;
+                      final res = await showDialog<bool>(
                         context: context,
-                        builder: (context) => SafeArea(
-                          child: ListView(
-                            shrinkWrap: true,
-                            children: [
-                              ListTile(
-                                leading: const Icon(Icons.edit),
-                                title: Text(AppLocalizations.of(context)!.categoryEditTitle),
-                                onTap: () => Navigator.pop(context, 'edit'),
-                              ),
-                              ListTile(
-                                leading: const Icon(Icons.delete),
-                                title: Text(AppLocalizations.of(context)!.delete),
-                                onTap: () => Navigator.pop(context, 'delete'),
-                              ),
-                            ],
-                          ),
+                        builder: (_) => AlertDialog(
+                          content: Text(loc.deleteConfirm),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, false),
+                              child: Text(loc.cancel),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, true),
+                              child: Text(loc.delete),
+                            ),
+                          ],
                         ),
                       );
-                      if (result == 'delete') {
-                        try {
-                          await _viewModel.delete(inv.id);
-                        } catch (e) {
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(AppLocalizations.of(context)!.deleteFailed)),
-                            );
-                          }
+                      return res ?? false;
+                    },
+                    onDismissed: (_) async {
+                      try {
+                        await _viewModel.delete(inv.id);
+                      } catch (e) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(AppLocalizations.of(context)!.deleteFailed)),
+                          );
                         }
-                      } else if (result == 'edit') {
+                      }
+                    },
+                    background: Container(
+                      color: Colors.red,
+                      alignment: Alignment.centerLeft,
+                      padding: const EdgeInsets.only(left: 16),
+                      child: const Icon(Icons.delete, color: Colors.white),
+                    ),
+                    child: GestureDetector(
+                      onTap: () {
+                        // 在庫カードをタップすると詳細画面へ
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => EditInventoryPage(
-                              id: inv.id,
-                              itemName: inv.itemName,
-                              category: widget.categories.firstWhere(
-                                (e) => e.name == inv.category,
-                                orElse: () => Category(
-                                  id: 0,
-                                  name: inv.category,
-                                  createdAt: DateTime.now(),
-                                  color: null,
-                                ),
-                              ),
-                              itemType: inv.itemType,
-                              quantity: inv.quantity,
-                              volume: inv.volume,
-                              unit: inv.unit,
-                              note: inv.note,
+                            builder: (_) => InventoryDetailPage(
+                              inventoryId: inv.id,
+                              categories: widget.categories,
                             ),
                           ),
                         );
-                      }
-                    },
-                    child: InventoryCard(
+                      },
+                      child: InventoryCard(
                       inventory: inv,
                       updateQuantity: _viewModel.updateQuantity,
                       stocktake: _viewModel.stocktake,
@@ -319,6 +301,7 @@ class _InventoryListState extends State<InventoryList> {
                           );
                         }
                       },
+                      ),
                     ),
                   );
                 }).toList(),

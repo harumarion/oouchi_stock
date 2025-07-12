@@ -53,7 +53,7 @@ void main() {
     expect(find.byType(Card), findsNWidgets(2));
   });
 
-  testWidgets('情報アイコンタップで詳細画面へ遷移', (WidgetTester tester) async {
+  testWidgets('カードタップで詳細画面へ遷移', (WidgetTester tester) async {
     final repo = _FakeRepository();
     await tester.pumpWidget(MaterialApp(
       home: PriceCategoryList(
@@ -65,7 +65,7 @@ void main() {
       ),
     ));
     await tester.pump();
-    await tester.tap(find.byIcon(Icons.info_outline).first);
+    await tester.tap(find.byType(InkWell).first);
     await tester.pumpAndSettle();
     expect(find.byType(PriceDetailPage), findsOneWidget);
   });
