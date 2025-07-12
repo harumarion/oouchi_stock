@@ -94,4 +94,17 @@ class BuyListRepositoryImpl implements BuyListRepository {
     await _init();
     return List<String>.from(_ignoredIds);
   }
+
+  @override
+  /// 在庫IDに紐づくアイテムを削除
+  Future<void> removeItemsByInventoryId(String inventoryId) async {
+    await _init();
+    final prefs = await _prefs;
+    final list = prefs.getStringList(_key) ?? [];
+    list.removeWhere((key) => key.endsWith('|$inventoryId'));
+    await prefs.setStringList(_key, list);
+    _items = list.map(BuyItem.fromKey).toList();
+    await removeIgnoredId(inventoryId);
+    _controller.add(List<BuyItem>.from(_items));
+  }
 }

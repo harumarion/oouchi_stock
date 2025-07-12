@@ -113,4 +113,15 @@ class PriceRepositoryImpl implements PriceRepository {
   Future<void> deletePriceInfo(String id) async {
     await userCollection('priceInfos').doc(id).delete();
   }
+
+  @override
+  /// 在庫IDに紐づくセール情報を削除する
+  Future<void> deleteByInventoryId(String inventoryId) async {
+    final snapshot = await userCollection('priceInfos')
+        .where('inventoryId', isEqualTo: inventoryId)
+        .get();
+    for (final doc in snapshot.docs) {
+      await doc.reference.delete();
+    }
+  }
 }

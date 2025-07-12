@@ -50,4 +50,15 @@ class BuyPredictionRepositoryImpl implements BuyPredictionRepository {
     await prefs.setStringList(_key, list);
     _controller.add(list.map(BuyItem.fromKey).toList());
   }
+
+  @override
+  /// 在庫IDに紐づくアイテムを削除
+  Future<void> removeItemsByInventoryId(String inventoryId) async {
+    await _init();
+    final prefs = await _prefs;
+    final list = prefs.getStringList(_key) ?? [];
+    list.removeWhere((key) => key.endsWith('|$inventoryId'));
+    await prefs.setStringList(_key, list);
+    _controller.add(list.map(BuyItem.fromKey).toList());
+  }
 }

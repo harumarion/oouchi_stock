@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../domain/entities/inventory.dart';
 import '../../domain/entities/buy_item.dart';
 import '../../domain/usecases/watch_inventories.dart';
-import '../../domain/usecases/delete_inventory.dart';
+import '../../domain/usecases/delete_inventory_with_relations.dart';
 import '../../domain/usecases/add_buy_item.dart';
 import '../../domain/usecases/update_quantity.dart';
 import '../../domain/usecases/stocktake.dart';
@@ -26,8 +26,12 @@ class InventoryListViewModel extends ChangeNotifier {
   final String category;
   final WatchInventories watchUsecase =
       WatchInventories(InventoryRepositoryImpl());
-  final DeleteInventory deleteUsecase =
-      DeleteInventory(InventoryRepositoryImpl());
+  final DeleteInventoryWithRelations deleteUsecase = DeleteInventoryWithRelations(
+    InventoryRepositoryImpl(),
+    PriceRepositoryImpl(),
+    BuyListRepositoryImpl(),
+    BuyPredictionRepositoryImpl(),
+  );
   final AddBuyItem addUsecase = AddBuyItem(BuyListRepositoryImpl());
   final UpdateQuantity updateQuantityUsecase =
       UpdateQuantity(InventoryRepositoryImpl());

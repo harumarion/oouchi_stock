@@ -210,7 +210,12 @@ class InventoryRepositoryImpl implements InventoryRepository {
   @override
   /// 在庫を削除する
   Future<void> deleteInventory(String id) async {
-    await userCollection('inventory').doc(id).delete();
+    final doc = userCollection('inventory').doc(id);
+    final history = await doc.collection('history').get();
+    for (final h in history.docs) {
+      await h.reference.delete();
+    }
+    await doc.delete();
   }
 
   @override
