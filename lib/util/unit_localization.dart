@@ -1,5 +1,6 @@
 import '../i18n/app_localizations.dart';
 import 'package:flutter/widgets.dart';
+import 'constants.dart';
 
 /// 単位文字列をローカライズするためのユーティリティ
 /// [unit] はデータベースに保存されている日本語表記
@@ -7,15 +8,15 @@ import 'package:flutter/widgets.dart';
 String localizeUnit(BuildContext context, String unit) {
   final loc = AppLocalizations.of(context)!;
   switch (unit) {
-    case '個':
+    case defaultUnits[0]:
       return loc.unitPiece;
-    case '本':
+    case defaultUnits[1]:
       return loc.unitBottle;
-    case '袋':
+    case defaultUnits[2]:
       return loc.unitBag;
-    case 'ロール':
+    case defaultUnits[3]:
       return loc.unitRoll;
-    case 'リットル':
+    case defaultUnits[4]:
       return loc.unitLiter;
     default:
       return unit;

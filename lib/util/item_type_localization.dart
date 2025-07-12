@@ -1,5 +1,6 @@
 import '../i18n/app_localizations.dart';
 import 'package:flutter/widgets.dart';
+import 'constants.dart';
 
 /// 品種名をローカライズするユーティリティ
 /// Firestore上には日本語名で保存されているため、
@@ -7,7 +8,7 @@ import 'package:flutter/widgets.dart';
 String localizeItemType(BuildContext context, String type) {
   final loc = AppLocalizations.of(context)!;
   switch (type) {
-    case 'その他':
+    case itemTypeOther:
       return loc.itemTypeOther;
     default:
       return type;

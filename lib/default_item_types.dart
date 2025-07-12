@@ -1,10 +1,12 @@
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'util/firestore_refs.dart';
+// 品種デフォルト値などの共通定数を利用
+import 'util/constants.dart';
 
 const Map<String, List<String>> defaultItemTypes = {
-  '冷蔵庫': ['その他'],
-  '冷凍庫': ['その他'],
+  '冷蔵庫': [itemTypeOther],
+  '冷凍庫': [itemTypeOther],
   '日用品': [
     '柔軟剤',
     '洗濯洗剤',
