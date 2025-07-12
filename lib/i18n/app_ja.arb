@@ -79,7 +79,7 @@
   "checkedDate": "確認日: {date}",
   "categorySettings": "カテゴリ設定",
   "priceSummary": "数:{count} {unit} 合計容量:{volume} 合計:{total} 値段:{price} 購入店舗:{shop} 単価:{unitPrice}",
-  "totalVolumeLabel": "合計",
+  "totalVolumeLabel": "総容量",
   "unitPriceLabel": "単価",
   "sortUnitPrice": "単価安い順",
   "inventoryList": "在庫一覧",
