@@ -126,6 +126,7 @@ class _CategorySettingsPageState extends State<CategorySettingsPage> {
                 );
                 return res ?? false;
               },
+              // スワイプでカテゴリを削除する
               onDismissed: (_) => _deleteCategory(c),
               background: Container(
                 color: Colors.red,
@@ -142,7 +143,7 @@ class _CategorySettingsPageState extends State<CategorySettingsPage> {
                       decoration: BoxDecoration(
                         color: Color(
                           int.parse(
-                            'ff${c.color!.replaceFirst('#', '')}',
+                            "ff${c.color!.replaceFirst('#', '')}",
                             radix: 16,
                           ),
                         ),
@@ -150,6 +151,7 @@ class _CategorySettingsPageState extends State<CategorySettingsPage> {
                       ),
                     ),
               title: Text(c.name),
+              // カテゴリをタップしたときに編集画面へ遷移
               onTap: () async {
                 await Navigator.push<String>(
                   context,
@@ -164,6 +166,7 @@ class _CategorySettingsPageState extends State<CategorySettingsPage> {
       floatingActionButton: FloatingActionButton(
         // カテゴリ設定画面専用のヒーロータグ
         heroTag: 'categoryFab',
+        // 追加ボタン押下時にカテゴリ追加画面を表示
         onPressed: () async {
           await Navigator.push(
             context,

@@ -96,8 +96,9 @@ class _PriceListPageState extends State<PriceListPage> {
             for (final c in _viewModel.categories) PriceCategoryList(category: c.name)
           ],
         ),
-        floatingActionButton: FloatingActionButton(
-          heroTag: 'priceListFab',
+       floatingActionButton: FloatingActionButton(
+         heroTag: 'priceListFab',
+          // セール情報を追加する画面へ遷移
           onPressed: () {
             Navigator.push(
               context,
@@ -152,11 +153,13 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
           child: Row(
             children: [
               Expanded(
+                // セール情報の検索テキストフィールド
                 child: TextField(
                   controller: _viewModel.controller,
                   decoration: InputDecoration(
                     labelText: AppLocalizations.of(context)!.searchHint,
                   ),
+                  // 入力値が変わったら検索条件を更新
                   onChanged: _viewModel.setSearch,
                 ),
               ),
