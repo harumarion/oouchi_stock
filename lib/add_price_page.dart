@@ -5,6 +5,7 @@ import 'domain/entities/inventory.dart';
 import 'presentation/viewmodels/add_price_viewmodel.dart';
 import 'util/input_validators.dart';
 import 'util/item_type_localization.dart';
+import 'util/unit_localization.dart';
 import 'add_inventory_page.dart';
 
 // セール情報追加画面
