@@ -34,7 +34,7 @@
   "itemType": "品種",
   "quantity": "数量",
   "pieceCount": "個数",
-  "unit": "単位",
+  "unit": "容量単位",
   "unitPiece": "個",
   "unitBottle": "本",
   "unitBag": "袋",

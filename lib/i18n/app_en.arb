@@ -34,7 +34,7 @@
   "itemType": "Item type",
   "quantity": "Quantity",
   "pieceCount": "Pieces",
-  "unit": "Unit",
+  "unit": "Volume unit",
   "unitPiece": "piece",
   "unitBottle": "bottle",
   "unitBag": "bag",
