@@ -159,6 +159,7 @@ class BuyListCard extends StatelessWidget {
       child: Card(
         margin: const EdgeInsets.only(bottom: 12),
         child: item.inventoryId == null
+            // 手入力アイテムは商品名のみ表示
             ? ListTile(title: Text(item.name))
             : StreamBuilder<Inventory?>(
                 stream: watchInventory(item.inventoryId!),
@@ -181,7 +182,8 @@ class BuyListCard extends StatelessWidget {
                       final subtitle =
                           '${inv.quantity.toStringAsFixed(1)}$daysText';
                       return ListTile(
-                        title: Text(item.name),
+                        // 商品名の後ろに品種を表示
+                        title: Text('${inv.itemName} / ${inv.itemType}'),
                         subtitle: Text(subtitle),
                         onTap: () => _openDetail(context),
                       );

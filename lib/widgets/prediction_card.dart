@@ -85,7 +85,8 @@ class PredictionCard extends StatelessWidget {
                 // 買い物予報画面の1アイテムをカード表示
                 margin: const EdgeInsets.only(bottom: 12),
                 child: ListTile(
-                  title: Text(item.name),
+                  // 商品名の後に品種を表示する
+                  title: Text('${inv.itemName} / ${inv.itemType}'),
                   subtitle: Text(subtitle),
                   onTap: () => _openDetail(context),
                   trailing: IconButton(
