@@ -7,18 +7,18 @@ import 'constants.dart';
 /// 例: "個", "本", "袋", "ロール", "リットル"
 String localizeUnit(BuildContext context, String unit) {
   final loc = AppLocalizations.of(context)!;
-  switch (unit) {
-    case defaultUnits[0]:
-      return loc.unitPiece;
-    case defaultUnits[1]:
-      return loc.unitBottle;
-    case defaultUnits[2]:
-      return loc.unitBag;
-    case defaultUnits[3]:
-      return loc.unitRoll;
-    case defaultUnits[4]:
-      return loc.unitLiter;
-    default:
-      return unit;
+  // 単位ごとにローカライズされた表示名を返す
+  if (unit == defaultUnits[0]) {
+    return loc.unitPiece;
+  } else if (unit == defaultUnits[1]) {
+    return loc.unitBottle;
+  } else if (unit == defaultUnits[2]) {
+    return loc.unitBag;
+  } else if (unit == defaultUnits[3]) {
+    return loc.unitRoll;
+  } else if (unit == defaultUnits[4]) {
+    return loc.unitLiter;
+  } else {
+    return unit;
   }
 }

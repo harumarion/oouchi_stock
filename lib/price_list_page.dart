@@ -221,8 +221,8 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
                 itemBuilder: (context, index) {
                   final p = items[index];
                   final diff = p.regularPrice - p.salePrice;
+                  // 商品タップ時に詳細ページへ遷移
                   return InkWell(
-                    // カードタップで詳細画面へ遷移
                     onTap: () {
                       Navigator.push(
                         context,
