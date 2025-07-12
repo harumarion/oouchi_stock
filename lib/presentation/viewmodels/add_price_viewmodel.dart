@@ -35,9 +35,9 @@ class AddPriceViewModel extends ChangeNotifier {
   bool loaded = false;
 
   /// 数量
-  double count = 1;
+  double count = 0;
   /// 容量
-  double volume = 1;
+  double volume = 0;
   /// 通常価格
   double regularPrice = 0;
   /// セール価格
@@ -61,7 +61,7 @@ class AddPriceViewModel extends ChangeNotifier {
   double get unitPrice => totalVolume == 0 ? 0 : salePrice / totalVolume;
 
   Future<void> _init() async {
-    expiry = DateTime.now().add(const Duration(days: 7));
+    expiry = DateTime.now();
     inventories = await _fetchInventory();
     if (inventories.isNotEmpty) inventory = inventories.first;
     loaded = true;

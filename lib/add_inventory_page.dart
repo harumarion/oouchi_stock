@@ -7,6 +7,7 @@ import 'main.dart';
 import 'add_category_page.dart';
 import 'presentation/viewmodels/add_inventory_viewmodel.dart';
 import 'util/unit_localization.dart';
+import 'util/item_type_localization.dart';
 
 // 商品を追加する画面のウィジェット
 
@@ -125,7 +126,10 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
                   decoration: InputDecoration(labelText: AppLocalizations.of(context)!.itemType),
                   value: _viewModel.itemType,
                   items: itemTypes
-                      .map((t) => DropdownMenuItem(value: t, child: Text(t)))
+                      .map((t) => DropdownMenuItem(
+                            value: t,
+                            child: Text(localizeItemType(context, t)),
+                          ))
                       .toList(),
                   onChanged: (value) {
                     if (value != null) _viewModel.changeItemType(value);
@@ -152,7 +156,7 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
               TextFormField(
                 decoration: InputDecoration(labelText: AppLocalizations.of(context)!.volume),
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                initialValue: '1',
+                initialValue: '0',
                 onChanged: (v) => _viewModel.setVolume(v),
               ),
               const SizedBox(height: 12),

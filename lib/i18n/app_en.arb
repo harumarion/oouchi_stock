@@ -128,5 +128,6 @@
   "purchaseDecisionSettings": "Purchase Decision Settings",
   "cautiousDaysLabel": "Cautious days",
   "bestDaysLabel": "Best time days",
-  "discountPercentLabel": "Discount percent(%)"
+  "discountPercentLabel": "Discount percent(%)",
+  "itemTypeOther": "Other"
 }

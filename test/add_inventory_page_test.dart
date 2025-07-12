@@ -16,8 +16,8 @@ void main() {
       ),
     );
 
-    // 初期状態では数量 1 が表示されているはず
-    expect(find.text('1'), findsOneWidget);
+    // 初期状態では数量 0 が表示されているはず
+    expect(find.text('0'), findsOneWidget);
 
     // プラスボタンをタップして 2 になるか確認
     await tester.tap(find.widgetWithIcon(IconButton, Icons.add));

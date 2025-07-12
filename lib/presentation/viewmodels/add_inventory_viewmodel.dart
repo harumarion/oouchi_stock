@@ -24,13 +24,13 @@ class AddInventoryViewModel extends ChangeNotifier {
   Category? category;
 
   /// 品種
-  String itemType = '柔軟剤';
+  String itemType = '';
 
   /// 数量
-  double quantity = 1.0;
+  double quantity = 0;
 
   /// 1個あたり容量
-  double volume = 1.0;
+  double volume = 0;
 
   /// 単位
   String unit = '個';
@@ -156,8 +156,8 @@ class AddInventoryViewModel extends ChangeNotifier {
   void resetFields() {
     itemName = '';
     note = '';
-    quantity = 1.0;
-    volume = 1.0;
+    quantity = 0;
+    volume = 0;
     notifyListeners();
   }
 
