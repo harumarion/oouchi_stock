@@ -239,18 +239,18 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: ScrollingText(
-                                  // 商品名の後に品種を表示する
-                                  '${p.itemName} / ${p.itemType}',
-                                  style: const TextStyle(fontSize: 18),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: ScrollingText(
+                                    // 商品名の後に品種を表示する
+                                    '${p.itemName} / ${p.itemType}',
+                                    style: const TextStyle(fontSize: 18),
+                                  ),
                                 ),
-                              ),
-                              // 買い物リストに追加するアイコンボタン
-                              IconButton(
-                                icon: const Icon(Icons.playlist_add),
+                                // 買い物リストに追加するアイコンボタン
+                                IconButton(
+                                  icon: const Icon(Icons.playlist_add),
                                 onPressed: () async {
                                   await _viewModel.addToBuyList(p);
                                   if (mounted) {
