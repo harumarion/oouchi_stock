@@ -134,7 +134,8 @@ class AddInventoryViewModel extends ChangeNotifier {
   /// 個数増減処理
   void changeQuantity(double delta) {
     quantity += delta;
-    if (quantity < 1.0) quantity = 1.0;
+    // 個数は0以上とし、マイナスにはならないようにする
+    if (quantity < 0) quantity = 0;
     quantity = double.parse(quantity.toStringAsFixed(0));
     notifyListeners();
   }

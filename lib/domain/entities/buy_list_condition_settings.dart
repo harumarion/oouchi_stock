@@ -46,7 +46,7 @@ Future<void> saveBuyListConditionSettings(BuyListConditionSettings settings) asy
 /// 在庫から残り日数を計算するヘルパー
 int _daysLeftFromInventory(Inventory inv) {
   if (inv.monthlyConsumption <= 0) return 9999;
-  return (inv.quantity / inv.monthlyConsumption * 30).ceil();
+  return (inv.totalVolume / inv.monthlyConsumption * 30).ceil();
 }
 
 /// 買い物予報抽出用ストラテジー

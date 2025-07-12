@@ -10,6 +10,8 @@ void main() {
       category: 'cat',
       itemType: 'type',
       quantity: 1,
+      volume: 1,
+      totalVolume: 1,
       unit: '個',
       createdAt: now,
     );
@@ -19,6 +21,8 @@ void main() {
       category: 'cat',
       itemType: 'type',
       quantity: 2,
+      volume: 1,
+      totalVolume: 2,
       unit: '本',
       createdAt: now,
     );

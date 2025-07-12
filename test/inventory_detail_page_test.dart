@@ -48,6 +48,8 @@ class _DataRepository extends _FakeRepository {
         category: '日用品',
         itemType: '一般',
         quantity: 1.0,
+        volume: 1,
+        totalVolume: 1,
         unit: '個',
         monthlyConsumption: 0,
         createdAt: DateTime.now(),
