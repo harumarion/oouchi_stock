@@ -16,4 +16,7 @@ abstract class PriceRepository {
 
   /// 情報を削除する
   Future<void> deletePriceInfo(String id);
+
+  /// 在庫IDに紐づくセール情報をすべて削除する
+  Future<void> deleteByInventoryId(String inventoryId);
 }

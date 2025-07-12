@@ -19,4 +19,7 @@ abstract class BuyListRepository {
 
   /// 保存された削除済み在庫ID一覧を取得する
   Future<List<String>> loadIgnoredIds();
+
+  /// 在庫IDに紐づくアイテムをすべて削除する
+  Future<void> removeItemsByInventoryId(String inventoryId);
 }

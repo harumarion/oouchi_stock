@@ -3,9 +3,15 @@ import 'package:oouchi_stock/domain/entities/inventory.dart';
 import 'package:oouchi_stock/domain/usecases/add_inventory.dart';
 import 'package:oouchi_stock/domain/usecases/update_quantity.dart';
 import 'package:oouchi_stock/domain/usecases/delete_inventory.dart';
+import 'package:oouchi_stock/domain/usecases/delete_inventory_with_relations.dart';
 import 'package:oouchi_stock/domain/usecases/stocktake.dart';
 import 'package:oouchi_stock/domain/repositories/inventory_repository.dart';
+import 'package:oouchi_stock/domain/repositories/price_repository.dart';
+import 'package:oouchi_stock/domain/repositories/buy_list_repository.dart';
+import 'package:oouchi_stock/domain/repositories/buy_prediction_repository.dart';
 import 'package:oouchi_stock/domain/entities/history_entry.dart';
+import 'package:oouchi_stock/domain/entities/price_info.dart';
+import 'package:oouchi_stock/domain/entities/buy_item.dart';
 
 /// テストで利用するフェイクの在庫リポジトリ
 class FakeInventoryRepository implements InventoryRepository {
@@ -75,6 +81,83 @@ class FakeInventoryRepository implements InventoryRepository {
       throw UnimplementedError();
 }
 
+/// テストで利用するフェイクの価格リポジトリ
+class FakePriceRepository implements PriceRepository {
+  /// 削除された在庫ID
+  String? deletedInventoryId;
+
+  @override
+  Future<String> addPriceInfo(PriceInfo info) async => '';
+
+  @override
+  Future<void> updatePriceInfo(PriceInfo info) async {}
+
+  @override
+  Stream<List<PriceInfo>> watchByCategory(String category) =>
+      const Stream.empty();
+
+  @override
+  Stream<List<PriceInfo>> watchByType(String category, String itemType) =>
+      const Stream.empty();
+
+  @override
+  Future<void> deletePriceInfo(String id) async {}
+
+  @override
+  Future<void> deleteByInventoryId(String inventoryId) async {
+    deletedInventoryId = inventoryId;
+  }
+}
+
+/// テスト用のフェイク買い物リストリポジトリ
+class FakeBuyListRepository implements BuyListRepository {
+  /// 削除された在庫ID
+  String? deletedInventoryId;
+
+  @override
+  Stream<List<BuyItem>> watchItems() => const Stream.empty();
+
+  @override
+  Future<void> addItem(BuyItem item) async {}
+
+  @override
+  Future<void> removeItem(BuyItem item) async {}
+
+  @override
+  Future<void> addIgnoredId(String id) async {}
+
+  @override
+  Future<void> removeIgnoredId(String id) async {}
+
+  @override
+  Future<List<String>> loadIgnoredIds() async => [];
+
+  @override
+  Future<void> removeItemsByInventoryId(String inventoryId) async {
+    deletedInventoryId = inventoryId;
+  }
+}
+
+/// テスト用のフェイク買い物予報リポジトリ
+class FakePredictionRepository implements BuyPredictionRepository {
+  /// 削除された在庫ID
+  String? deletedInventoryId;
+
+  @override
+  Stream<List<BuyItem>> watchItems() => const Stream.empty();
+
+  @override
+  Future<void> addItem(BuyItem item) async {}
+
+  @override
+  Future<void> removeItem(BuyItem item) async {}
+
+  @override
+  Future<void> removeItemsByInventoryId(String inventoryId) async {
+    deletedInventoryId = inventoryId;
+  }
+}
+
 void main() {
   test('AddInventory が repository に Inventory を渡す', () async {
     final repo = FakeInventoryRepository();
@@ -128,5 +211,20 @@ void main() {
       'after': 2.0,
       'diff': 1.0,
     });
+  });
+
+  test('DeleteInventoryWithRelations が各リポジトリを呼び出す', () async {
+    final inv = FakeInventoryRepository();
+    final price = FakePriceRepository();
+    final buy = FakeBuyListRepository();
+    final pred = FakePredictionRepository();
+    final usecase = DeleteInventoryWithRelations(inv, price, buy, pred);
+
+    await usecase('id5');
+
+    expect(inv.deletedId, 'id5');
+    expect(price.deletedInventoryId, 'id5');
+    expect(buy.deletedInventoryId, 'id5');
+    expect(pred.deletedInventoryId, 'id5');
   });
 }

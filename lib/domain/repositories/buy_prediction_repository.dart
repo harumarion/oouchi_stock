@@ -10,4 +10,7 @@ abstract class BuyPredictionRepository {
 
   /// アイテムを削除する
   Future<void> removeItem(BuyItem item);
+
+  /// 在庫IDに紐づくアイテムをすべて削除する
+  Future<void> removeItemsByInventoryId(String inventoryId);
 }
