@@ -88,6 +88,18 @@ class InventoryDetailPage extends StatelessWidget {
                     '${inv.quantity.toStringAsFixed(1)}${localizeUnit(context, inv.unit)}',
                     textStyle,
                   ),
+                  // 1個あたり容量の表示行
+                  _buildDetailRow(
+                    AppLocalizations.of(context)!.volume,
+                    inv.volume.toStringAsFixed(1),
+                    textStyle,
+                  ),
+                  // 総容量の表示行
+                  _buildDetailRow(
+                    AppLocalizations.of(context)!.totalVolumeLabel,
+                    inv.totalVolume.toStringAsFixed(1),
+                    textStyle,
+                  ),
                   _buildDetailRow(AppLocalizations.of(context)!.monthlyConsumption, inv.monthlyConsumption.toStringAsFixed(1), textStyle),
                   const SizedBox(height: 8),
                   _buildDetailRow(AppLocalizations.of(context)!.predictLabel, _formatDate(predicted), textStyle),
