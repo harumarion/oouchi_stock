@@ -31,6 +31,8 @@ Inventory inv(double q) => Inventory(
       category: 'cat',
       itemType: 'type',
       quantity: q,
+      volume: 1,
+      totalVolume: q,
       unit: '個',
       createdAt: DateTime.now(),
     );

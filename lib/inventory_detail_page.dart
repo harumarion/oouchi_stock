@@ -73,7 +73,8 @@ class InventoryDetailPage extends StatelessWidget {
               if (inv.monthlyConsumption <= 0) {
                 predicted = DateTime.now();
               } else {
-                final days = (inv.quantity / inv.monthlyConsumption * 30).ceil();
+                final days =
+                    (inv.totalVolume / inv.monthlyConsumption * 30).ceil();
                 predicted = DateTime.now().add(Duration(days: days));
               }
               final textStyle = Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 18);

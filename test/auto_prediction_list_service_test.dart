@@ -31,6 +31,8 @@ Inventory inv(double q, {double consumption = 30}) => Inventory(
       category: 'cat',
       itemType: 'type',
       quantity: q,
+      volume: 1,
+      totalVolume: q,
       monthlyConsumption: consumption,
       unit: '個',
       createdAt: DateTime.now(),

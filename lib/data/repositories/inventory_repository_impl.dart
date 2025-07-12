@@ -94,15 +94,23 @@ class InventoryRepositoryImpl implements InventoryRepository {
       // Firestore ドキュメントから取得したデータ。null の可能性があるため Map を nullable として扱う
       final Map<String, dynamic>? data = snapshot.data();
       final before = (data?['quantity'] ?? 0).toDouble();
+      final volume = (data?['volume'] ?? 0).toDouble();
+      final beforeVolume = (data?['totalVolume'] ?? before * volume).toDouble();
       final after = before + amount;
+      final diffVolume = amount * volume;
+      final afterVolume = beforeVolume + diffVolume;
 
-      await doc.update({'quantity': FieldValue.increment(amount)});
+      await doc.update({
+        'quantity': after,
+        'totalVolume': afterVolume,
+      });
       await doc.collection('history').add({
         'type': type,
-        'quantity': amount.abs(),
-        'before': before,
-        'after': after,
-        'diff': amount,
+        // 増減量を総容量で記録
+        'quantity': diffVolume.abs(),
+        'before': beforeVolume,
+        'after': afterVolume,
+        'diff': diffVolume,
         'timestamp': Timestamp.now(),
       });
       await _recalculateMonthlyConsumption(id);
@@ -179,12 +187,21 @@ class InventoryRepositoryImpl implements InventoryRepository {
   Future<void> stocktake(
       String id, double before, double after, double diff) async {
     final doc = userCollection('inventory').doc(id);
-    await doc.update({'quantity': after});
+    final snapshot = await doc.get();
+    final data = snapshot.data();
+    final volume = (data?['volume'] ?? 0).toDouble();
+    final beforeVolume = before * volume;
+    final afterVolume = after * volume;
+    final diffVolume = diff * volume;
+    await doc.update({
+      'quantity': after,
+      'totalVolume': afterVolume,
+    });
     await doc.collection('history').add({
       'type': 'stocktake',
-      'before': before,
-      'after': after,
-      'diff': diff,
+      'before': beforeVolume,
+      'after': afterVolume,
+      'diff': diffVolume,
       'timestamp': Timestamp.now(),
     });
     await _recalculateMonthlyConsumption(id);
@@ -200,8 +217,8 @@ class InventoryRepositoryImpl implements InventoryRepository {
   /// 残量が一定以下の在庫を監視する
   Stream<List<Inventory>> watchNeedsBuy(double threshold) {
     return userCollection('inventory')
-        .where('quantity', isLessThanOrEqualTo: threshold)
-        .orderBy('quantity')
+        .where('totalVolume', isLessThanOrEqualTo: threshold)
+        .orderBy('totalVolume')
         .snapshots()
         .map((snapshot) => snapshot.docs.map((doc) {
               final data = doc.data();
@@ -234,7 +251,7 @@ class InventoryRepositoryImpl implements InventoryRepository {
     for (final doc in history.docs) {
       final data = doc.data();
       if (data['type'] == 'used') {
-        used += (data['quantity'] ?? 0).toDouble();
+        used += (data['diff'] ?? 0).abs().toDouble();
       }
     }
     await userCollection('inventory')
