@@ -4,6 +4,7 @@ import 'package:oouchi_stock/i18n/app_localizations.dart';
 import 'domain/entities/inventory.dart';
 import 'presentation/viewmodels/add_price_viewmodel.dart';
 import 'util/input_validators.dart';
+import 'util/item_type_localization.dart';
 import 'add_inventory_page.dart';
 
 // セール情報追加画面
@@ -74,7 +75,8 @@ class _AddPricePageState extends State<AddPricePage> {
                       items: _viewModel.inventories
                           .map((e) => DropdownMenuItem(
                                 value: e,
-                                child: Text('${e.itemType} / ${e.itemName}'),
+                                child: Text(
+                                    '${localizeItemType(context, e.itemType)} / ${e.itemName}'),
                               ))
                           .toList(),
                       onChanged: (v) => setState(() => _viewModel.inventory = v),
@@ -97,16 +99,16 @@ class _AddPricePageState extends State<AddPricePage> {
                     TextFormField(
                       decoration: InputDecoration(labelText: AppLocalizations.of(context)!.count),
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      initialValue: '1',
-                      onChanged: (v) => setState(() => _viewModel.count = double.tryParse(v) ?? 1),
+                      initialValue: '0',
+                      onChanged: (v) => setState(() => _viewModel.count = double.tryParse(v) ?? 0),
                       validator: (v) => positiveNumberValidator(context, v),
                     ),
                     const SizedBox(height: 12),
                     TextFormField(
                       decoration: InputDecoration(labelText: AppLocalizations.of(context)!.volume),
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      initialValue: '1',
-                      onChanged: (v) => setState(() => _viewModel.volume = double.tryParse(v) ?? 1),
+                      initialValue: '0',
+                      onChanged: (v) => setState(() => _viewModel.volume = double.tryParse(v) ?? 0),
                       validator: (v) => positiveNumberValidator(context, v),
                     ),
                     const SizedBox(height: 12),

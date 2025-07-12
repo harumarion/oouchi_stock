@@ -4,6 +4,7 @@ import 'domain/entities/category.dart';
 import 'add_category_page.dart';
 import 'presentation/viewmodels/edit_inventory_viewmodel.dart';
 import 'util/unit_localization.dart';
+import 'util/item_type_localization.dart';
 
 /// 商品を編集する画面のウィジェット
 class EditInventoryPage extends StatefulWidget {
@@ -156,7 +157,10 @@ class _EditInventoryPageState extends State<EditInventoryPage> {
                   value:
                       itemTypes.contains(_viewModel.itemType) ? _viewModel.itemType : null,
                   items: itemTypes
-                      .map((t) => DropdownMenuItem(value: t, child: Text(t)))
+                      .map((t) => DropdownMenuItem(
+                            value: t,
+                            child: Text(localizeItemType(context, t)),
+                          ))
                       .toList(),
                   onChanged: (v) {
                     if (v != null) setState(() => _viewModel.changeItemType(v));
