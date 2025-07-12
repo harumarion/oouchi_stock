@@ -52,6 +52,8 @@ class InventoryDetailPage extends StatelessWidget {
                         orElse: () => Category(id: 0, name: inv.category, createdAt: DateTime.now(), color: null),
                       ),
                       itemType: inv.itemType,
+                      quantity: inv.quantity,
+                      volume: inv.volume,
                       unit: inv.unit,
                       note: inv.note,
                     ),
@@ -83,6 +85,18 @@ class InventoryDetailPage extends StatelessWidget {
                   _buildDetailRow(
                     AppLocalizations.of(context)!.quantity,
                     '${inv.quantity.toStringAsFixed(1)}${localizeUnit(context, inv.unit)}',
+                    textStyle,
+                  ),
+                  // 1個あたり容量の表示行
+                  _buildDetailRow(
+                    AppLocalizations.of(context)!.volume,
+                    inv.volume.toStringAsFixed(1),
+                    textStyle,
+                  ),
+                  // 総容量の表示行
+                  _buildDetailRow(
+                    AppLocalizations.of(context)!.totalVolumeLabel,
+                    inv.totalVolume.toStringAsFixed(1),
                     textStyle,
                   ),
                   _buildDetailRow(AppLocalizations.of(context)!.monthlyConsumption, inv.monthlyConsumption.toStringAsFixed(1), textStyle),

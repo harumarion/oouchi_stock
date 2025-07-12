@@ -25,8 +25,15 @@ class EditInventoryViewModel extends ChangeNotifier {
   Category? category;
   /// 品種
   String itemType = '';
+  /// 数量
+  double quantity = 0;
+
+  /// 1個あたり容量
+  double volume = 0;
+
   /// 単位
   String unit = '個';
+
   /// メモ
   String note = '';
 
@@ -47,11 +54,23 @@ class EditInventoryViewModel extends ChangeNotifier {
   EditInventoryViewModel();
 
   /// 初期データを読み込む
-  void load({required String id, required String itemName, required Category category, required String itemType, required String unit, required String note, List<Category>? initialCategories}) {
+  void load({
+    required String id,
+    required String itemName,
+    required Category category,
+    required String itemType,
+    required double quantity,
+    required double volume,
+    required String unit,
+    required String note,
+    List<Category>? initialCategories,
+  }) {
     this.id = id;
     this.itemName = itemName;
     this.category = category;
     this.itemType = itemType;
+    this.quantity = quantity;
+    this.volume = volume;
     this.unit = unit;
     this.note = note;
     if (initialCategories != null && initialCategories.isNotEmpty) {
@@ -127,6 +146,13 @@ class EditInventoryViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// 容量設定処理
+  void setVolume(String value) {
+    final v = double.tryParse(value) ?? 0;
+    volume = v;
+    notifyListeners();
+  }
+
   /// 単位設定処理
   void setUnit(String value) {
     unit = value;
@@ -150,7 +176,9 @@ class EditInventoryViewModel extends ChangeNotifier {
       itemName: itemName,
       category: category?.name ?? '',
       itemType: itemType,
-      quantity: 0,
+      quantity: quantity,
+      volume: volume,
+      totalVolume: quantity * volume,
       unit: unit,
       note: note,
       createdAt: DateTime.now(),

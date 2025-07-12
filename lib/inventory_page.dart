@@ -298,6 +298,8 @@ class _InventoryListState extends State<InventoryList> {
                                 ),
                               ),
                               itemType: inv.itemType,
+                              quantity: inv.quantity,
+                              volume: inv.volume,
                               unit: inv.unit,
                               note: inv.note,
                             ),
