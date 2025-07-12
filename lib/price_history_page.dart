@@ -69,25 +69,37 @@ class _PriceHistoryPageState extends State<PriceHistoryPage> {
           return ListView(
             children: [
               for (final p in list)
-                Card(
-                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: InkWell(
-                    // 履歴カードを長押しした際の削除メニュー表示
-                    onLongPress: () async {
-                      final res = await showModalBottomSheet<String>(
-                        context: context,
-                        builder: (_) => SafeArea(
-                          child: ListTile(
-                            leading: const Icon(Icons.delete),
-                            title: Text(loc.delete),
-                            onTap: () => Navigator.pop(context, 'delete'),
+                Dismissible(
+                  key: ValueKey(p.id),
+                  direction: DismissDirection.startToEnd,
+                  confirmDismiss: (_) async {
+                    final res = await showDialog<bool>(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        content: Text(loc.deleteConfirm),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, false),
+                            child: Text(loc.cancel),
                           ),
-                        ),
-                      );
-                      if (res == 'delete') {
-                        await _viewModel.delete(p.id);
-                      }
-                    },
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, true),
+                            child: Text(loc.delete),
+                          ),
+                        ],
+                      ),
+                    );
+                    return res ?? false;
+                  },
+                  onDismissed: (_) async => _viewModel.delete(p.id),
+                  background: Container(
+                    color: Colors.red,
+                    alignment: Alignment.centerLeft,
+                    padding: const EdgeInsets.only(left: 16),
+                    child: const Icon(Icons.delete, color: Colors.white),
+                  ),
+                  child: Card(
+                    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     child: Padding(
                       padding: const EdgeInsets.all(16),
                       child: Column(

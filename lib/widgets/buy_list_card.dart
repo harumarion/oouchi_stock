@@ -163,12 +163,12 @@ class BuyListCard extends StatelessWidget {
             : StreamBuilder<Inventory?>(
                 stream: watchInventory(item.inventoryId!),
                 builder: (context, snapshot) {
-                  final trailingButton = IconButton(
-                    icon: const Icon(Icons.info_outline),
-                    onPressed: () => _openDetail(context),
-                  );
                   if (!snapshot.hasData) {
-                    return ListTile(title: Text(item.name), trailing: trailingButton);
+                    return ListTile(
+                      title: Text(item.name),
+                      // 詳細画面へ遷移するタップイベント
+                      onTap: () => _openDetail(context),
+                    );
                   }
                   final inv = snapshot.data!;
                   return FutureBuilder<int>(
@@ -183,7 +183,7 @@ class BuyListCard extends StatelessWidget {
                       return ListTile(
                         title: Text(item.name),
                         subtitle: Text(subtitle),
-                        trailing: trailingButton,
+                        onTap: () => _openDetail(context),
                       );
                     },
                   );

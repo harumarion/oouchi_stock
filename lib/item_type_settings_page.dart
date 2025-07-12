@@ -55,32 +55,39 @@ class _ItemTypeSettingsPageState extends State<ItemTypeSettingsPage> {
     return ListView(
       children: [
         for (final t in items)
-          ListTile(
-            title: Text(t.name),
-            onLongPress: () async {
-              final result = await showModalBottomSheet<String>(
+          Dismissible(
+            key: ValueKey(t.name),
+            direction: DismissDirection.startToEnd,
+            confirmDismiss: (_) async {
+              final loc = AppLocalizations.of(context)!;
+              final res = await showDialog<bool>(
                 context: context,
-                builder: (_) => SafeArea(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      ListTile(
-                        leading: const Icon(Icons.edit),
-                        title: Text(AppLocalizations.of(context)!.itemTypeEditTitle),
-                        onTap: () => Navigator.pop(context, 'edit'),
-                      ),
-                      ListTile(
-                        leading: const Icon(Icons.delete),
-                        title: Text(AppLocalizations.of(context)!.delete),
-                        onTap: () => Navigator.pop(context, 'delete'),
-                      ),
-                    ],
-                  ),
+                builder: (_) => AlertDialog(
+                  content: Text(loc.deleteConfirm),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, false),
+                      child: Text(loc.cancel),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, true),
+                      child: Text(loc.delete),
+                    ),
+                  ],
                 ),
               );
-              if (result == 'delete') {
-                _delete(t);
-              } else if (result == 'edit') {
+              return res ?? false;
+            },
+            onDismissed: (_) => _delete(t),
+            background: Container(
+              color: Colors.red,
+              alignment: Alignment.centerLeft,
+              padding: const EdgeInsets.only(left: 16),
+              child: const Icon(Icons.delete, color: Colors.white),
+            ),
+            child: ListTile(
+              title: Text(t.name),
+              onTap: () async {
                 await Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -90,8 +97,8 @@ class _ItemTypeSettingsPageState extends State<ItemTypeSettingsPage> {
                     ),
                   ),
                 );
-              }
-            },
+              },
+            ),
           ),
       ],
     );

@@ -221,13 +221,21 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
                 itemBuilder: (context, index) {
                   final p = items[index];
                   final diff = p.regularPrice - p.salePrice;
-                  return Card(
-                    margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    child: Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
+                  return InkWell(
+                    // カードタップで詳細画面へ遷移
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => PriceDetailPage(info: p)),
+                      );
+                    },
+                    child: Card(
+                      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
                           Row(
                             children: [
                               Expanded(
@@ -235,25 +243,6 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
                                   '${p.itemType} / ${p.itemName}',
                                   style: const TextStyle(fontSize: 18),
                                 ),
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.info_outline),
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(builder: (_) => PriceDetailPage(info: p)),
-                                  );
-                                },
-                              ),
-                              // 編集画面へ遷移するアイコンボタン
-                              IconButton(
-                                icon: const Icon(Icons.edit),
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(builder: (_) => EditPricePage(info: p)),
-                                  );
-                                },
                               ),
                               // 買い物リストに追加するアイコンボタン
                               IconButton(
