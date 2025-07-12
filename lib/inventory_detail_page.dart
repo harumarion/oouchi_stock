@@ -85,19 +85,22 @@ class InventoryDetailPage extends StatelessWidget {
                   _buildDetailRow(AppLocalizations.of(context)!.itemType, inv.itemType, textStyle),
                   _buildDetailRow(
                     AppLocalizations.of(context)!.quantity,
-                    '${inv.quantity.toStringAsFixed(1)}${localizeUnit(context, inv.unit)}',
+                    // 数量は単位なしで表示
+                    inv.quantity.toStringAsFixed(1),
                     textStyle,
                   ),
                   // 1個あたり容量の表示行
+                  // 1個あたり容量を単位付きで表示
                   _buildDetailRow(
                     AppLocalizations.of(context)!.volume,
-                    inv.volume.toStringAsFixed(1),
+                    '${inv.volume.toStringAsFixed(1)}${localizeUnit(context, inv.unit)}',
                     textStyle,
                   ),
                   // 総容量の表示行
+                  // 総容量を単位付きで表示
                   _buildDetailRow(
                     AppLocalizations.of(context)!.totalVolumeLabel,
-                    inv.totalVolume.toStringAsFixed(1),
+                    '${inv.totalVolume.toStringAsFixed(1)}${localizeUnit(context, inv.unit)}',
                     textStyle,
                   ),
                   _buildDetailRow(AppLocalizations.of(context)!.monthlyConsumption, inv.monthlyConsumption.toStringAsFixed(1), textStyle),
@@ -142,7 +145,8 @@ class InventoryDetailPage extends StatelessWidget {
 
   Widget _buildHistoryTile(HistoryEntry e, String unit) {
     final diffSign = e.diff >= 0 ? '+' : '-';
-    final quantityText = '${e.before.toStringAsFixed(1)} -> ${e.after.toStringAsFixed(1)} ($diffSign${e.diff.abs().toStringAsFixed(1)}$unit)';
+    // 数量履歴は単位を付けずに表示
+    final quantityText = '${e.before.toStringAsFixed(1)} -> ${e.after.toStringAsFixed(1)} ($diffSign${e.diff.abs().toStringAsFixed(1)})';
     final color = e.diff >= 0 ? Colors.green : Colors.red;
     final style = const TextStyle(fontSize: 18);
     return Column(

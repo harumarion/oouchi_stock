@@ -177,8 +177,9 @@ class BuyListCard extends StatelessWidget {
                       final daysText = daysSnapshot.hasData
                           ? ' ・ ${loc.daysLeft(daysSnapshot.data!.toString())}'
                           : '';
+                      // 数量は単位を付けずに表示
                       final subtitle =
-                          '${inv.quantity.toStringAsFixed(1)}${inv.unit}$daysText';
+                          '${inv.quantity.toStringAsFixed(1)}$daysText';
                       return ListTile(
                         title: Text(item.name),
                         subtitle: Text(subtitle),

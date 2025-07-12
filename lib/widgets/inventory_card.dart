@@ -154,8 +154,9 @@ class InventoryCard extends StatelessWidget {
                         style: const TextStyle(fontSize: 18),
                       ),
                     const SizedBox(height: 4),
+                    // 数量は単位を付けずに表示
                     Text(
-                      '${inventory.quantity.toStringAsFixed(1)}${inventory.unit}',
+                      inventory.quantity.toStringAsFixed(1),
                       style: const TextStyle(color: Colors.black87),
                     ),
                     // 予測ラベルを削除し、残り日数のみ表示する

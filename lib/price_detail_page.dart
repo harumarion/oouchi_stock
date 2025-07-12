@@ -24,11 +24,14 @@ class PriceDetailPage extends StatelessWidget {
           _buildRow(loc.itemName, info.itemName),
           _buildRow(loc.checkedDate(_formatDate(info.checkedAt)), ''),
           _buildRow(loc.expiry(_formatDate(info.expiry)), ''),
+          // 数量は単位を付けずに表示
           _buildRow(
             loc.count,
-            '${info.count} ${localizeUnit(context, info.unit)}',
+            info.count.toString(),
           ),
-          _buildRow(loc.totalVolumeLabel, info.totalVolume.toString()),
+          // 総容量は単位付きで表示
+          _buildRow(loc.totalVolumeLabel,
+              '${info.totalVolume.toString()}${localizeUnit(context, info.unit)}'),
           _buildRow(loc.regularPrice, info.regularPrice.toString()),
           _buildRow(loc.salePrice, info.salePrice.toString()),
           _buildRow(loc.unitPriceLabel, info.unitPrice.toStringAsFixed(2)),
