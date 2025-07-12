@@ -5,6 +5,9 @@ abstract class PriceRepository {
   /// セール情報を追加してIDを返す
   Future<String> addPriceInfo(PriceInfo info);
 
+  /// セール情報を更新する
+  Future<void> updatePriceInfo(PriceInfo info);
+
   /// カテゴリ単位でセール情報を監視する
   Stream<List<PriceInfo>> watchByCategory(String category);
 

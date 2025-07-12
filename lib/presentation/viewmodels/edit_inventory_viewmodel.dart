@@ -41,7 +41,8 @@ class EditInventoryViewModel extends ChangeNotifier {
   StreamSubscription? _typeSub;
 
   /// 単位の選択肢
-  final List<String> units = const ['個', '本', '袋', 'ロール'];
+  // 単位選択肢にリットルを追加
+  final List<String> units = const ['個', '本', '袋', 'ロール', 'リットル'];
 
   EditInventoryViewModel();
 

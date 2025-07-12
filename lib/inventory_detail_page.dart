@@ -3,6 +3,7 @@ import 'package:oouchi_stock/i18n/app_localizations.dart';
 import 'package:intl/intl.dart';
 import 'presentation/viewmodels/inventory_detail_viewmodel.dart';
 import 'domain/entities/category.dart';
+import 'util/unit_localization.dart';
 import 'edit_inventory_page.dart';
 
 import "domain/entities/history_entry.dart";
@@ -79,7 +80,11 @@ class InventoryDetailPage extends StatelessWidget {
                 children: [
                   _buildDetailRow(AppLocalizations.of(context)!.category, inv.category, textStyle),
                   _buildDetailRow(AppLocalizations.of(context)!.itemType, inv.itemType, textStyle),
-                  _buildDetailRow(AppLocalizations.of(context)!.quantity, '${inv.quantity.toStringAsFixed(1)}${inv.unit}', textStyle),
+                  _buildDetailRow(
+                    AppLocalizations.of(context)!.quantity,
+                    '${inv.quantity.toStringAsFixed(1)}${localizeUnit(context, inv.unit)}',
+                    textStyle,
+                  ),
                   _buildDetailRow(AppLocalizations.of(context)!.monthlyConsumption, inv.monthlyConsumption.toStringAsFixed(1), textStyle),
                   const SizedBox(height: 8),
                   _buildDetailRow(AppLocalizations.of(context)!.predictLabel, _formatDate(predicted), textStyle),
@@ -88,7 +93,9 @@ class InventoryDetailPage extends StatelessWidget {
                   SizedBox(
                     height: MediaQuery.of(context).size.height / 3,
                     child: ListView(
-                      children: list.map((e) => _buildHistoryTile(e, inv.unit)).toList(),
+                      children: list
+                          .map((e) => _buildHistoryTile(e, localizeUnit(context, inv.unit)))
+                          .toList(),
                     ),
                   ),
                 ],

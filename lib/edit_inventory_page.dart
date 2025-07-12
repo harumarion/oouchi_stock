@@ -3,6 +3,7 @@ import 'package:oouchi_stock/i18n/app_localizations.dart';
 import 'domain/entities/category.dart';
 import 'add_category_page.dart';
 import 'presentation/viewmodels/edit_inventory_viewmodel.dart';
+import 'util/unit_localization.dart';
 
 /// 商品を編集する画面のウィジェット
 class EditInventoryPage extends StatefulWidget {
@@ -161,7 +162,10 @@ class _EditInventoryPageState extends State<EditInventoryPage> {
                 decoration: InputDecoration(labelText: AppLocalizations.of(context)!.unit),
                 value: _viewModel.unit,
                 items: _viewModel.units
-                    .map((u) => DropdownMenuItem(value: u, child: Text(u)))
+                    .map((u) => DropdownMenuItem(
+                          value: u,
+                          child: Text(localizeUnit(context, u)),
+                        ))
                     .toList(),
                 onChanged: (v) => setState(() => _viewModel.setUnit(v ?? '')),
               ),

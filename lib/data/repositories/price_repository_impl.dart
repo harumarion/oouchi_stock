@@ -39,6 +39,30 @@ class PriceRepositoryImpl implements PriceRepository {
   }
 
   @override
+  /// 価格情報を更新する
+  Future<void> updatePriceInfo(PriceInfo info) async {
+    await userCollection('priceInfos').doc(info.id).update({
+      'inventoryId': info.inventoryId,
+      'checkedAt': Timestamp.fromDate(info.checkedAt),
+      'category': info.category,
+      'itemType': info.itemType,
+      'itemName': info.itemName,
+      'count': info.count,
+      'unit': info.unit,
+      'volume': info.volume,
+      'totalVolume': info.totalVolume,
+      'regularPrice': info.regularPrice,
+      'salePrice': info.salePrice,
+      'price': info.salePrice,
+      'shop': info.shop,
+      'approvalUrl': info.approvalUrl,
+      'memo': info.memo,
+      'unitPrice': info.unitPrice,
+      'expiry': Timestamp.fromDate(info.expiry),
+    });
+  }
+
+  @override
   /// カテゴリ別の価格情報を監視する
   Stream<List<PriceInfo>> watchByCategory(String category) {
     return userCollection('priceInfos')

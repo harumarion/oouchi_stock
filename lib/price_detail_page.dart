@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'i18n/app_localizations.dart';
 import 'presentation/viewmodels/price_detail_viewmodel.dart';
 import "domain/entities/price_info.dart";
+import 'util/unit_localization.dart';
 
 /// セール詳細情報表示画面
 class PriceDetailPage extends StatelessWidget {
@@ -23,7 +24,10 @@ class PriceDetailPage extends StatelessWidget {
           _buildRow(loc.itemName, info.itemName),
           _buildRow(loc.checkedDate(_formatDate(info.checkedAt)), ''),
           _buildRow(loc.expiry(_formatDate(info.expiry)), ''),
-          _buildRow(loc.count, '${info.count} ${info.unit}'),
+          _buildRow(
+            loc.count,
+            '${info.count} ${localizeUnit(context, info.unit)}',
+          ),
           _buildRow(loc.totalVolumeLabel, info.totalVolume.toString()),
           _buildRow(loc.regularPrice, info.regularPrice.toString()),
           _buildRow(loc.salePrice, info.salePrice.toString()),
