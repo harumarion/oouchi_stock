@@ -69,7 +69,8 @@ void main() {
     await tester.enterText(find.byType(TextFormField).at(1), '2');
     await tester.pump();
 
-    expect(find.text('総容量: 2.0'), findsOneWidget);
+    // 単位付きで総容量が表示されるか確認
+    expect(find.text('総容量: 2.0個'), findsOneWidget);
   });
 
   testWidgets('品種リストに無い初期値は自動で先頭に変更される',

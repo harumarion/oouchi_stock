@@ -97,9 +97,14 @@ class _PriceHistoryPageState extends State<PriceHistoryPage> {
                           _buildRow(loc.itemName, p.itemName, textStyle),
                           _buildRow(loc.checkedDate(_formatDate(p.checkedAt)), ''),
                           _buildRow(loc.expiry(_formatDate(p.expiry)), ''),
-                          _buildRow(loc.count, '${p.count} ${p.unit}'),
-                          _buildRow(loc.volume, p.volume.toString()),
-                          _buildRow(loc.totalVolumeLabel, p.totalVolume.toString()),
+                          // 数量は単位を付けずに表示
+                          _buildRow(loc.count, p.count.toString()),
+                          // 1個あたり容量を単位付きで表示
+                          _buildRow(loc.volume,
+                              '${p.volume.toString()}${localizeUnit(context, p.unit)}'),
+                          // 総容量を単位付きで表示
+                          _buildRow(loc.totalVolumeLabel,
+                              '${p.totalVolume.toString()}${localizeUnit(context, p.unit)}'),
                           _buildRow(loc.regularPrice, p.regularPrice.toString()),
                           _buildRow(loc.salePrice, p.salePrice.toString()),
                           _buildRow(loc.unitPriceLabel, p.unitPrice.toStringAsFixed(2)),

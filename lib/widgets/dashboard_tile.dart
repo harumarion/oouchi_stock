@@ -46,7 +46,8 @@ class DashboardTile extends StatelessWidget {
           // 残り日数をローカライズして表示
           Text(AppLocalizations.of(context)!.daysLeft(daysLeft.toString())),
           const SizedBox(height: 4),
-          Text('${inventory.quantity.toStringAsFixed(1)}${inventory.unit}'),
+          // 数量は単位を付けずに表示
+          Text(inventory.quantity.toStringAsFixed(1)),
           const SizedBox(height: 8),
           ElevatedButton(
             onPressed: onAdd,

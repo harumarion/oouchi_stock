@@ -78,8 +78,9 @@ class PredictionCard extends StatelessWidget {
               final daysText = daysSnapshot.hasData
                   ? ' ・ ${loc.daysLeft(daysSnapshot.data!.toString())}'
                   : '';
+              // 数量は単位を付けずに表示
               final subtitle =
-                  '${inv.quantity.toStringAsFixed(1)}${inv.unit}$daysText';
+                  '${inv.quantity.toStringAsFixed(1)}$daysText';
               return Card(
                 // 買い物予報画面の1アイテムをカード表示
                 margin: const EdgeInsets.only(bottom: 12),
