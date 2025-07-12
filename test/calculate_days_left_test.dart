@@ -48,6 +48,8 @@ void main() {
         category: 'cat',
         itemType: 'type',
         quantity: 1,
+        volume: 1,
+        totalVolume: 1,
         unit: '個',
         monthlyConsumption: 0.5,
         createdAt: DateTime.now());

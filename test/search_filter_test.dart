@@ -11,6 +11,8 @@ void main() {
       category: '果物',
       itemType: '赤玉',
       quantity: 1,
+      volume: 1,
+      totalVolume: 1,
       unit: '個',
       createdAt: DateTime.now(),
     );
@@ -20,6 +22,8 @@ void main() {
       category: '果物',
       itemType: '甘熟王',
       quantity: 1,
+      volume: 1,
+      totalVolume: 1,
       unit: '房',
       createdAt: DateTime.now(),
     );

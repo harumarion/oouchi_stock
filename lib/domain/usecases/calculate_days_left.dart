@@ -11,7 +11,8 @@ class CalculateDaysLeft {
   /// [inventory] の残量がなくなるまでの日数を返す
   Future<int> call(Inventory inventory) async {
     if (inventory.monthlyConsumption <= 0) return 9999;
-    final days = (inventory.quantity / inventory.monthlyConsumption * 30).ceil();
+    final days =
+        (inventory.totalVolume / inventory.monthlyConsumption * 30).ceil();
     return days;
   }
 }

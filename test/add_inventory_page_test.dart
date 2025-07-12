@@ -28,6 +28,11 @@ void main() {
     await tester.tap(find.widgetWithIcon(IconButton, Icons.remove));
     await tester.pump();
     expect(find.text('1'), findsOneWidget);
+
+    // さらにマイナスで 0 になるか確認
+    await tester.tap(find.widgetWithIcon(IconButton, Icons.remove));
+    await tester.pump();
+    expect(find.text('0'), findsOneWidget);
   });
 
   testWidgets('設定メニューが表示される', (WidgetTester tester) async {

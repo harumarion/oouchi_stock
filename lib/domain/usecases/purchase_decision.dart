@@ -38,12 +38,12 @@ class PurchaseDecision {
 
   int _daysLeft(Inventory inv) {
     if (inv.monthlyConsumption <= 0) return 9999;
-    return (inv.quantity / inv.monthlyConsumption * 30).ceil();
+    return (inv.totalVolume / inv.monthlyConsumption * 30).ceil();
   }
 
   /// 判定を実行する
   PurchaseDecisionType call(Inventory inv, PriceInfo? price) {
-    if (inv.quantity <= 0) {
+    if (inv.totalVolume <= 0) {
       return PurchaseDecisionType.emergency;
     }
     final isSale = price != null && price.salePrice < price.regularPrice;
@@ -60,7 +60,7 @@ class PurchaseDecision {
     if (days <= cautiousDays) {
       return PurchaseDecisionType.cautious;
     }
-    if (inv.quantity > threshold && isSale) {
+    if (inv.totalVolume > threshold && isSale) {
       return PurchaseDecisionType.bulkOpportunity;
     }
     return PurchaseDecisionType.none;

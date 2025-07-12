@@ -33,7 +33,7 @@ class InventoryCard extends StatelessWidget {
       return DateTime.now();
     }
     final days =
-        (inventory.quantity / inventory.monthlyConsumption * 30).ceil();
+        (inventory.totalVolume / inventory.monthlyConsumption * 30).ceil();
     return DateTime.now().add(Duration(days: days));
   }
 
