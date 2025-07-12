@@ -49,7 +49,8 @@ class AddInventoryViewModel extends ChangeNotifier {
   StreamSubscription? _typeSub;
 
   /// 単位の選択肢
-  final List<String> units = ['個', '本', '袋', 'ロール'];
+  // 入力フォームで選択可能な単位一覧。リットルを追加
+  final List<String> units = ['個', '本', '袋', 'ロール', 'リットル'];
 
   AddInventoryViewModel();
 

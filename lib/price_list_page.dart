@@ -6,6 +6,7 @@ import 'widgets/settings_menu_button.dart';
 import 'presentation/viewmodels/price_list_viewmodel.dart';
 import 'presentation/viewmodels/price_category_list_viewmodel.dart';
 import 'price_detail_page.dart';
+import 'edit_price_page.dart';
 import 'main.dart';
 import 'widgets/scrolling_text.dart';
 import 'domain/entities/price_info.dart';
@@ -244,6 +245,29 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
                                   );
                                 },
                               ),
+                              // 編集画面へ遷移するアイコンボタン
+                              IconButton(
+                                icon: const Icon(Icons.edit),
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(builder: (_) => EditPricePage(info: p)),
+                                  );
+                                },
+                              ),
+                              // 買い物リストに追加するアイコンボタン
+                              IconButton(
+                                icon: const Icon(Icons.playlist_add),
+                                onPressed: () async {
+                                  await _viewModel.addToBuyList(p);
+                                  if (mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text(AppLocalizations.of(context)!.addedBuyItem)),
+                                    );
+                                  }
+                                },
+                              ),
+                              // セール情報を削除するアイコンボタン
                               IconButton(
                                 icon: const Icon(Icons.delete),
                                 onPressed: () async {

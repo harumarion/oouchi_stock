@@ -6,6 +6,7 @@ import 'widgets/settings_menu_button.dart';
 import 'main.dart';
 import 'add_category_page.dart';
 import 'presentation/viewmodels/add_inventory_viewmodel.dart';
+import 'util/unit_localization.dart';
 
 // 商品を追加する画面のウィジェット
 
@@ -160,7 +161,10 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
                 decoration: InputDecoration(labelText: AppLocalizations.of(context)!.unit),
                 value: _viewModel.unit,
                 items: _viewModel.units
-                    .map((u) => DropdownMenuItem(value: u, child: Text(u)))
+                    .map((u) => DropdownMenuItem(
+                          value: u,
+                          child: Text(localizeUnit(context, u)),
+                        ))
                     .toList(),
                 onChanged: (value) => _viewModel.setUnit(value!),
               ),

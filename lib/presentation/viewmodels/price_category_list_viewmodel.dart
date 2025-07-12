@@ -3,6 +3,9 @@ import '../../data/repositories/price_repository_impl.dart';
 import '../../domain/entities/price_info.dart';
 import '../../domain/usecases/watch_price_by_category.dart';
 import '../../domain/usecases/delete_price_info.dart';
+import '../../domain/usecases/add_buy_item.dart';
+import '../../data/repositories/buy_list_repository_impl.dart';
+import '../../domain/entities/buy_item.dart';
 
 /// セール情報管理画面のカテゴリタブを管理する ViewModel
 class PriceCategoryListViewModel extends ChangeNotifier {
@@ -12,13 +15,16 @@ class PriceCategoryListViewModel extends ChangeNotifier {
   final WatchPriceByCategory _watch;
   /// セール情報削除用ユースケース
   final DeletePriceInfo _delete;
+  /// 買い物リスト追加ユースケース
+  final AddBuyItem _addBuy;
 
   PriceCategoryListViewModel({
     required this.category,
     WatchPriceByCategory? watch,
     DeletePriceInfo? delete,
   })  : _watch = watch ?? WatchPriceByCategory(PriceRepositoryImpl()),
-        _delete = delete ?? DeletePriceInfo(PriceRepositoryImpl());
+        _delete = delete ?? DeletePriceInfo(PriceRepositoryImpl()),
+        _addBuy = AddBuyItem(BuyListRepositoryImpl());
 
   /// 検索文字列
   String search = '';
@@ -56,6 +62,12 @@ class PriceCategoryListViewModel extends ChangeNotifier {
   /// セール情報を削除
   Future<void> delete(String id) async {
     await _delete(id);
+  }
+
+  /// カードのボタンから呼ばれ、買い物リストに追加する
+  Future<void> addToBuyList(PriceInfo info) async {
+    final item = BuyItem(info.itemName, info.itemType);
+    await _addBuy(item);
   }
 
   @override
