@@ -8,6 +8,8 @@ import '../../data/repositories/inventory_repository_impl.dart';
 import '../../util/firestore_refs.dart';
 import '../../util/date_time_parser.dart';
 import '../../default_item_types.dart';
+// アプリ共通の定数を利用
+import '../../util/constants.dart';
 
 /// 在庫編集画面の状態を管理する ViewModel
 class EditInventoryViewModel extends ChangeNotifier {
@@ -32,7 +34,8 @@ class EditInventoryViewModel extends ChangeNotifier {
   double volume = 0;
 
   /// 単位
-  String unit = '個';
+  // 初期の単位を定数から取得
+  String unit = defaultUnits.first;
 
   /// メモ
   String note = '';
@@ -49,7 +52,8 @@ class EditInventoryViewModel extends ChangeNotifier {
 
   /// 単位の選択肢
   // 単位選択肢にリットルを追加
-  final List<String> units = const ['個', '本', '袋', 'ロール', 'リットル'];
+  // 選択可能な単位一覧を定数から生成
+  final List<String> units = List.from(defaultUnits);
 
   EditInventoryViewModel();
 
@@ -122,7 +126,7 @@ class EditInventoryViewModel extends ChangeNotifier {
       if (types != null && types.isNotEmpty) {
         if (!types.contains(itemType)) itemType = types.first;
       } else {
-        itemType = 'その他';
+        itemType = itemTypeOther;
       }
       notifyListeners();
     });
@@ -135,7 +139,7 @@ class EditInventoryViewModel extends ChangeNotifier {
     if (types != null && types.isNotEmpty) {
       itemType = types.first;
     } else {
-      itemType = 'その他';
+      itemType = itemTypeOther;
     }
     notifyListeners();
   }
