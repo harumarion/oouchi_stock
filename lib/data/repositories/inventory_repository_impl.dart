@@ -114,11 +114,14 @@ class InventoryRepositoryImpl implements InventoryRepository {
 
   @override
   /// 在庫情報を更新する
+  /// 商品名やカテゴリだけでなく容量と単位も更新する
   Future<void> updateInventory(Inventory inventory) async {
     await userCollection('inventory').doc(inventory.id).update({
       'itemName': inventory.itemName,
       'category': inventory.category,
       'itemType': inventory.itemType,
+      'volume': inventory.volume,
+      'totalVolume': inventory.totalVolume,
       'unit': inventory.unit,
       'note': inventory.note,
     });
