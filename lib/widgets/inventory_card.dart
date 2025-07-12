@@ -150,7 +150,8 @@ class InventoryCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       ScrollingText(
-                        '${inventory.itemType} / ${inventory.itemName}',
+                        // 在庫カードでは商品名の後に品種を表示
+                        '${inventory.itemName} / ${inventory.itemType}',
                         style: const TextStyle(fontSize: 18),
                       ),
                     const SizedBox(height: 4),

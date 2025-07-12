@@ -68,6 +68,7 @@ class PredictionCard extends StatelessWidget {
           if (!snapshot.hasData) {
             return Card(
               margin: const EdgeInsets.only(bottom: 12),
+              // 在庫未取得時は商品名のみ表示
               child: ListTile(title: Text(item.name), trailing: detailButton),
             );
           }
@@ -84,7 +85,8 @@ class PredictionCard extends StatelessWidget {
                 // 買い物予報画面の1アイテムをカード表示
                 margin: const EdgeInsets.only(bottom: 12),
                 child: ListTile(
-                  title: Text(item.name),
+                  // 商品名の後に品種を表示する
+                  title: Text('${inv.itemName} / ${inv.itemType}'),
                   subtitle: Text(subtitle),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,

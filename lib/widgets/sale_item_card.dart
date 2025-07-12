@@ -35,7 +35,8 @@ class SaleItemCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    item.name,
+                    // 商品名の後ろに品種を表示する
+                    '${item.name} / ${item.itemType}',
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,

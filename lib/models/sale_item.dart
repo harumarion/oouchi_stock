@@ -2,6 +2,8 @@
 class SaleItem {
   /// 商品名
   final String name;
+  /// 品種名
+  final String itemType;
   /// 店舗名
   final String shop;
   /// 通常価格
@@ -21,6 +23,7 @@ class SaleItem {
 
   SaleItem({
     required this.name,
+    required this.itemType,
     required this.shop,
     required this.regularPrice,
     required this.salePrice,

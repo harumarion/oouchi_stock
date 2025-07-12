@@ -73,9 +73,9 @@ void main() {
     final categories = [Category(id: 1, name: '日用品', createdAt: DateTime.now())];
     await tester.pumpWidget(MaterialApp(home: BuyListPage(categories: categories)));
     await tester.pumpAndSettle();
-    expect(find.text('テスト'), findsOneWidget);
+    expect(find.text('テスト / 一般'), findsOneWidget);
 
-    await tester.drag(find.text('テスト'), const Offset(300, 0));
+    await tester.drag(find.text('テスト / 一般'), const Offset(300, 0));
     await tester.pumpAndSettle();
     expect(find.byType(AlertDialog), findsOneWidget);
   });
