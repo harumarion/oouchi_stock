@@ -232,7 +232,8 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
                             children: [
                               Expanded(
                                 child: ScrollingText(
-                                  '${p.itemType} / ${p.itemName}',
+                                  // 商品名の後に品種を表示する
+                                  '${p.itemName} / ${p.itemType}',
                                   style: const TextStyle(fontSize: 18),
                                 ),
                               ),

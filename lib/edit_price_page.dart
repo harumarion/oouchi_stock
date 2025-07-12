@@ -73,10 +73,11 @@ class _EditPricePageState extends State<EditPricePage> {
                           decoration: InputDecoration(labelText: loc.itemName),
                           value: _viewModel.inventory,
                           items: _viewModel.inventories
-                              .map((e) => DropdownMenuItem(
-                                    value: e,
-                                    child: Text('${e.itemType} / ${e.itemName}'),
-                                  ))
+                                .map((e) => DropdownMenuItem(
+                                      value: e,
+                                      // 商品名の後に品種を表示
+                                      child: Text('${e.itemName} / ${e.itemType}'),
+                                    ))
                               .toList(),
                           onChanged: (v) => setState(() => _viewModel.inventory = v),
                         ),

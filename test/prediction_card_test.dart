@@ -59,7 +59,7 @@ void main() {
       ),
     ));
     await tester.pump();
-    expect(find.text('テスト'), findsOneWidget);
+    expect(find.text('テスト / 一般'), findsOneWidget);
     // カードウィジェットとして表示されることを確認
     expect(find.byType(Card), findsOneWidget);
   });
