@@ -11,6 +11,8 @@ class EditInventoryPage extends StatefulWidget {
   final String itemName;
   final Category category;
   final String itemType;
+  final double quantity;
+  final double volume;
   final String unit;
   final String note;
   // テスト用に初期カテゴリを差し込めるようにする
@@ -22,6 +24,8 @@ class EditInventoryPage extends StatefulWidget {
     required this.itemName,
     required this.category,
     required this.itemType,
+    required this.quantity,
+    required this.volume,
     required this.unit,
     required this.note,
     this.categories,
@@ -44,6 +48,8 @@ class _EditInventoryPageState extends State<EditInventoryPage> {
         itemName: widget.itemName,
         category: widget.category,
         itemType: widget.itemType,
+        quantity: widget.quantity,
+        volume: widget.volume,
         unit: widget.unit,
         note: widget.note,
         // テストから渡されたカテゴリ一覧を利用
@@ -157,6 +163,14 @@ class _EditInventoryPageState extends State<EditInventoryPage> {
                   },
                 );
               }),
+              const SizedBox(height: 12),
+              // 1個あたり容量の入力欄を追加
+              TextFormField(
+                initialValue: _viewModel.volume.toString(),
+                decoration: InputDecoration(labelText: AppLocalizations.of(context)!.volume),
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                onChanged: (v) => _viewModel.setVolume(v),
+              ),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
                 decoration: InputDecoration(labelText: AppLocalizations.of(context)!.unit),

@@ -52,6 +52,8 @@ class InventoryDetailPage extends StatelessWidget {
                         orElse: () => Category(id: 0, name: inv.category, createdAt: DateTime.now(), color: null),
                       ),
                       itemType: inv.itemType,
+                      quantity: inv.quantity,
+                      volume: inv.volume,
                       unit: inv.unit,
                       note: inv.note,
                     ),

@@ -12,6 +12,8 @@ void main() {
         itemName: 'ティッシュ',
         category: cat,
         itemType: '消耗品',
+        quantity: 1,
+        volume: 1,
         unit: '個',
         note: '',
       ),
@@ -27,6 +29,8 @@ void main() {
         itemName: 'ティッシュ',
         category: cat,
         itemType: '柔軟剤',
+        quantity: 1,
+        volume: 1,
         unit: '個',
         note: '',
       ),
@@ -45,6 +49,8 @@ void main() {
           itemName: 'ティッシュ',
           category: cat,
           itemType: '存在しない品種',
+          quantity: 1,
+          volume: 1,
           unit: '個',
           note: '',
           categories: [cat],
@@ -55,5 +61,26 @@ void main() {
     final dropdown = tester.widget<DropdownButtonFormField<String>>(
         find.byType(DropdownButtonFormField<String>).first);
     expect(dropdown.initialValue ?? dropdown.value, 'その他');
+  });
+
+  testWidgets('容量入力欄が表示される', (WidgetTester tester) async {
+    final cat = Category(id: 1, name: '日用品', createdAt: DateTime.now());
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditInventoryPage(
+          id: '1',
+          itemName: 'ティッシュ',
+          category: cat,
+          itemType: '柔軟剤',
+          quantity: 2,
+          volume: 1.5,
+          unit: '個',
+          note: '',
+          categories: [cat],
+        ),
+      ),
+    );
+    await tester.pump();
+    expect(find.byType(TextFormField).at(1), findsOneWidget);
   });
 }
