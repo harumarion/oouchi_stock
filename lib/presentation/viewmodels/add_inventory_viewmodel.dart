@@ -26,7 +26,9 @@ class AddInventoryViewModel extends ChangeNotifier {
   Category? category;
 
   /// 品種
-  String itemType = '';
+  /// 初期値を空文字にするとドロップダウンの値がリストに存在せず
+  /// 例外が発生する可能性があるため `itemTypeOther` で初期化
+  String itemType = itemTypeOther;
 
   /// 数量
   double quantity = 0;
