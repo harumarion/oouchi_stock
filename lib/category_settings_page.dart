@@ -6,7 +6,6 @@ import 'util/firestore_refs.dart';
 import 'util/date_time_parser.dart';
 import 'add_category_page.dart';
 import 'edit_category_page.dart';
-import 'reorder_categories_page.dart';
 import 'domain/entities/category.dart';
 import 'domain/entities/category_order.dart';
 
