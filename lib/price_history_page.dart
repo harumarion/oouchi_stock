@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:oouchi_stock/i18n/app_localizations.dart';
 import 'domain/entities/price_info.dart';
 import 'presentation/viewmodels/price_history_viewmodel.dart';
+import 'domain/usecases/watch_price_by_type.dart';
+import 'domain/usecases/delete_price_info.dart';
 // 数量や容量の単位をユーザーの言語設定に合わせて表示する
 import 'util/unit_localization.dart';
 
