@@ -7,6 +7,7 @@ import 'presentation/viewmodels/edit_price_viewmodel.dart';
 import 'util/input_validators.dart';
 import 'util/unit_localization.dart';
 import 'add_inventory_page.dart';
+import 'widgets/inventory_dropdown.dart';
 
 /// セール情報編集画面
 class EditPricePage extends StatefulWidget {
@@ -70,16 +71,11 @@ class _EditPricePageState extends State<EditPricePage> {
                     key: _viewModel.formKey,
                     child: ListView(
                       children: [
-                        DropdownButtonFormField<Inventory>(
-                          decoration: InputDecoration(labelText: loc.itemName),
+                        // 商品名選択ドロップダウン
+                        InventoryDropdown(
+                          label: loc.itemName,
+                          inventories: _viewModel.inventories,
                           value: _viewModel.inventory,
-                          items: _viewModel.inventories
-                                .map((e) => DropdownMenuItem(
-                                      value: e,
-                                      // 商品名の後に品種を表示
-                                      child: Text('${e.itemName} / ${e.itemType}'),
-                                    ))
-                              .toList(),
                           onChanged: (v) => setState(() => _viewModel.inventory = v),
                         ),
                         const SizedBox(height: 12),
