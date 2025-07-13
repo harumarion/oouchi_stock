@@ -20,6 +20,7 @@ class PriceListPage extends StatefulWidget {
 }
 
 class _PriceListPageState extends State<PriceListPage> {
+  /// 画面全体の状態を管理する ViewModel
   late final PriceListViewModel _viewModel;
 
   @override
@@ -224,89 +225,99 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
                 itemBuilder: (context, index) {
                   final p = items[index];
                   final diff = p.regularPrice - p.salePrice;
-                  // 商品タップ時に詳細ページへ遷移
-                  return InkWell(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => PriceDetailPage(info: p)),
-                      );
-                    },
-                    child: Card(
-                      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      child: Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: ScrollingText(
-                                    // 商品名の後に品種を表示する
-                                    '${p.itemName} / ${p.itemType}',
-                                    style: const TextStyle(fontSize: 18),
-                                  ),
-                                ),
-                                // 買い物リストに追加するアイコンボタン
-                                IconButton(
-                                  icon: const Icon(Icons.playlist_add),
-                                  onPressed: () async {
-                                    await _viewModel.addToBuyList(p);
-                                    if (mounted) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: Text(AppLocalizations.of(context)!.addedBuyItem)),
-                                      );
-                                    }
-                                  },
-                                ),
-                                // セール情報を削除するアイコンボタン
-                                IconButton(
-                                  icon: const Icon(Icons.delete),
-                                  onPressed: () async {
-                                    final confirm = await showDialog<bool>(
-                                      context: context,
-                                      builder: (context) => AlertDialog(
-                                        title: Text(AppLocalizations.of(context)!.deleteConfirm),
-                                        actions: [
-                                          TextButton(
-                                            onPressed: () => Navigator.pop(context, false),
-                                            child: Text(AppLocalizations.of(context)!.cancel),
-                                          ),
-                                          TextButton(
-                                            onPressed: () => Navigator.pop(context, true),
-                                            child: Text(AppLocalizations.of(context)!.delete),
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                    if (confirm == true) {
-                                      try {
-                                        await _viewModel.delete(p.id);
-                                        if (mounted) {
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            SnackBar(content: Text(AppLocalizations.of(context)!.deleted)),
-                                          );
-                                        }
-                                      } catch (e) {
-                                        if (mounted) {
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            SnackBar(content: Text(AppLocalizations.of(context)!.deleteFailed)),
-                                          );
-                                        }
-                                      }
-                                    }
-                                  },
-                                ),
-                              ]
+                  return Dismissible(
+                    key: ValueKey(p.id),
+                    direction: DismissDirection.startToEnd,
+                    // スワイプ時に削除確認ダイアログを表示
+                    confirmDismiss: (_) async {
+                      final loc = AppLocalizations.of(context)!;
+                      final res = await showDialog<bool>(
+                        context: context,
+                        builder: (_) => AlertDialog(
+                          content: Text(loc.deleteConfirm),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, false),
+                              child: Text(loc.cancel),
                             ),
-                            const SizedBox(height: 4),
-                            Text(AppLocalizations.of(context)!.expiry(_formatDate(p.expiry))),
-                            const SizedBox(height: 4),
-                            Text(AppLocalizations.of(context)!.regularPriceLabel(p.regularPrice.toStringAsFixed(0))),
-                            Text(AppLocalizations.of(context)!.salePriceLabel(p.salePrice.toStringAsFixed(0))),
-                            Text(AppLocalizations.of(context)!.priceDiffLabel(diff.toStringAsFixed(0))),
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, true),
+                              child: Text(loc.delete),
+                            ),
                           ],
+                        ),
+                      );
+                      return res ?? false;
+                    },
+                    // 削除処理本体
+                    onDismissed: (_) async {
+                      try {
+                        await _viewModel.delete(p.id);
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(AppLocalizations.of(context)!.deleted)),
+                          );
+                        }
+                      } catch (_) {
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(AppLocalizations.of(context)!.deleteFailed)),
+                          );
+                        }
+                      }
+                    },
+                    background: Container(
+                      color: Colors.red,
+                      alignment: Alignment.centerLeft,
+                      padding: const EdgeInsets.only(left: 16),
+                      child: const Icon(Icons.delete, color: Colors.white),
+                    ),
+                    child: InkWell(
+                      // 商品タップ時に詳細ページへ遷移
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => PriceDetailPage(info: p)),
+                        );
+                      },
+                      child: Card(
+                        margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        child: Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: ScrollingText(
+                                      // 商品名の後に品種を表示する
+                                      '${p.itemName} / ${p.itemType}',
+                                      style: const TextStyle(fontSize: 18),
+                                    ),
+                                  ),
+                                  // 買い物リストに追加するアイコンボタン
+                                  IconButton(
+                                    icon: const Icon(Icons.playlist_add),
+                                    onPressed: () async {
+                                      await _viewModel.addToBuyList(p);
+                                      if (mounted) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(content: Text(AppLocalizations.of(context)!.addedBuyItem)),
+                                        );
+                                      }
+                                    },
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 4),
+                              Text(AppLocalizations.of(context)!.expiry(_formatDate(p.expiry))),
+                              const SizedBox(height: 4),
+                              Text(AppLocalizations.of(context)!.regularPriceLabel(p.regularPrice.toStringAsFixed(0))),
+                              Text(AppLocalizations.of(context)!.salePriceLabel(p.salePrice.toStringAsFixed(0))),
+                              Text(AppLocalizations.of(context)!.priceDiffLabel(diff.toStringAsFixed(0))),
+                            ],
+                          ),
                         ),
                       ),
                     ),
