@@ -251,62 +251,63 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
                                 // 買い物リストに追加するアイコンボタン
                                 IconButton(
                                   icon: const Icon(Icons.playlist_add),
-                                onPressed: () async {
-                                  await _viewModel.addToBuyList(p);
-                                  if (mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text(AppLocalizations.of(context)!.addedBuyItem)),
+                                  onPressed: () async {
+                                    await _viewModel.addToBuyList(p);
+                                    if (mounted) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(content: Text(AppLocalizations.of(context)!.addedBuyItem)),
+                                      );
+                                    }
+                                  },
+                                ),
+                                // セール情報を削除するアイコンボタン
+                                IconButton(
+                                  icon: const Icon(Icons.delete),
+                                  onPressed: () async {
+                                    final confirm = await showDialog<bool>(
+                                      context: context,
+                                      builder: (context) => AlertDialog(
+                                        title: Text(AppLocalizations.of(context)!.deleteConfirm),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () => Navigator.pop(context, false),
+                                            child: Text(AppLocalizations.of(context)!.cancel),
+                                          ),
+                                          TextButton(
+                                            onPressed: () => Navigator.pop(context, true),
+                                            child: Text(AppLocalizations.of(context)!.delete),
+                                          ),
+                                        ],
+                                      ),
                                     );
-                                  }
-                                },
-                              ),
-                              // セール情報を削除するアイコンボタン
-                              IconButton(
-                                icon: const Icon(Icons.delete),
-                                onPressed: () async {
-                                  final confirm = await showDialog<bool>(
-                                    context: context,
-                                    builder: (context) => AlertDialog(
-                                      title: Text(AppLocalizations.of(context)!.deleteConfirm),
-                                      actions: [
-                                        TextButton(
-                                          onPressed: () => Navigator.pop(context, false),
-                                          child: Text(AppLocalizations.of(context)!.cancel),
-                                        ),
-                                        TextButton(
-                                          onPressed: () => Navigator.pop(context, true),
-                                          child: Text(AppLocalizations.of(context)!.delete),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                  if (confirm == true) {
-                                    try {
-                                      await _viewModel.delete(p.id);
-                                      if (mounted) {
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          SnackBar(content: Text(AppLocalizations.of(context)!.deleted)),
-                                        );
-                                      }
-                                    } catch (e) {
-                                      if (mounted) {
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          SnackBar(content: Text(AppLocalizations.of(context)!.deleteFailed)),
-                                        );
+                                    if (confirm == true) {
+                                      try {
+                                        await _viewModel.delete(p.id);
+                                        if (mounted) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(content: Text(AppLocalizations.of(context)!.deleted)),
+                                          );
+                                        }
+                                      } catch (e) {
+                                        if (mounted) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(content: Text(AppLocalizations.of(context)!.deleteFailed)),
+                                          );
+                                        }
                                       }
                                     }
-                                  }
-                                },
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                          Text(AppLocalizations.of(context)!.expiry(_formatDate(p.expiry))),
-                          const SizedBox(height: 4),
-                          Text(AppLocalizations.of(context)!.regularPriceLabel(p.regularPrice.toStringAsFixed(0))),
-                          Text(AppLocalizations.of(context)!.salePriceLabel(p.salePrice.toStringAsFixed(0))),
-                          Text(AppLocalizations.of(context)!.priceDiffLabel(diff.toStringAsFixed(0))),
-                        ],
+                                  },
+                                ),
+                              ]
+                            ),
+                            const SizedBox(height: 4),
+                            Text(AppLocalizations.of(context)!.expiry(_formatDate(p.expiry))),
+                            const SizedBox(height: 4),
+                            Text(AppLocalizations.of(context)!.regularPriceLabel(p.regularPrice.toStringAsFixed(0))),
+                            Text(AppLocalizations.of(context)!.salePriceLabel(p.salePrice.toStringAsFixed(0))),
+                            Text(AppLocalizations.of(context)!.priceDiffLabel(diff.toStringAsFixed(0))),
+                          ],
+                        ),
                       ),
                     ),
                   );

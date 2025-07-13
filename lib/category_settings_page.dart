@@ -150,16 +150,17 @@ class _CategorySettingsPageState extends State<CategorySettingsPage> {
                         shape: BoxShape.circle,
                       ),
                     ),
-              title: Text(c.name),
-              // カテゴリをタップしたときに編集画面へ遷移
-              onTap: () async {
-                await Navigator.push<String>(
+                title: Text(c.name),
+                // カテゴリをタップしたときに編集画面へ遷移
+                onTap: () async {
+                  await Navigator.push<String>(
                   context,
                   MaterialPageRoute(
                     builder: (_) => EditCategoryPage(category: c),
-                  ),
-                );
-              },
+                    ),
+                  );
+                },
+              ),
             ),
         ],
       ),
