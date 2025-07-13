@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../domain/entities/inventory.dart';
 import '../i18n/app_localizations.dart';
+import '../util/inventory_display.dart';
 
 /// ホーム画面のダッシュボードで使用するタイル
 class DashboardTile extends StatelessWidget {
@@ -46,8 +47,9 @@ class DashboardTile extends StatelessWidget {
           // 残り日数をローカライズして表示
           Text(AppLocalizations.of(context)!.daysLeft(daysLeft.toString())),
           const SizedBox(height: 4),
-          // 数量は単位を付けずに表示
-          Text(inventory.quantity.toStringAsFixed(1)),
+          // 数量は単位を付けずに表示 -> 新関数でローカライズ
+          // ダッシュボードタイルに在庫数量と総容量を表示
+          Text(formatRemaining(context, inventory)),
           const SizedBox(height: 8),
           ElevatedButton(
             onPressed: onAdd,

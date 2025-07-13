@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import "../i18n/app_localizations.dart";
+import '../util/inventory_display.dart';
 import "scrolling_text.dart"; // 長いテキストを流すウィジェット
 import "../domain/entities/inventory.dart";
 
@@ -155,9 +156,10 @@ class InventoryCard extends StatelessWidget {
                         style: const TextStyle(fontSize: 18),
                       ),
                     const SizedBox(height: 4),
-                    // 数量は単位を付けずに表示
+                    // 数量は単位を付けずに表示 -> 新関数でローカライズ
+                    // 在庫一覧画面カードの数量と総容量をまとめて表示
                     Text(
-                      inventory.quantity.toStringAsFixed(1),
+                      formatRemaining(context, inventory),
                       style: const TextStyle(color: Colors.black87),
                     ),
                     // 予測ラベルを削除し、残り日数のみ表示する

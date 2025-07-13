@@ -92,7 +92,7 @@ void main() {
       ),
     ));
     await tester.pumpAndSettle();
-    expect(find.textContaining('1.0個'), findsOneWidget);
+    expect(find.textContaining('残り1.0(1.0個)'), findsOneWidget);
     expect(find.textContaining('あと7日'), findsOneWidget);
   });
 

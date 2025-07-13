@@ -4,6 +4,7 @@ import '../domain/entities/category.dart';
 import '../domain/entities/inventory.dart';
 import '../i18n/app_localizations.dart';
 import '../inventory_detail_page.dart';
+import '../util/inventory_display.dart';
 
 /// 買い物予報画面で使用するカードウィジェット
 /// 右スワイプで予報リストから削除できる
@@ -78,9 +79,10 @@ class PredictionCard extends StatelessWidget {
               final daysText = daysSnapshot.hasData
                   ? ' ・ ${loc.daysLeft(daysSnapshot.data!.toString())}'
                   : '';
-              // 数量は単位を付けずに表示
+              // 数量は単位を付けずに表示 -> 新関数でローカライズ
+              // 予報画面カードで在庫数量と総容量をまとめて表示
               final subtitle =
-                  '${inv.quantity.toStringAsFixed(1)}$daysText';
+                  '${formatRemaining(context, inv)}$daysText';
               return Card(
                 // 買い物予報画面の1アイテムをカード表示
                 margin: const EdgeInsets.only(bottom: 12),
