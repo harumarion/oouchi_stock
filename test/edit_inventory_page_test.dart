@@ -41,7 +41,7 @@ void main() {
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
   });
 
-  testWidgets('品種リストに無い初期値は自動で先頭に変更される',
+  testWidgets('品種リストに無い初期値でもそのまま表示される',
       (WidgetTester tester) async {
     final cat = Category(id: 1, name: '日用品', createdAt: DateTime.now());
     await tester.pumpWidget(
@@ -63,7 +63,7 @@ void main() {
     await tester.pump();
     final dropdown = tester.widget<DropdownButtonFormField<String>>(
         find.byType(DropdownButtonFormField<String>).first);
-    expect(dropdown.initialValue ?? dropdown.value, 'その他');
+    expect(dropdown.initialValue ?? dropdown.value, '存在しない品種');
   });
 
   testWidgets('容量入力欄が表示される', (WidgetTester tester) async {
