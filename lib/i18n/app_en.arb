@@ -132,5 +132,6 @@
   "cautiousDaysLabel": "Cautious days",
   "bestDaysLabel": "Best time days",
   "discountPercentLabel": "Discount percent(%)",
-  "itemTypeOther": "Other"
+  "itemTypeOther": "Other",
+  "remainingFormat": "left {count} ({volume}{unit})"
 }

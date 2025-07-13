@@ -5,6 +5,7 @@ import '../domain/entities/inventory.dart';
 // 残り日数計算や在庫監視などは外部から関数として受け取る
 import '../i18n/app_localizations.dart';
 import '../inventory_detail_page.dart';
+import '../util/inventory_display.dart';
 
 /// BuyListPage で使用される、買い物リストを表示するカードウィジェット
 class BuyListCard extends StatelessWidget {
@@ -178,9 +179,10 @@ class BuyListCard extends StatelessWidget {
                       final daysText = daysSnapshot.hasData
                           ? ' ・ ${loc.daysLeft(daysSnapshot.data!.toString())}'
                           : '';
-                      // 数量は単位を付けずに表示
+                      // 数量は単位を付けずに表示 -> 新関数でローカライズ
+                      // 買い物リスト画面のカードで在庫数量と総容量をまとめて表示
                       final subtitle =
-                          '${inv.quantity.toStringAsFixed(1)}$daysText';
+                          '${formatRemaining(context, inv)}$daysText';
                       return ListTile(
                         // 商品名の後ろに品種を表示
                         title: Text('${inv.itemName} / ${inv.itemType}'),

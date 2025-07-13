@@ -132,5 +132,6 @@
   "cautiousDaysLabel": "慎重判定日数",
   "bestDaysLabel": "買い時判定日数",
   "discountPercentLabel": "値引き率(%)",
-  "itemTypeOther": "その他"
+  "itemTypeOther": "その他",
+  "remainingFormat": "残り{count}({volume}{unit})"
 }
