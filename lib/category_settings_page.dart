@@ -81,21 +81,6 @@ class _CategorySettingsPageState extends State<CategorySettingsPage> {
     }
   }
 
-  /// 並び順変更画面を開き、結果を保存する
-  Future<void> _openReorder() async {
-    final result = await Navigator.push<List<Category>>(
-      context,
-      MaterialPageRoute(
-        builder: (_) => ReorderCategoriesPage(categories: _list),
-      ),
-    );
-    if (result != null) {
-      await saveCategoryOrder(result);
-      setState(() => _list = result);
-      widget.onChanged(List.from(result));
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

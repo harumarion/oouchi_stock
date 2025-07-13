@@ -3,7 +3,6 @@ import 'package:oouchi_stock/i18n/app_localizations.dart';
 import 'add_category_page.dart';
 import 'add_inventory_page.dart';
 import 'inventory_detail_page.dart';
-import 'edit_inventory_page.dart';
 import 'widgets/inventory_card.dart';
 import 'widgets/settings_menu_button.dart';
 import 'main.dart';

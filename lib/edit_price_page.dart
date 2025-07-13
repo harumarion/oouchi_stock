@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:oouchi_stock/i18n/app_localizations.dart';
 
 import 'domain/entities/price_info.dart';
-import 'domain/entities/inventory.dart';
 import 'presentation/viewmodels/edit_price_viewmodel.dart';
 import 'util/input_validators.dart';
 import 'util/unit_localization.dart';

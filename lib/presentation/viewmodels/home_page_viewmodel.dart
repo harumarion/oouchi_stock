@@ -8,7 +8,6 @@ import '../../domain/entities/inventory.dart';
 import '../../domain/entities/category.dart';
 import '../../domain/entities/category_order.dart';
 import '../../domain/entities/buy_list_condition_settings.dart';
-import '../../domain/entities/buy_item.dart';
 import '../../data/repositories/inventory_repository_impl.dart';
 import '../../domain/usecases/calculate_days_left.dart';
 import '../../domain/usecases/watch_inventory.dart';
