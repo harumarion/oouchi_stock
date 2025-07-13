@@ -50,6 +50,9 @@ class EditInventoryViewModel extends ChangeNotifier {
   Map<String, List<String>> typesMap = {};
   StreamSubscription? _typeSub;
 
+  /// Firestore から品種リストを受信済みかどうか
+  bool typesLoaded = false;
+
   /// 単位の選択肢
   // ミリリットル、グラム、キログラムも含めた選択肢
   // 選択可能な単位一覧を定数から生成
@@ -122,11 +125,21 @@ class EditInventoryViewModel extends ChangeNotifier {
         final list = typesMap.putIfAbsent(cat, () => []);
         if (!list.contains(name)) list.add(name);
       }
+      // Firestore から一覧を取得できたのでフラグを立てる
+      typesLoaded = true;
       final types = typesMap[category?.name];
       if (types != null && types.isNotEmpty) {
-        if (!types.contains(itemType)) itemType = types.first;
+        // 既に設定されている品種がリストにあるかを確認
+        if (itemType.isEmpty) {
+          itemType = types.first;
+        } else if (!types.contains(itemType)) {
+          // リストに存在しない場合のみ先頭の品種へ変更
+          itemType = types.first;
+        }
       } else {
-        itemType = itemTypeOther;
+        if (itemType.isEmpty) {
+          itemType = itemTypeOther;
+        }
       }
       notifyListeners();
     });

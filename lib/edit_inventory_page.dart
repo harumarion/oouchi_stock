@@ -138,15 +138,18 @@ class _EditInventoryPageState extends State<EditInventoryPage> {
               ),
               const SizedBox(height: 12),
               Builder(builder: (context) {
-                // 選択中カテゴリに該当する品種リストを取得
-                final itemTypes =
-                    _viewModel.typesMap[_viewModel.category?.name] ?? ['その他'];
-                // 品種リストに現在の値が無ければ自動的に先頭に切り替える
-                final selectedType = itemTypes.contains(_viewModel.itemType)
+                // 選択中カテゴリに対応する品種リストを取得。未読み込み時は現在値のみ表示
+                final loadedTypes = _viewModel.typesMap[_viewModel.category?.name];
+                // 未読み込みの場合は現在の品種だけをリスト化
+                final itemTypes = loadedTypes ?? [_viewModel.itemType];
+                // 品種リストに現在の値が存在しない場合のみ更新
+                final selectedType = loadedTypes == null
                     ? _viewModel.itemType
-                    : itemTypes.first;
-                if (selectedType != _viewModel.itemType) {
-                  // ビルド完了後に状態を更新する
+                    : itemTypes.contains(_viewModel.itemType)
+                        ? _viewModel.itemType
+                        : itemTypes.first;
+                if (_viewModel.typesLoaded && selectedType != _viewModel.itemType) {
+                  // ビルド完了後に ViewModel の値を更新
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     _viewModel.changeItemType(selectedType);
                   });
@@ -154,8 +157,9 @@ class _EditInventoryPageState extends State<EditInventoryPage> {
                 return DropdownButtonFormField<String>(
                   decoration: InputDecoration(
                       labelText: AppLocalizations.of(context)!.itemType),
-                  value:
-                      itemTypes.contains(_viewModel.itemType) ? _viewModel.itemType : null,
+                  value: itemTypes.contains(_viewModel.itemType)
+                      ? _viewModel.itemType
+                      : null,
                   items: itemTypes
                       .map((t) => DropdownMenuItem(
                             value: t,
