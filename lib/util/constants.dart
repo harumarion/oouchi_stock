@@ -5,4 +5,15 @@
 const String itemTypeOther = 'その他';
 
 /// 容量単位の候補リスト
-const List<String> defaultUnits = ['個', '本', '袋', 'ロール', 'リットル'];
+// 容量単位を増やして欲しい要望に対応
+// 新たにミリリットル、グラム、キログラムを追加
+const List<String> defaultUnits = [
+  '個',
+  '本',
+  '袋',
+  'ロール',
+  'リットル',
+  'ミリリットル',
+  'グラム',
+  'キログラム',
+];

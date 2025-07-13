@@ -52,7 +52,7 @@ class AddInventoryViewModel extends ChangeNotifier {
   StreamSubscription? _typeSub;
 
   /// 単位の選択肢
-  // 入力フォームで選択可能な単位一覧。リットルを追加
+  // 入力フォームで選べる単位一覧。ミリリットル、グラム、キログラムも追加
   // 選択可能な単位一覧を定数から生成
   final List<String> units = List.from(defaultUnits);
 

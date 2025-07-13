@@ -51,7 +51,7 @@ class EditInventoryViewModel extends ChangeNotifier {
   StreamSubscription? _typeSub;
 
   /// 単位の選択肢
-  // 単位選択肢にリットルを追加
+  // ミリリットル、グラム、キログラムも含めた選択肢
   // 選択可能な単位一覧を定数から生成
   final List<String> units = List.from(defaultUnits);
 
