@@ -4,8 +4,8 @@ import 'package:oouchi_stock/i18n/app_localizations.dart';
 import 'domain/entities/inventory.dart';
 import 'presentation/viewmodels/add_price_viewmodel.dart';
 import 'util/input_validators.dart';
-import 'util/item_type_localization.dart';
 import 'util/unit_localization.dart';
+import 'widgets/inventory_dropdown.dart';
 import 'add_inventory_page.dart';
 
 // セール情報追加画面
@@ -70,16 +70,11 @@ class _AddPricePageState extends State<AddPricePage> {
                 key: _viewModel.formKey,
                 child: ListView(
                   children: [
-                    DropdownButtonFormField<Inventory>(
-                      decoration: InputDecoration(labelText: AppLocalizations.of(context)!.itemName),
+                    // 商品名選択ドロップダウン
+                    InventoryDropdown(
+                      label: AppLocalizations.of(context)!.itemName,
+                      inventories: _viewModel.inventories,
                       value: _viewModel.inventory,
-                      items: _viewModel.inventories
-                          .map((e) => DropdownMenuItem(
-                                value: e,
-                                child: Text(
-                                    '${localizeItemType(context, e.itemType)} / ${e.itemName}'),
-                              ))
-                          .toList(),
                       onChanged: (v) => setState(() => _viewModel.inventory = v),
                     ),
                     const SizedBox(height: 12),
