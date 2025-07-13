@@ -25,6 +25,15 @@ samples, guidance on mobile development, and a full API reference.
 Android ビルドを行う場合は JDK 17 が必要です。`JAVA_HOME` が JDK 17 を指してい
 ることを確認してください。
 
+Windows ビルドを行う場合は Visual Studio (デスクトップ C++ 開発) が必要です。
+`flutter doctor` で必要なコンポーネントが認識されていることを確認してください。
+インストール例として Visual Studio 2022 を使用し、「C++ によるデスクトップ開発」
+ワークロードを有効にします。Windows 向けのビルドは次のコマンドで実行できます。
+
+```bash
+flutter build windows
+```
+
 折りたたみ端末などの最新機種に対応するため、AndroidX Window ライブラリを利用しています。
 Flutter エンジンと互換性のある `1.0.x` 系を使用しており、`android/app/build.gradle.kts` では `1.0.0` を指定しています。
 以前は Sidecar API の不足を補うため `window-sidecar` を追加していましたが、現在は `window` ライブラリのみで問題なく動作するため不要となりました。
