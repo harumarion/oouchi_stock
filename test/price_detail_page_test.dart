@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:oouchi_stock/price_detail_page.dart';
 import 'package:oouchi_stock/domain/entities/price_info.dart';
+import 'package:oouchi_stock/edit_price_page.dart';
 
 void main() {
   testWidgets('PriceDetailPage が詳細を表示する', (WidgetTester tester) async {
@@ -28,5 +29,13 @@ void main() {
     expect(find.text('テスト商品'), findsOneWidget);
     expect(find.text('日用品'), findsOneWidget);
     expect(find.textContaining('150'), findsWidgets);
+    // 編集アイコンが表示されていることを確認
+    final editButton = find.widgetWithIcon(IconButton, Icons.edit);
+    expect(editButton, findsOneWidget);
+
+    // 編集アイコンタップで EditPricePage が開くことを確認
+    await tester.tap(editButton);
+    await tester.pumpAndSettle();
+    expect(find.byType(EditPricePage), findsOneWidget);
   });
 }

@@ -6,7 +6,6 @@ import 'widgets/settings_menu_button.dart';
 import 'presentation/viewmodels/price_list_viewmodel.dart';
 import 'presentation/viewmodels/price_category_list_viewmodel.dart';
 import 'price_detail_page.dart';
-import 'edit_price_page.dart';
 import 'main.dart';
 import 'widgets/scrolling_text.dart';
 import 'domain/entities/price_info.dart';
