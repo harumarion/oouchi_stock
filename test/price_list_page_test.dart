@@ -70,7 +70,7 @@ void main() {
     expect(find.byType(PriceDetailPage), findsOneWidget);
   });
 
-  testWidgets('削除アイコンが表示される', (WidgetTester tester) async {
+  testWidgets('カードをスワイプして削除できる', (WidgetTester tester) async {
     final repo = _FakeRepository();
     await tester.pumpWidget(MaterialApp(
       home: PriceCategoryList(
@@ -82,7 +82,7 @@ void main() {
       ),
     ));
     await tester.pump();
-    expect(find.byIcon(Icons.delete), findsWidgets);
+    expect(find.byType(Dismissible), findsWidgets);
   });
 }
 
