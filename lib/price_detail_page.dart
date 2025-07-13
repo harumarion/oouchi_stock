@@ -3,6 +3,7 @@ import 'i18n/app_localizations.dart';
 import 'presentation/viewmodels/price_detail_viewmodel.dart';
 import "domain/entities/price_info.dart";
 import 'util/unit_localization.dart';
+import 'edit_price_page.dart';
 
 /// セール詳細情報表示画面
 class PriceDetailPage extends StatelessWidget {
@@ -15,7 +16,23 @@ class PriceDetailPage extends StatelessWidget {
     final info = viewModel.info;
     final textStyle = Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 18);
     return Scaffold(
-      appBar: AppBar(title: Text(info.itemName.isNotEmpty ? info.itemName : info.itemType)),
+      appBar: AppBar(
+        title: Text(info.itemName.isNotEmpty ? info.itemName : info.itemType),
+        actions: [
+          // セール情報編集ボタン
+          IconButton(
+            icon: const Icon(Icons.edit),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => EditPricePage(info: viewModel.info),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
