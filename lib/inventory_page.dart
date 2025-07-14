@@ -25,8 +25,6 @@ class InventoryPage extends StatefulWidget {
 class InventoryPageState extends State<InventoryPage> {
   /// 画面全体の状態を管理する ViewModel
   late final InventoryPageViewModel _viewModel;
-  /// スワイプで削除した在庫IDを一時的に保持
-  final Set<String> _removedIds = {};
 
   /// 画面が再表示された際にカテゴリを最新化する
   Future<void> refresh() async {
@@ -153,6 +151,8 @@ class InventoryList extends StatefulWidget {
 class _InventoryListState extends State<InventoryList> {
   /// リスト表示を制御する ViewModel
   late final InventoryListViewModel _viewModel;
+  /// Dismissible のアニメーション中に一時保持する削除済み在庫ID
+  final Set<String> _removedIds = {};
 
   @override
   void dispose() {
