@@ -142,7 +142,7 @@ class _EditPricePageState extends State<EditPricePage> {
                           onChanged: (v) => _viewModel.memo = v,
                         ),
                         const SizedBox(height: 12),
-                        // 合計容量を単位→値の順で表示
+                        // 合計容量を値→単位の順で表示
                         Text(
                           loc.totalVolume(
                             localizeUnit(
