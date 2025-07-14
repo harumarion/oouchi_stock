@@ -21,8 +21,6 @@ class PriceListPage extends StatefulWidget {
 class _PriceListPageState extends State<PriceListPage> {
   /// 画面全体の状態を管理する ViewModel
   late final PriceListViewModel _viewModel;
-  /// スワイプ削除されたID一覧
-  final Set<String> _removedIds = {};
 
   @override
   void initState() {
@@ -131,6 +129,8 @@ class PriceCategoryList extends StatefulWidget {
 class _PriceCategoryListState extends State<PriceCategoryList> {
   /// カテゴリリストを管理する ViewModel
   late final PriceCategoryListViewModel _viewModel;
+  /// Dismissible処理中に保持する削除済みID一覧
+  final Set<String> _removedIds = {};
 
   @override
   void initState() {
