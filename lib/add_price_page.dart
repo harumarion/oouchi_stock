@@ -135,12 +135,12 @@ class _AddPricePageState extends State<AddPricePage> {
                       onChanged: (v) => _viewModel.memo = v,
                     ),
                     const SizedBox(height: 12),
-                    // 合計容量を大きめの文字で表示（単位付き）
+                    // 合計容量を大きめの文字で表示（単位→値の順）
                     Text(
                       AppLocalizations.of(context)!.totalVolume(
-                        _viewModel.totalVolume.toStringAsFixed(2),
                         localizeUnit(
                             context, _viewModel.inventory?.unit ?? ''),
+                        _viewModel.totalVolume.toStringAsFixed(2),
                       ),
                       style: const TextStyle(fontSize: 20),
                     ),
