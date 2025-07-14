@@ -77,7 +77,8 @@ class InventoryDetailPage extends StatelessWidget {
                     (inv.totalVolume / inv.monthlyConsumption * 30).ceil();
                 predicted = DateTime.now().add(Duration(days: days));
               }
-              final textStyle = Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 18);
+              // 詳細ページ用フォントスタイルを取得
+              final textStyle = Theme.of(context).textTheme.bodyLarge;
               return ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
@@ -107,7 +108,11 @@ class InventoryDetailPage extends StatelessWidget {
                   const SizedBox(height: 8),
                   _buildDetailRow(AppLocalizations.of(context)!.predictLabel, _formatDate(predicted), textStyle),
                   const SizedBox(height: 16),
-                  Text(AppLocalizations.of(context)!.history, style: const TextStyle(fontSize: 18)),
+                  Text(
+                    AppLocalizations.of(context)!.history,
+                    // 履歴見出しも同じスタイルを使用
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
                   SizedBox(
                     height: MediaQuery.of(context).size.height / 3,
                     child: ListView(
@@ -148,7 +153,8 @@ class InventoryDetailPage extends StatelessWidget {
     // 数量履歴は単位を付けずに表示
     final quantityText = '${e.before.toStringAsFixed(1)} -> ${e.after.toStringAsFixed(1)} ($diffSign${e.diff.abs().toStringAsFixed(1)})';
     final color = e.diff >= 0 ? Colors.green : Colors.red;
-    final style = const TextStyle(fontSize: 18);
+    // 履歴行のテキストスタイル
+    final style = Theme.of(context).textTheme.bodyLarge!;
     return Column(
       children: [
         Row(

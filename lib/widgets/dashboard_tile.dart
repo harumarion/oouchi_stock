@@ -41,7 +41,8 @@ class DashboardTile extends StatelessWidget {
         children: [
           Text(
             inventory.itemName,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            // タイルでもカードタイトル用スタイルを採用
+            style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 4),
           // 残り日数をローカライズして表示

@@ -55,7 +55,8 @@ class _PriceHistoryPageState extends State<PriceHistoryPage> {
 
   @override
   Widget build(BuildContext context) {
-    final textStyle = Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 18);
+    // 詳細表示用フォントスタイル
+    final textStyle = Theme.of(context).textTheme.bodyLarge;
     return Scaffold(
       appBar: AppBar(title: Text(widget.itemName ?? widget.itemType)),
       body: StreamBuilder<List<PriceInfo>>(
@@ -150,13 +151,20 @@ class _PriceHistoryPageState extends State<PriceHistoryPage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Expanded(child: Text(label, style: const TextStyle(fontSize: 18))),
+          Expanded(
+            child: Text(
+              label,
+              // ラベル用テキストスタイル
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
+          ),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               value,
               textAlign: TextAlign.right,
-              style: style ?? const TextStyle(fontSize: 18),
+              // 値のスタイルもテーマから取得
+              style: style ?? Theme.of(context).textTheme.bodyLarge,
             ),
           ),
         ],

@@ -49,14 +49,16 @@ class SettingsMenuButton extends StatelessWidget {
           value: 'settings',
           child: Text(
             AppLocalizations.of(context)!.settings,
-            style: const TextStyle(fontSize: 18),
+            // メニュー項目にはカードタイトルと同じフォントを使用
+            style: Theme.of(context).textTheme.titleMedium,
           ),
         ),
         PopupMenuItem(
           value: 'price',
           child: Text(
             AppLocalizations.of(context)!.priceManagementTitle,
-            style: const TextStyle(fontSize: 18),
+            // 同上
+            style: Theme.of(context).textTheme.titleMedium,
           ),
         ),
       ],

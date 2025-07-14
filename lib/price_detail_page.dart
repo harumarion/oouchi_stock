@@ -14,7 +14,8 @@ class PriceDetailPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
     final info = viewModel.info;
-    final textStyle = Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 18);
+    // 詳細画面用の標準テキストスタイル
+    final textStyle = Theme.of(context).textTheme.bodyLarge;
     return Scaffold(
       appBar: AppBar(
         title: Text(info.itemName.isNotEmpty ? info.itemName : info.itemType),
@@ -69,13 +70,20 @@ class PriceDetailPage extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Expanded(child: Text(label, style: const TextStyle(fontSize: 18))),
+          Expanded(
+            child: Text(
+              label,
+              // ラベルにも詳細ページ用スタイルを適用
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
+          ),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               value,
               textAlign: TextAlign.right,
-              style: style ?? const TextStyle(fontSize: 18),
+              // 値のテキストスタイルも統一
+              style: style ?? Theme.of(context).textTheme.bodyLarge,
             ),
           ),
         ],
