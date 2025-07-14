@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:oouchi_stock/price_detail_page.dart';
 import 'package:oouchi_stock/domain/entities/price_info.dart';
 import 'package:oouchi_stock/edit_price_page.dart';
+import 'package:oouchi_stock/i18n/app_localizations.dart';
 
 void main() {
   testWidgets('PriceDetailPage が詳細を表示する', (WidgetTester tester) async {
@@ -25,7 +26,12 @@ void main() {
       unitPrice: 150,
       expiry: DateTime(2023, 1, 2),
     );
-    await tester.pumpWidget(MaterialApp(home: PriceDetailPage(info: info)));
+    await tester.pumpWidget(MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: const Locale('ja'),
+      home: PriceDetailPage(info: info),
+    ));
     expect(find.text('テスト商品'), findsOneWidget);
     expect(find.text('日用品'), findsOneWidget);
     expect(find.textContaining('150'), findsWidgets);
