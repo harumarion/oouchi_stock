@@ -223,7 +223,11 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
                 itemCount: items.length,
                 itemBuilder: (context, index) {
                   final p = items[index];
-                  final diff = p.regularPrice - p.salePrice;
+                  // セール価格と通常価格の差額（正負をそのまま表示）
+                  final diff = p.salePrice - p.regularPrice;
+                  final diffStr = diff > 0
+                      ? '+${diff.toStringAsFixed(0)}'
+                      : diff.toStringAsFixed(0);
                   return Dismissible(
                     key: ValueKey(p.id),
                     direction: DismissDirection.startToEnd,
@@ -312,9 +316,14 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
                               const SizedBox(height: 4),
                               Text(AppLocalizations.of(context)!.expiry(_formatDate(p.expiry))),
                               const SizedBox(height: 4),
-                              Text(AppLocalizations.of(context)!.regularPriceLabel(p.regularPrice.toStringAsFixed(0))),
-                              Text(AppLocalizations.of(context)!.salePriceLabel(p.salePrice.toStringAsFixed(0))),
-                              Text(AppLocalizations.of(context)!.priceDiffLabel(diff.toStringAsFixed(0))),
+                              // 価格情報を1行で表示（通常価格、セール価格、差額）
+                              Text(
+                                '${AppLocalizations.of(context)!.regularPriceLabel(p.regularPrice.toStringAsFixed(0))} '
+                                '${AppLocalizations.of(context)!.salePriceLabel(p.salePrice.toStringAsFixed(0))} '
+                                '${AppLocalizations.of(context)!.priceDiffLabel(diffStr)}',
+                              ),
+                              // 単価は次の行で表示
+                              Text(AppLocalizations.of(context)!.unitPrice(p.unitPrice.toStringAsFixed(2))),
                             ],
                           ),
                         ),

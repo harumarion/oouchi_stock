@@ -84,6 +84,24 @@ void main() {
     await tester.pump();
     expect(find.byType(Dismissible), findsWidgets);
   });
+
+  testWidgets('価格情報が1行表示され単価が次行に表示される',
+      (WidgetTester tester) async {
+    final repo = _FakeRepository();
+    await tester.pumpWidget(MaterialApp(
+      locale: const Locale('ja'),
+      home: PriceCategoryList(
+        category: '日用品',
+        viewModel: PriceCategoryListViewModel(
+          category: '日用品',
+          watch: WatchPriceByCategory(repo),
+        ),
+      ),
+    ));
+    await tester.pump();
+    expect(find.text('通常価格: 200 セール価格: 150 差額: -50'), findsOneWidget);
+    expect(find.text('単価: 150.00'), findsOneWidget);
+  });
 }
 
 class _FakeRepository implements PriceRepository {
