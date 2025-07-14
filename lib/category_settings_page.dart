@@ -111,7 +111,13 @@ class _CategorySettingsPageState extends State<CategorySettingsPage> {
                 return res ?? false;
               },
               // スワイプでカテゴリを削除する
-              onDismissed: (_) => _deleteCategory(c),
+              onDismissed: (_) {
+                setState(() {
+                  // 画面上から即座に削除するためリストから対象を除外
+                  _list.remove(c);
+                });
+                _deleteCategory(c);
+              },
               background: Container(
                 color: Colors.red,
                 alignment: Alignment.centerLeft,

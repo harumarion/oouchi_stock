@@ -9,7 +9,7 @@ import '../util/inventory_display.dart';
 import '../util/buy_item_reason_label.dart';
 
 /// BuyListPage で使用される、買い物リストを表示するカードウィジェット
-class BuyListCard extends StatelessWidget {
+class BuyListCard extends StatefulWidget {
   /// 表示する買い物データ
   final BuyItem item;
   /// カテゴリ一覧。詳細画面遷移に利用する
@@ -40,6 +40,14 @@ class BuyListCard extends StatelessWidget {
     required this.updateQuantity,
     required this.onRemove,
   });
+
+  @override
+  State<BuyListCard> createState() => _BuyListCardState();
+}
+
+class _BuyListCardState extends State<BuyListCard> {
+  /// 削除済みフラグ
+  bool _removed = false;
 
   /// 削除時の数量入力ダイアログを表示
   Future<double?> _inputAmountDialog(BuildContext context) async {
@@ -97,12 +105,12 @@ class BuyListCard extends StatelessWidget {
   /// カードを右スワイプしたときに呼ばれる削除確認処理
   Future<bool> _confirmDismiss(BuildContext context) async {
     final loc = AppLocalizations.of(context)!;
-    if (item.inventoryId != null) {
+    if (widget.item.inventoryId != null) {
       // 在庫と紐づく場合、購入数を入力してから削除
       final v = await _inputAmountDialog(context);
       if (v == null) return false;
       try {
-        await updateQuantity(item.inventoryId!, v, 'bought');
+        await widget.updateQuantity(widget.item.inventoryId!, v, 'bought');
       } catch (_) {
         // 更新失敗時はスナックバーで通知
         ScaffoldMessenger.of(context)
@@ -132,13 +140,13 @@ class BuyListCard extends StatelessWidget {
 
   /// 在庫詳細画面へ遷移する処理
   void _openDetail(BuildContext context) {
-    if (item.inventoryId == null) return;
+    if (widget.item.inventoryId == null) return;
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => InventoryDetailPage(
-          inventoryId: item.inventoryId!,
-          categories: categories,
+          inventoryId: widget.item.inventoryId!,
+          categories: widget.categories,
         ),
       ),
     );
@@ -147,11 +155,18 @@ class BuyListCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
+    if (_removed) return const SizedBox.shrink();
     return Dismissible(
-      key: ValueKey(item.key),
+      key: ValueKey(widget.item.key),
       direction: DismissDirection.startToEnd,
       confirmDismiss: (_) => _confirmDismiss(context),
-      onDismissed: (_) => onRemove(item),
+      onDismissed: (_) {
+        setState(() {
+          // カードを即座に非表示にする
+          _removed = true;
+        });
+        widget.onRemove(widget.item);
+      },
       background: Container(
         color: Colors.red,
         alignment: Alignment.centerLeft,
@@ -160,25 +175,25 @@ class BuyListCard extends StatelessWidget {
       ),
       child: Card(
         margin: const EdgeInsets.only(bottom: 12),
-        child: item.inventoryId == null
+        child: widget.item.inventoryId == null
             // 手入力アイテムは理由も表示
             ? ListTile(
-                title: Text(item.name),
-                subtitle: Text(item.reason.label(loc)),
+                title: Text(widget.item.name),
+                subtitle: Text(widget.item.reason.label(loc)),
               )
             : StreamBuilder<Inventory?>(
-                stream: watchInventory(item.inventoryId!),
+                stream: widget.watchInventory(widget.item.inventoryId!),
                 builder: (context, snapshot) {
                   if (!snapshot.hasData) {
                     return ListTile(
-                      title: Text(item.name),
+                      title: Text(widget.item.name),
                       // 詳細画面へ遷移するタップイベント
                       onTap: () => _openDetail(context),
                     );
                   }
                   final inv = snapshot.data!;
                   return FutureBuilder<int>(
-                    future: calcDaysLeft(inv),
+                    future: widget.calcDaysLeft(inv),
                     builder: (context, daysSnapshot) {
                       final daysText = daysSnapshot.hasData
                           ? ' ・ ${loc.daysLeft(daysSnapshot.data!.toString())}'
@@ -194,7 +209,7 @@ class BuyListCard extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(subtitle),
-                            Text(item.reason.label(loc),
+                            Text(widget.item.reason.label(loc),
                                 style:
                                     Theme.of(context).textTheme.bodySmall),
                           ],

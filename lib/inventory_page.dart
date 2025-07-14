@@ -25,6 +25,8 @@ class InventoryPage extends StatefulWidget {
 class InventoryPageState extends State<InventoryPage> {
   /// 画面全体の状態を管理する ViewModel
   late final InventoryPageViewModel _viewModel;
+  /// スワイプで削除した在庫IDを一時的に保持
+  final Set<String> _removedIds = {};
 
   /// 画面が再表示された際にカテゴリを最新化する
   Future<void> refresh() async {
@@ -226,6 +228,9 @@ class _InventoryListState extends State<InventoryList> {
                       inv.category.contains(_viewModel.search) ||
                       inv.itemType.contains(_viewModel.search))
                   .toList();
+              // Firestore側で削除済みのIDを除外
+              _removedIds.removeWhere((id) => list.every((e) => e.id != id));
+              list = list.where((e) => !_removedIds.contains(e.id)).toList();
               // ドロップダウンの選択に応じて並び替えを実施
               if (_viewModel.sort == 'alphabet') {
                 list.sort((a, b) => a.itemName.compareTo(b.itemName));
@@ -259,6 +264,10 @@ class _InventoryListState extends State<InventoryList> {
                       return res ?? false;
                     },
                     onDismissed: (_) async {
+                      setState(() {
+                        // アニメーション中に残らないようIDを記録
+                        _removedIds.add(inv.id);
+                      });
                       try {
                         await _viewModel.delete(inv.id);
                       } catch (e) {

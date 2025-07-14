@@ -21,6 +21,8 @@ class PriceListPage extends StatefulWidget {
 class _PriceListPageState extends State<PriceListPage> {
   /// 画面全体の状態を管理する ViewModel
   late final PriceListViewModel _viewModel;
+  /// スワイプ削除されたID一覧
+  final Set<String> _removedIds = {};
 
   @override
   void initState() {
@@ -206,12 +208,17 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
               if (!snapshot.hasData) {
                 return const Center(child: CircularProgressIndicator());
               }
+              // Firestoreから取得した最新データ
               var items = snapshot.data!
                   .where((e) => e.itemName.contains(_viewModel.search) ||
                       e.category.contains(_viewModel.search) ||
                       e.itemType.contains(_viewModel.search))
                   .where((e) => _viewModel.showExpired || e.expiry.isAfter(DateTime.now().subtract(const Duration(days: 1))))
                   .toList();
+              // Firestore側で削除完了したIDは一覧から除外
+              _removedIds.removeWhere((id) => items.every((e) => e.id != id));
+              // スワイプ直後に除外したIDも非表示にする
+              items = items.where((e) => !_removedIds.contains(e.id)).toList();
               if (_viewModel.sort == 'alphabet') {
                 items.sort((a, b) => a.itemType.compareTo(b.itemType));
               } else if (_viewModel.sort == 'unitPrice') {
@@ -254,6 +261,10 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
                     },
                     // 削除処理本体
                     onDismissed: (_) async {
+                      setState(() {
+                        // Dismissible アニメーション完了後に残らないようIDを記録
+                        _removedIds.add(p.id);
+                      });
                       try {
                         await _viewModel.delete(p.id);
                         if (mounted) {
