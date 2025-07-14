@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:oouchi_stock/price_history_page.dart';
 import 'package:oouchi_stock/presentation/viewmodels/price_history_viewmodel.dart';
+import 'package:oouchi_stock/theme.dart';
 import 'package:oouchi_stock/domain/entities/price_info.dart';
 import 'package:oouchi_stock/domain/repositories/price_repository.dart';
 import 'package:oouchi_stock/domain/usecases/delete_price_info.dart';

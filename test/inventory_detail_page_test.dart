@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:oouchi_stock/inventory_detail_page.dart';
+import 'package:oouchi_stock/theme.dart';
 import 'package:oouchi_stock/i18n/app_localizations.dart';
 import 'package:oouchi_stock/domain/entities/category.dart';
 import 'package:oouchi_stock/domain/entities/inventory.dart';

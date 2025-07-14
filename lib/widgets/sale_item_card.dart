@@ -37,10 +37,8 @@ class SaleItemCard extends StatelessWidget {
                   child: Text(
                     // 商品名の後ろに品種を表示する
                     '${item.name} / ${item.itemType}',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    // カードタイトル用フォントを適用
+                    style: Theme.of(context).textTheme.titleMedium,
                   ),
                 ),
                 if (item.recommended)
@@ -61,7 +59,11 @@ class SaleItemCard extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               loc.daysLeft(daysLeft.toString()),
-              style: TextStyle(color: expired ? Colors.red : null),
+              // 残り日数表示は bodyMedium
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyMedium
+                  ?.copyWith(color: expired ? Colors.red : null),
             ),
             const SizedBox(height: 4),
             Text(loc.stockInfo(item.stock)),

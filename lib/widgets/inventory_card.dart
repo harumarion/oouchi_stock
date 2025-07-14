@@ -153,19 +153,28 @@ class InventoryCard extends StatelessWidget {
                       ScrollingText(
                         // 在庫カードでは商品名の後に品種を表示
                         '${inventory.itemName} / ${inventory.itemType}',
-                        style: const TextStyle(fontSize: 18),
+                        // カードタイトル用フォントを利用
+                        style: Theme.of(context).textTheme.titleMedium,
                       ),
                     const SizedBox(height: 4),
                     // 数量は単位を付けずに表示 -> 新関数でローカライズ
                     // 在庫一覧画面カードの数量と総容量をまとめて表示
                     Text(
                       formatRemaining(context, inventory),
-                      style: const TextStyle(color: Colors.black87),
+                      // 在庫数などの情報には bodyMedium を使用
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyMedium
+                          ?.copyWith(color: Colors.black87),
                     ),
                     // 予測ラベルを削除し、残り日数のみ表示する
                     Text(
                       dateText,
-                      style: const TextStyle(color: Colors.black87),
+                      // 残り日数表示も同じく bodyMedium
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyMedium
+                          ?.copyWith(color: Colors.black87),
                     ),
                   ],
                   ),

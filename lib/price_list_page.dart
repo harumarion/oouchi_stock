@@ -296,7 +296,8 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
                                     child: ScrollingText(
                                       // 商品名の後に品種を表示する
                                       '${p.itemName} / ${p.itemType}',
-                                      style: const TextStyle(fontSize: 18),
+                                      // カードタイトルスタイルを使用
+                                      style: Theme.of(context).textTheme.titleMedium,
                                     ),
                                   ),
                                   // 買い物リストに追加するアイコンボタン
