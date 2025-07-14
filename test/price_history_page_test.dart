@@ -30,8 +30,13 @@ void main() {
       ),
     ));
     await tester.pump();
+    // セール情報履歴画面のテキストスタイル確認
+    final context = tester.element(find.text('テスト商品'));
     final text = tester.widget<Text>(find.text('テスト商品'));
-    expect(text.style?.fontSize, 18);
+    // テーマ定義からフォントサイズを取得し比較する
+    final expected =
+        Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 18).fontSize;
+    expect(text.style?.fontSize, expected);
   });
 
   testWidgets('外部 ViewModel を注入できる', (WidgetTester tester) async {

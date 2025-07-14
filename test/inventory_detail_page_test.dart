@@ -147,8 +147,13 @@ void main() {
     ));
     await tester.pump();
 
+    // 履歴タイルのテキストスタイルを取得
+    final context = tester.element(find.text('追加'));
     final text = tester.widget<Text>(find.text('追加'));
-    expect(text.style?.fontSize, 18);
+    // テーマから期待されるフォントサイズを取得し比較
+    final expected =
+        Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 18).fontSize;
+    expect(text.style?.fontSize, expected);
 
     final divider = tester.widget<Divider>(find.byType(Divider).first);
     expect(divider.color, Colors.grey.shade300);
