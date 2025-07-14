@@ -72,7 +72,8 @@ class SaleItemCard extends StatelessWidget {
               alignment: Alignment.centerRight,
               child: ElevatedButton(
                 onPressed: () async {
-                  await onAdd(BuyItem(item.name, ''));
+                  await onAdd(
+                      BuyItem(item.name, '', null, BuyItemReason.sale));
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text(loc.addedBuyItem)),

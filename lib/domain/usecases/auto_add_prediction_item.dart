@@ -19,7 +19,10 @@ class AutoAddPredictionItem {
     final type = _decide(inv, price);
     if (type == PurchaseDecisionType.cautious ||
         type == PurchaseDecisionType.bulkOpportunity) {
-      await _add(BuyItem(inv.itemName, inv.category, inv.id));
+      final reason = type == PurchaseDecisionType.cautious
+          ? BuyItemReason.autoCautious
+          : BuyItemReason.autoBulk;
+      await _add(BuyItem(inv.itemName, inv.category, inv.id, reason));
     }
   }
 }

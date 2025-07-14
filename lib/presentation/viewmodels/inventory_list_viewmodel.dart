@@ -66,7 +66,8 @@ class InventoryListViewModel extends ChangeNotifier {
 
   /// 在庫を買い物リストへ追加
   Future<void> addToBuyList(Inventory inv) async {
-    await addUsecase(BuyItem(inv.itemName, inv.category, inv.id));
+    await addUsecase(
+        BuyItem(inv.itemName, inv.category, inv.id, BuyItemReason.inventory));
   }
 
   /// 在庫数量を更新

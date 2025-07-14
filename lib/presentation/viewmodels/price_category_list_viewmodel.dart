@@ -66,7 +66,8 @@ class PriceCategoryListViewModel extends ChangeNotifier {
 
   /// カードのボタンから呼ばれ、買い物リストに追加する
   Future<void> addToBuyList(PriceInfo info) async {
-    final item = BuyItem(info.itemName, info.itemType);
+    final item =
+        BuyItem(info.itemName, info.itemType, null, BuyItemReason.sale);
     await _addBuy(item);
   }
 

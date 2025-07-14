@@ -19,7 +19,10 @@ class AutoAddBuyItem {
     final type = _decide(inv, price);
     if (type == PurchaseDecisionType.emergency ||
         type == PurchaseDecisionType.bestTime) {
-      await _add(BuyItem(inv.itemName, inv.category, inv.id));
+      final reason = type == PurchaseDecisionType.emergency
+          ? BuyItemReason.autoEmergency
+          : BuyItemReason.autoBestTime;
+      await _add(BuyItem(inv.itemName, inv.category, inv.id, reason));
     }
   }
 }

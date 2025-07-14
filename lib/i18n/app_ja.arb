@@ -133,5 +133,13 @@
   "bestDaysLabel": "買い時判定日数",
   "discountPercentLabel": "値引き率(%)",
   "itemTypeOther": "その他",
-  "remainingFormat": "残り{count}({volume}{unit})"
+  "remainingFormat": "残り{count}({volume}{unit})",
+  "reasonManual": "手動追加",
+  "reasonInventory": "在庫画面から追加",
+  "reasonSale": "セール管理から追加",
+  "reasonPrediction": "買い物予報から追加",
+  "reasonAutoEmergency": "在庫ゼロのため自動追加",
+  "reasonAutoBestTime": "買い時のため自動追加",
+  "reasonAutoCautious": "残り日数が少ないため自動追加",
+  "reasonAutoBulk": "セール中で在庫十分のため自動追加"
 }

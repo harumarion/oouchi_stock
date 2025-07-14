@@ -6,6 +6,7 @@ import '../domain/entities/inventory.dart';
 import '../i18n/app_localizations.dart';
 import '../inventory_detail_page.dart';
 import '../util/inventory_display.dart';
+import '../util/buy_item_reason_label.dart';
 
 /// BuyListPage で使用される、買い物リストを表示するカードウィジェット
 class BuyListCard extends StatelessWidget {
@@ -160,8 +161,11 @@ class BuyListCard extends StatelessWidget {
       child: Card(
         margin: const EdgeInsets.only(bottom: 12),
         child: item.inventoryId == null
-            // 手入力アイテムは商品名のみ表示
-            ? ListTile(title: Text(item.name))
+            // 手入力アイテムは理由も表示
+            ? ListTile(
+                title: Text(item.name),
+                subtitle: Text(item.reason.label(loc)),
+              )
             : StreamBuilder<Inventory?>(
                 stream: watchInventory(item.inventoryId!),
                 builder: (context, snapshot) {
@@ -186,7 +190,15 @@ class BuyListCard extends StatelessWidget {
                       return ListTile(
                         // 商品名の後ろに品種を表示
                         title: Text('${inv.itemName} / ${inv.itemType}'),
-                        subtitle: Text(subtitle),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(subtitle),
+                            Text(item.reason.label(loc),
+                                style:
+                                    Theme.of(context).textTheme.bodySmall),
+                          ],
+                        ),
                         onTap: () => _openDetail(context),
                       );
                     },

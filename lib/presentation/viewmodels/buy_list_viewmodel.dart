@@ -132,7 +132,8 @@ class BuyListViewModel extends ChangeNotifier {
       for (final inv in list) {
         // ユーザーが削除した在庫IDは追加しない
         if (_ignoredIds.contains(inv.id)) continue;
-        addUsecase(BuyItem(inv.itemName, inv.category, inv.id));
+        addUsecase(BuyItem(
+            inv.itemName, inv.category, inv.id, BuyItemReason.autoCautious));
       }
     });
   }
@@ -154,7 +155,7 @@ class BuyListViewModel extends ChangeNotifier {
   Future<void> addManualItem() async {
     final text = itemController.text.trim();
     if (text.isEmpty) return;
-    await addUsecase(BuyItem(text, ''));
+    await addUsecase(BuyItem(text, '', null, BuyItemReason.manual));
     itemController.clear();
   }
 
