@@ -92,6 +92,7 @@ void main() {
       ),
     ));
     await tester.pumpAndSettle();
+    // 残量表示が総容量→単位の順になっているか確認
     expect(find.textContaining('残り1.0(1.0個)'), findsOneWidget);
     expect(find.textContaining('あと7日'), findsOneWidget);
   });

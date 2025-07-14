@@ -77,7 +77,7 @@
   "expiry": "期限: {date}",
   "expiryLabel": "期限",
   "showExpired": "期限切れも表示",
-  "totalVolume": "総容量: {value}{unit}",
+  "totalVolume": "総容量: {unit}{value}",
   "unitPrice": "単価: {value}",
   "checkedDate": "確認日: {date}",
   "categorySettings": "カテゴリ設定",
