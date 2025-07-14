@@ -16,6 +16,13 @@ class AppTheme {
   // 補助テキストの色
   static const Color subTextColor = Color(0xFF616161);
 
+  // カードタイトルのフォントサイズ
+  static const double cardTitleFontSize = 18;
+  // カード情報表示のフォントサイズ
+  static const double cardInfoFontSize = 16;
+  // 詳細画面で使用するフォントサイズ
+  static const double detailFontSize = 18;
+
   /// ライトテーマの定義
   /// MaterialApp の `theme` に設定され、全画面で利用されます。
   static ThemeData get lightTheme {
