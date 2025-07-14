@@ -140,6 +140,9 @@ void main() {
 
   testWidgets('履歴タイルのスタイルを確認', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: const Locale('ja'),
       home: InventoryDetailPage(
         inventoryId: '1',
         categories: [Category(id: 1, name: '日用品', createdAt: DateTime.now())],

@@ -117,7 +117,8 @@ class InventoryDetailPage extends StatelessWidget {
                     height: MediaQuery.of(context).size.height / 3,
                     child: ListView(
                       children: list
-                          .map((e) => _buildHistoryTile(e, localizeUnit(context, inv.unit)))
+                          .map((e) =>
+                              _buildHistoryTile(context, e, localizeUnit(context, inv.unit)))
                           .toList(),
                     ),
                   ),
@@ -148,7 +149,12 @@ class InventoryDetailPage extends StatelessWidget {
     return DateFormat('yyyy/MM/dd HH:mm').format(date);
   }
 
-  Widget _buildHistoryTile(HistoryEntry e, String unit) {
+  /// 履歴エントリ1件を表示するウィジェット
+  /// [context] 表示に利用する BuildContext
+  /// [e] 履歴データ
+  /// [unit] 容量の単位
+  Widget _buildHistoryTile(
+      BuildContext context, HistoryEntry e, String unit) {
     final diffSign = e.diff >= 0 ? '+' : '-';
     // 数量履歴は単位を付けずに表示
     final quantityText = '${e.before.toStringAsFixed(1)} -> ${e.after.toStringAsFixed(1)} ($diffSign${e.diff.abs().toStringAsFixed(1)})';

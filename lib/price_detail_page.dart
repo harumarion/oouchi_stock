@@ -37,26 +37,27 @@ class PriceDetailPage extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          _buildRow(loc.category, info.category),
-          _buildRow(loc.itemType, info.itemType),
-          _buildRow(loc.itemName, info.itemName),
-          _buildRow(loc.checkedDate(_formatDate(info.checkedAt)), ''),
-          _buildRow(loc.expiry(_formatDate(info.expiry)), ''),
+          _buildRow(context, loc.category, info.category),
+          _buildRow(context, loc.itemType, info.itemType),
+          _buildRow(context, loc.itemName, info.itemName),
+          _buildRow(context, loc.checkedDate(_formatDate(info.checkedAt)), ''),
+          _buildRow(context, loc.expiry(_formatDate(info.expiry)), ''),
           // 数量は単位を付けずに表示
           _buildRow(
+            context,
             loc.count,
             info.count.toString(),
           ),
           // 総容量は単位付きで表示
-          _buildRow(loc.totalVolumeLabel,
+          _buildRow(context, loc.totalVolumeLabel,
               '${info.totalVolume.toString()}${localizeUnit(context, info.unit)}'),
-          _buildRow(loc.regularPrice, info.regularPrice.toString()),
-          _buildRow(loc.salePrice, info.salePrice.toString()),
-          _buildRow(loc.unitPriceLabel, info.unitPrice.toStringAsFixed(2)),
-          _buildRow(loc.shop, info.shop),
+          _buildRow(context, loc.regularPrice, info.regularPrice.toString()),
+          _buildRow(context, loc.salePrice, info.salePrice.toString()),
+          _buildRow(context, loc.unitPriceLabel, info.unitPrice.toStringAsFixed(2)),
+          _buildRow(context, loc.shop, info.shop),
           if (info.approvalUrl.isNotEmpty)
-            _buildRow(loc.approvalUrl, info.approvalUrl, textStyle),
-          if (info.memo.isNotEmpty) _buildRow(loc.memo, info.memo, textStyle),
+            _buildRow(context, loc.approvalUrl, info.approvalUrl, textStyle),
+          if (info.memo.isNotEmpty) _buildRow(context, loc.memo, info.memo, textStyle),
         ],
       ),
     );
@@ -64,7 +65,14 @@ class PriceDetailPage extends StatelessWidget {
 
   String _formatDate(DateTime d) => '${d.year}/${d.month}/${d.day}';
 
-  Widget _buildRow(String label, String value, [TextStyle? style]) {
+  /// ラベルと値を横並びで表示する共通行ウィジェット
+  /// [context] テーマ取得に利用する BuildContext
+  /// [label] 左側に表示するラベル
+  /// [value] 右側に表示する値
+  /// [style] 任意で指定するテキストスタイル
+  Widget _buildRow(
+      BuildContext context, String label, String value,
+      [TextStyle? style]) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
