@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:oouchi_stock/inventory_detail_page.dart';
+import 'package:oouchi_stock/theme.dart';
 import 'package:oouchi_stock/i18n/app_localizations.dart';
 import 'package:oouchi_stock/domain/entities/category.dart';
 import 'package:oouchi_stock/domain/entities/inventory.dart';
@@ -148,7 +149,7 @@ void main() {
     await tester.pump();
 
     final text = tester.widget<Text>(find.text('追加'));
-    expect(text.style?.fontSize, 18);
+    expect(text.style?.fontSize, AppTheme.lightTheme.textTheme.bodyLarge?.fontSize);
 
     final divider = tester.widget<Divider>(find.byType(Divider).first);
     expect(divider.color, Colors.grey.shade300);

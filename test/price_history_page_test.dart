@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:oouchi_stock/price_history_page.dart';
 import 'package:oouchi_stock/presentation/viewmodels/price_history_viewmodel.dart';
+import 'package:oouchi_stock/theme.dart';
 import 'package:oouchi_stock/domain/entities/price_info.dart';
 import 'package:oouchi_stock/domain/repositories/price_repository.dart';
 import 'package:oouchi_stock/domain/usecases/delete_price_info.dart';
@@ -31,7 +32,7 @@ void main() {
     ));
     await tester.pump();
     final text = tester.widget<Text>(find.text('テスト商品'));
-    expect(text.style?.fontSize, 18);
+    expect(text.style?.fontSize, AppTheme.lightTheme.textTheme.bodyLarge?.fontSize);
   });
 
   testWidgets('外部 ViewModel を注入できる', (WidgetTester tester) async {
