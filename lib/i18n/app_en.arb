@@ -133,5 +133,13 @@
   "bestDaysLabel": "Best time days",
   "discountPercentLabel": "Discount percent(%)",
   "itemTypeOther": "Other",
-  "remainingFormat": "left {count} ({volume}{unit})"
+  "remainingFormat": "left {count} ({volume}{unit})",
+  "reasonManual": "Added manually",
+  "reasonInventory": "Added from inventory list",
+  "reasonSale": "Added from sale management",
+  "reasonPrediction": "Added from prediction",
+  "reasonAutoEmergency": "Auto added: out of stock",
+  "reasonAutoBestTime": "Auto added: best time",
+  "reasonAutoCautious": "Auto added: running low",
+  "reasonAutoBulk": "Auto added: sale & enough stock"
 }

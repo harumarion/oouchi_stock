@@ -45,7 +45,9 @@ class HomePageViewModel extends ChangeNotifier {
 
   /// ホーム画面で予報カードの「買い物リストに追加」ボタンを押したときの処理
   Future<void> addPredictionToBuyList(BuyItem item) async {
-    await _addBuyItem(item);
+    final updated = BuyItem(
+        item.name, item.category, item.inventoryId, BuyItemReason.prediction);
+    await _addBuyItem(updated);
   }
 
   /// ホーム画面で予報カードをスワイプしたときの削除処理

@@ -46,7 +46,8 @@ class _FakeInventoryRepository implements InventoryRepository {
 
 void main() {
   testWidgets('PredictionCard 表示テスト', (WidgetTester tester) async {
-    final item = BuyItem('テスト', '日用品', 'inv1');
+    final item =
+        BuyItem('テスト', '日用品', 'inv1', BuyItemReason.autoCautious);
     final categories = [Category(id: 1, name: '日用品', createdAt: DateTime.now())];
     await tester.pumpWidget(MaterialApp(
       home: PredictionCard(

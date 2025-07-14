@@ -7,11 +7,13 @@ void main() {
   test('BuyListRepository add and remove', () async {
     SharedPreferences.setMockInitialValues({});
     final repo = BuyListRepositoryImpl();
-    await repo.addItem(const BuyItem('コーヒー', 'その他'));
+    await repo.addItem(
+        const BuyItem('コーヒー', 'その他', null, BuyItemReason.manual));
     var list = await repo.watchItems().first;
     expect(list.length, 1);
     expect(list.first.name, 'コーヒー');
-    await repo.removeItem(const BuyItem('コーヒー', 'その他'));
+    await repo.removeItem(
+        const BuyItem('コーヒー', 'その他', null, BuyItemReason.manual));
     list = await repo.watchItems().first;
     expect(list.isEmpty, true);
   });

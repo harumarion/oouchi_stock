@@ -5,6 +5,7 @@ import '../domain/entities/inventory.dart';
 import '../i18n/app_localizations.dart';
 import '../inventory_detail_page.dart';
 import '../util/inventory_display.dart';
+import '../util/buy_item_reason_label.dart';
 
 /// 買い物予報画面で使用するカードウィジェット
 /// 右スワイプで予報リストから削除できる
@@ -89,13 +90,23 @@ class PredictionCard extends StatelessWidget {
                 child: ListTile(
                   // 商品名の後に品種を表示する
                   title: Text('${inv.itemName} / ${inv.itemType}'),
-                  subtitle: Text(subtitle),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(subtitle),
+                      Text(item.reason.label(loc),
+                          style: Theme.of(context).textTheme.bodySmall),
+                    ],
+                  ),
                   onTap: () => _openDetail(context),
+                  // 買い物リストへ追加するボタン
                   trailing: IconButton(
                     icon: const Icon(Icons.playlist_add),
                     onPressed: () async {
                       await addToBuyList(
-                          BuyItem(inv.itemName, inv.category, inv.id));
+                        BuyItem(inv.itemName, inv.category, inv.id,
+                            BuyItemReason.prediction),
+                      );
                       await removePrediction(item);
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
