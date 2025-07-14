@@ -77,7 +77,7 @@
   "expiry": "Expiration: {date}",
   "expiryLabel": "Expiration",
   "showExpired": "Show expired",
-  "totalVolume": "Total volume: {unit}{value}",
+  "totalVolume": "Total volume: {value}{unit}",
   "unitPrice": "Unit price: {value}",
   "checkedDate": "Checked: {date}",
   "categorySettings": "Category Settings",
