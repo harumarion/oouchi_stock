@@ -39,6 +39,8 @@ class PriceHistoryPage extends StatefulWidget {
 class _PriceHistoryPageState extends State<PriceHistoryPage> {
   /// 画面の状態を管理する ViewModel
   late final PriceHistoryViewModel _viewModel;
+  /// 既に削除されたIDを保持
+  final Set<String> _removedIds = {};
 
   @override
   void initState() {
@@ -69,7 +71,11 @@ class _PriceHistoryPageState extends State<PriceHistoryPage> {
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
           }
-          final list = snapshot.data!;
+          var list = snapshot.data!;
+          // Firestoreから取得したデータに存在しないIDをクリーンアップ
+          _removedIds.removeWhere((id) => list.every((e) => e.id != id));
+          // すでに削除したIDは表示しない
+          list = list.where((e) => !_removedIds.contains(e.id)).toList();
           final loc = AppLocalizations.of(context)!;
           return ListView(
             children: [
@@ -96,7 +102,13 @@ class _PriceHistoryPageState extends State<PriceHistoryPage> {
                     );
                     return res ?? false;
                   },
-                  onDismissed: (_) async => _viewModel.delete(p.id),
+                  onDismissed: (_) async {
+                    setState(() {
+                      // スワイプ後すぐ非表示にするためIDを保存
+                      _removedIds.add(p.id);
+                    });
+                    await _viewModel.delete(p.id);
+                  },
                   background: Container(
                     color: Colors.red,
                     alignment: Alignment.centerLeft,

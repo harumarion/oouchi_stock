@@ -33,6 +33,10 @@ class _ItemTypeSettingsPageState extends State<ItemTypeSettingsPage> {
   }
 
   Future<void> _delete(ItemType item) async {
+    setState(() {
+      // スワイプ直後にカードを非表示にするためリストから削除
+      _viewModel.list.removeWhere((e) => e.id == item.id);
+    });
     try {
       await _viewModel.delete(item);
       if (mounted) {
