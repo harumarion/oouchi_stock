@@ -127,7 +127,7 @@ class EditInventoryViewModel extends ChangeNotifier {
       }
       // Firestore から一覧を取得できたのでフラグを立てる
       typesLoaded = true;
-      final types = typesMap[category?.name];
+      final types = typesMap[category.name];
       if (types != null && types.isNotEmpty) {
         // 既に設定されている品種がリストにあるかを確認
         if (itemType.isEmpty) {
