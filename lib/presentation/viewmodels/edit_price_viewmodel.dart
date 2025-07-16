@@ -75,9 +75,9 @@ class EditPriceViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// セール情報を更新
-  Future<void> save() async {
-    if (inventory == null) return;
+  /// セール情報を更新し、更新後の情報を返す
+  Future<PriceInfo?> save() async {
+    if (inventory == null) return null;
     final info = PriceInfo(
       id: original.id,
       inventoryId: inventory!.id,
@@ -98,5 +98,8 @@ class EditPriceViewModel extends ChangeNotifier {
       expiry: expiry,
     );
     await _usecase(info);
+    // 保存成功時は保持している元データを更新
+    original = info;
+    return info;
   }
 }

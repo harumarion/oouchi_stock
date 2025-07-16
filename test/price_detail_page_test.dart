@@ -43,5 +43,31 @@ void main() {
     await tester.tap(editButton);
     await tester.pumpAndSettle();
     expect(find.byType(EditPricePage), findsOneWidget);
+
+    // 編集画面から更新データを渡して戻る
+    Navigator.of(tester.element(find.byType(EditPricePage))).pop(
+      PriceInfo(
+        id: '1',
+        inventoryId: '1',
+        checkedAt: DateTime(2023, 1, 1),
+        category: '日用品',
+        itemType: '洗剤',
+        itemName: '更新後',
+        count: 1,
+        unit: '個',
+        volume: 1,
+        totalVolume: 1,
+        regularPrice: 200,
+        salePrice: 150,
+        shop: '店',
+        approvalUrl: 'https://example.com',
+        memo: 'メモ',
+        unitPrice: 150,
+        expiry: DateTime(2023, 1, 2),
+      ),
+    );
+    await tester.pumpAndSettle();
+    // 更新後の情報が画面に反映されることを確認
+    expect(find.text('更新後'), findsOneWidget);
   });
 }
