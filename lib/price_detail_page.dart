@@ -6,9 +6,43 @@ import 'util/unit_localization.dart';
 import 'edit_price_page.dart';
 
 /// セール詳細情報表示画面
-class PriceDetailPage extends StatelessWidget {
-  final PriceDetailViewModel viewModel;
-  PriceDetailPage({super.key, required PriceInfo info}) : viewModel = PriceDetailViewModel(info);
+class PriceDetailPage extends StatefulWidget {
+  /// 初期表示するセール情報
+  final PriceInfo info;
+
+  const PriceDetailPage({super.key, required this.info});
+
+  @override
+  State<PriceDetailPage> createState() => _PriceDetailPageState();
+}
+
+class _PriceDetailPageState extends State<PriceDetailPage> {
+  /// 画面状態を保持する ViewModel
+  late final PriceDetailViewModel viewModel;
+
+  @override
+  void initState() {
+    super.initState();
+    viewModel = PriceDetailViewModel(widget.info)
+      ..addListener(() { if (mounted) setState(() {}); });
+  }
+
+  @override
+  void dispose() {
+    viewModel.dispose();
+    super.dispose();
+  }
+
+  /// 編集画面を開き、戻ってきたら情報を更新する
+  Future<void> _editPrice() async {
+    final updated = await Navigator.push<PriceInfo>(
+      context,
+      MaterialPageRoute(builder: (_) => EditPricePage(info: viewModel.info)),
+    );
+    if (updated != null) {
+      viewModel.updateInfo(updated);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,14 +57,8 @@ class PriceDetailPage extends StatelessWidget {
           // セール情報編集ボタン
           IconButton(
             icon: const Icon(Icons.edit),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => EditPricePage(info: viewModel.info),
-                ),
-              );
-            },
+            // 編集アイコンタップで編集画面へ遷移
+            onPressed: _editPrice,
           ),
         ],
       ),

@@ -159,14 +159,16 @@ class _EditPricePageState extends State<EditPricePage> {
                         // 入力内容を保存するボタン
                         ElevatedButton(
                           onPressed: () async {
+                            // バリデーション通過後に保存処理を実行
                             if (_viewModel.formKey.currentState!.validate()) {
                               try {
-                                await _viewModel.save();
+                                final info = await _viewModel.save();
                                 if (!mounted) return;
                                 await ScaffoldMessenger.of(context)
                                     .showSnackBar(SnackBar(content: Text(loc.saved)))
                                     .closed;
-                                if (mounted) Navigator.pop(context);
+                                // 保存後は編集結果を前の画面へ渡して戻る
+                                if (mounted) Navigator.pop(context, info);
                               } catch (e) {
                                 if (mounted) {
                                   ScaffoldMessenger.of(context)
