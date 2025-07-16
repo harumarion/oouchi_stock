@@ -1,6 +1,6 @@
 import 'dart:async';
 // Flutter の基本ウィジェットとステート管理を使用
-import 'package:flutter/material.dart' hide Category;
+import 'package:flutter/material.dart';
 import '../../domain/entities/inventory.dart';
 import '../../domain/entities/category.dart';
 import '../../domain/usecases/update_inventory.dart';
