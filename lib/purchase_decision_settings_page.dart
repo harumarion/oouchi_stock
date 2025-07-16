@@ -3,7 +3,8 @@ import 'package:oouchi_stock/i18n/app_localizations.dart';
 import 'domain/entities/purchase_decision_settings.dart';
 
 /// 購入判定のしきい値を編集する画面
-/// 設定画面から遷移し、残り日数と値引き率を入力して保存する
+/// 設定画面のメニュー「購入判定設定」をタップすると表示され、
+/// 残り日数と値引き率を入力して保存する
 class PurchaseDecisionSettingsPage extends StatefulWidget {
   const PurchaseDecisionSettingsPage({super.key});
 
@@ -21,8 +22,11 @@ class _PurchaseDecisionSettingsPageState
   // 値引き率入力コントローラ
   late TextEditingController _percentController;
 
+  // 慎重判定日数の初期値
   int _cautious = 3;
+  // 買い時判定日数の初期値
   int _best = 3;
+  // 値引き率の初期値
   double _percent = 10;
 
   @override
@@ -31,6 +35,7 @@ class _PurchaseDecisionSettingsPageState
     _cautiousController = TextEditingController();
     _bestController = TextEditingController();
     _percentController = TextEditingController();
+    // 初期表示時に保存済み設定を読み込む
     _load();
   }
 
@@ -48,7 +53,7 @@ class _PurchaseDecisionSettingsPageState
   }
 
   Future<void> _save() async {
-    // 入力値を設定として保存
+    // 保存ボタン押下時に現在の入力値を設定として保持
     _cautious = int.tryParse(_cautiousController.text) ?? _cautious;
     _best = int.tryParse(_bestController.text) ?? _best;
     _percent = double.tryParse(_percentController.text) ?? _percent;
@@ -70,7 +75,8 @@ class _PurchaseDecisionSettingsPageState
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
-    // 画面構築。数値を入力して保存ボタンで戻る
+    // 画面を構築。各数値を入力して保存ボタンで設定を反映し、
+    // Navigator.pop で前の画面に戻る
     return Scaffold(
       appBar: AppBar(title: Text(loc.purchaseDecisionSettings)),
       body: ListView(
@@ -99,6 +105,7 @@ class _PurchaseDecisionSettingsPageState
               await _save();
               if (mounted) Navigator.pop(context, true);
             },
+            // 設定を保存して前の画面に戻る
             child: Text(loc.save),
           ),
         ],
