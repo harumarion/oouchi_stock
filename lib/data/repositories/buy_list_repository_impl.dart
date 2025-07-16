@@ -4,7 +4,20 @@ import '../../domain/entities/buy_item.dart';
 import '../../domain/repositories/buy_list_repository.dart';
 
 /// SharedPreferences を用いて買い物リストを保存するリポジトリ実装
+/// アプリ全体で同一インスタンスを共有するシングルトンとして実装する
 class BuyListRepositoryImpl implements BuyListRepository {
+  BuyListRepositoryImpl._internal();
+  static final BuyListRepositoryImpl _instance = BuyListRepositoryImpl._internal();
+
+  /// インスタンス取得
+  factory BuyListRepositoryImpl() => _instance;
+
+  /// テスト用に状態をリセットする
+  static void resetForTest() {
+    _instance._initialized = false;
+    _instance._items = [];
+    _instance._ignoredIds = [];
+  }
   // SharedPreferences に保存する際のキー
   static const _key = 'buy_list_items';
   // 手動削除した在庫IDを保持するキー

@@ -6,6 +6,7 @@ import 'package:oouchi_stock/data/repositories/buy_list_repository_impl.dart';
 void main() {
   test('BuyListRepository add and remove', () async {
     SharedPreferences.setMockInitialValues({});
+    BuyListRepositoryImpl.resetForTest();
     final repo = BuyListRepositoryImpl();
     await repo.addItem(
         const BuyItem('コーヒー', 'その他', null, BuyItemReason.manual));
@@ -20,6 +21,7 @@ void main() {
 
   test('ignored id functions', () async {
     SharedPreferences.setMockInitialValues({});
+    BuyListRepositoryImpl.resetForTest();
     final repo = BuyListRepositoryImpl();
     await repo.addIgnoredId('id1');
     var ids = await repo.loadIgnoredIds();
