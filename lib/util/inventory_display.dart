@@ -14,6 +14,6 @@ String formatRemaining(BuildContext context, Inventory inv) {
           ? inv.totalVolume
           : inv.calculateTotalVolume())
       .toStringAsFixed(1);
-  // remainingFormat の引数は (数量, 総容量, 単位) の順で指定する
-  return loc.remainingFormat(count, total, unit);
+  // remainingFormat の引数は (数量, 単位, 総容量) の順で指定する
+  return loc.remainingFormat(count, unit, total);
 }
