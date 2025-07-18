@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../domain/entities/buy_item.dart';
 import '../models/sale_item.dart';
 import '../util/localization_extensions.dart';
+import 'item_card.dart';
 
 /// セール情報画面で使用するカードウィジェット
 ///
@@ -27,8 +28,7 @@ class SaleItemCard extends StatelessWidget {
     final expired = daysLeft <= 1;
     final period =
         '${item.start.month}/${item.start.day}〜${item.end.month}/${item.end.day}';
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
+    return ItemCard(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

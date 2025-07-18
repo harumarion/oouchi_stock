@@ -7,6 +7,7 @@ import '../i18n/app_localizations.dart';
 import '../inventory_detail_page.dart';
 import '../util/inventory_display.dart';
 import '../util/buy_item_reason_label.dart';
+import 'item_card.dart';
 
 /// BuyListPage で使用される、買い物リストを表示するカードウィジェット
 ///
@@ -159,26 +160,17 @@ class _BuyListCardState extends State<BuyListCard> {
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
     if (_removed) return const SizedBox.shrink();
-    return Dismissible(
+    return ItemCard(
       key: ValueKey(widget.item.key),
-      direction: DismissDirection.startToEnd,
+      dismissDirection: DismissDirection.startToEnd,
       confirmDismiss: (_) => _confirmDismiss(context),
       onDismissed: (_) {
         setState(() {
-          // カードを即座に非表示にする
           _removed = true;
         });
         widget.onRemove(widget.item);
       },
-      background: Container(
-        color: Colors.red,
-        alignment: Alignment.centerLeft,
-        padding: const EdgeInsets.only(left: 16),
-        child: const Icon(Icons.delete, color: Colors.white),
-      ),
-      child: Card(
-        margin: const EdgeInsets.only(bottom: 12),
-        child: widget.item.inventoryId == null
+      child: widget.item.inventoryId == null
             // 手入力アイテムは理由も表示
             ? ListTile(
                 title: Text(
@@ -245,7 +237,6 @@ class _BuyListCardState extends State<BuyListCard> {
                   );
                 },
               ),
-      ),
     );
   }
 }

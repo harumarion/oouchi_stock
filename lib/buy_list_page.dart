@@ -6,6 +6,7 @@ import 'domain/entities/buy_item.dart';
 import 'domain/entities/category.dart';
 import 'widgets/settings_menu_button.dart';
 import 'widgets/buy_list_card.dart';
+import 'widgets/empty_state.dart';
 // 言語変更時にアプリ全体のロケールを更新するため MyAppState を参照
 import 'main.dart';
 
@@ -107,7 +108,7 @@ class BuyListPageState extends State<BuyListPage> {
               ),
               Expanded(
                 child: list.isEmpty
-                    ? Center(child: Text(loc.noBuyItems))
+                    ? EmptyState(message: loc.noBuyItems)
                     : ListView(
                         padding: const EdgeInsets.all(16),
                         children: [

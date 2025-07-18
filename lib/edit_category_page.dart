@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:oouchi_stock/i18n/app_localizations.dart';
 import 'presentation/viewmodels/edit_category_viewmodel.dart';
+import 'widgets/color_picker.dart';
 
 import 'domain/entities/category.dart';
 
@@ -47,30 +48,11 @@ class _EditCategoryPageState extends State<EditCategoryPage> {
                 alignment: Alignment.centerLeft,
                 child: Text(AppLocalizations.of(context)!.selectColor),
               ),
-              // カラー選択。既存の色があれば選択状態にする
-              SizedBox(
-                height: 48,
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  children: [
-                    for (final c in _viewModel.colors)
-                      GestureDetector(
-                        onTap: () => setState(() => _viewModel.color = c),
-                        child: Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 4),
-                          width: 40,
-                          decoration: BoxDecoration(
-                            color: c,
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: _viewModel.color == c ? Colors.black : Colors.transparent,
-                              width: 3,
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
+              // 共通ウィジェットで色を選択
+              ColorPicker(
+                colors: _viewModel.colors,
+                selected: _viewModel.color,
+                onSelected: (c) => setState(() => _viewModel.color = c),
               ),
               const SizedBox(height: 24),
               // 保存ボタンをタップしたときにカテゴリ名を更新

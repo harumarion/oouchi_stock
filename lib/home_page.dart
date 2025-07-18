@@ -5,6 +5,7 @@ import "domain/entities/category.dart";
 import "domain/entities/buy_item.dart";
 import 'widgets/settings_menu_button.dart';
 import 'widgets/prediction_card.dart';
+import 'widgets/empty_state.dart';
 import 'main.dart';
 import 'presentation/viewmodels/home_page_viewmodel.dart';
 
@@ -46,23 +47,15 @@ class _HomePageState extends State<HomePage> {
     if (_viewModel.categories.isEmpty) {
       return Scaffold(
         appBar: AppBar(title: Text(AppLocalizations.of(context)!.buyListTitle)),
-        body: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(AppLocalizations.of(context)!.noCategories),
-              const SizedBox(height: 8),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const AddCategoryPage()),
-                  );
-                },
-                child: Text(AppLocalizations.of(context)!.addCategory),
-              ),
-            ],
-          ),
+        body: EmptyState(
+          message: AppLocalizations.of(context)!.noCategories,
+          buttonLabel: AppLocalizations.of(context)!.addCategory,
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const AddCategoryPage()),
+            );
+          },
         ),
       );
     }
@@ -79,7 +72,7 @@ class _HomePageState extends State<HomePage> {
         if (items.isEmpty) {
           return Scaffold(
             appBar: AppBar(title: Text(AppLocalizations.of(context)!.buyListTitle)),
-            body: Center(child: Text(AppLocalizations.of(context)!.noBuyItems)),
+            body: EmptyState(message: AppLocalizations.of(context)!.noBuyItems),
           );
         }
         final map = {for (final c in _viewModel.categories) c.name: <BuyItem>[]};
@@ -114,7 +107,7 @@ class _HomePageState extends State<HomePage> {
               children: [
                 for (final c in _viewModel.categories)
                   map[c.name]!.isEmpty
-                      ? Center(child: Text(AppLocalizations.of(context)!.noBuyItems))
+                      ? EmptyState(message: AppLocalizations.of(context)!.noBuyItems)
                       : ListView(
                           padding: const EdgeInsets.all(16),
                           children: [
