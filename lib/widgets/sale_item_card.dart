@@ -5,6 +5,9 @@ import '../models/sale_item.dart';
 import '../util/localization_extensions.dart';
 
 /// セール情報画面で使用するカードウィジェット
+///
+/// 画面名: SaleListPage
+/// セール商品を買い物リストへ追加するボタンの処理を持つ
 class SaleItemCard extends StatelessWidget {
   /// 表示するセール情報
   final SaleItem item;
@@ -48,14 +51,30 @@ class SaleItemCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 4),
-            Text(item.shop),
+            Text(
+              item.shop,
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyMedium
+                  ?.copyWith(color: Colors.black87),
+            ),
             const SizedBox(height: 4),
             Text(
               '${loc.salePriceLabel(item.salePrice.toStringAsFixed(0))}  '
               '${loc.regularPriceLabel(item.regularPrice.toStringAsFixed(0))}',
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyMedium
+                  ?.copyWith(color: Colors.black87),
             ),
             const SizedBox(height: 4),
-            Text(loc.salePeriod(period)),
+            Text(
+              loc.salePeriod(period),
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyMedium
+                  ?.copyWith(color: Colors.black87),
+            ),
             const SizedBox(height: 4),
             Text(
               loc.daysLeft(daysLeft.toString()),
@@ -63,10 +82,17 @@ class SaleItemCard extends StatelessWidget {
               style: Theme.of(context)
                   .textTheme
                   .bodyMedium
-                  ?.copyWith(color: expired ? Colors.red : null),
+                  ?.copyWith(
+                      color: expired ? Colors.red : Colors.black87),
             ),
             const SizedBox(height: 4),
-            Text(loc.stockInfo(item.stock)),
+            Text(
+              loc.stockInfo(item.stock),
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyMedium
+                  ?.copyWith(color: Colors.black87),
+            ),
             const SizedBox(height: 8),
             Align(
               alignment: Alignment.centerRight,

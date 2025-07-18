@@ -9,6 +9,9 @@ import '../util/inventory_display.dart';
 import '../util/buy_item_reason_label.dart';
 
 /// BuyListPage で使用される、買い物リストを表示するカードウィジェット
+///
+/// 画面名: BuyListPage
+/// スワイプで削除、タップで在庫詳細画面へ遷移するイベントを管理
 class BuyListCard extends StatefulWidget {
   /// 表示する買い物データ
   final BuyItem item;
@@ -178,15 +181,26 @@ class _BuyListCardState extends State<BuyListCard> {
         child: widget.item.inventoryId == null
             // 手入力アイテムは理由も表示
             ? ListTile(
-                title: Text(widget.item.name),
-                subtitle: Text(widget.item.reason.label(loc)),
+                title: Text(
+                  widget.item.name,
+                  // 在庫リストカードと統一したタイトルフォント
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                subtitle: Text(
+                  widget.item.reason.label(loc),
+                  // 理由表示は補足用のスタイル
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
               )
             : StreamBuilder<Inventory?>(
                 stream: widget.watchInventory(widget.item.inventoryId!),
                 builder: (context, snapshot) {
                   if (!snapshot.hasData) {
                     return ListTile(
-                      title: Text(widget.item.name),
+                      title: Text(
+                        widget.item.name,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
                       // 詳細画面へ遷移するタップイベント
                       onTap: () => _openDetail(context),
                     );
@@ -203,17 +217,28 @@ class _BuyListCardState extends State<BuyListCard> {
                       final subtitle =
                           '${formatRemaining(context, inv)}$daysText';
                       return ListTile(
-                        // 商品名の後ろに品種を表示
-                        title: Text('${inv.itemName} / ${inv.itemType}'),
+                        // 商品名と品種をまとめて表示
+                        title: Text(
+                          '${inv.itemName} / ${inv.itemType}',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(subtitle),
-                            Text(widget.item.reason.label(loc),
-                                style:
-                                    Theme.of(context).textTheme.bodySmall),
+                            Text(
+                              subtitle,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(color: Colors.black87),
+                            ),
+                            Text(
+                              widget.item.reason.label(loc),
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
                           ],
                         ),
+                        // カードタップで在庫詳細画面へ遷移
                         onTap: () => _openDetail(context),
                       );
                     },
