@@ -6,6 +6,7 @@ import '../i18n/app_localizations.dart';
 import '../inventory_detail_page.dart';
 import '../util/inventory_display.dart';
 import '../util/buy_item_reason_label.dart';
+import 'item_card.dart';
 
 /// 買い物予報画面で使用するカードウィジェット
 /// 右スワイプで予報リストから削除できる
@@ -61,36 +62,25 @@ class _PredictionCardState extends State<PredictionCard> {
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
     if (_removed) return const SizedBox.shrink();
-    return Dismissible(
+    return ItemCard(
       key: ValueKey(widget.item.key),
-      direction: DismissDirection.startToEnd,
+      dismissDirection: DismissDirection.startToEnd,
       onDismissed: (_) {
-        setState(() {
-          _removed = true;
-        });
+        setState(() { _removed = true; });
         widget.removePrediction(widget.item);
       },
-      background: Container(
-        color: Colors.red,
-        alignment: Alignment.centerLeft,
-        padding: const EdgeInsets.only(left: 16),
-        child: const Icon(Icons.delete, color: Colors.white),
-      ),
       child: StreamBuilder<Inventory?>(
         stream: widget.watchInventory(widget.item.inventoryId!),
         builder: (context, snapshot) {
           // 在庫がまだ取得できない場合もカードとして表示する
           if (!snapshot.hasData) {
-            return Card(
-              margin: const EdgeInsets.only(bottom: 12),
-              child: ListTile(
-                title: Text(
-                  widget.item.name,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                // 詳細画面へ遷移するタップイベント
-                onTap: () => _openDetail(context),
+            return ListTile(
+              title: Text(
+                widget.item.name,
+                style: Theme.of(context).textTheme.titleMedium,
               ),
+              // 詳細画面へ遷移するタップイベント
+              onTap: () => _openDetail(context),
             );
           }
           final inv = snapshot.data!;
@@ -104,13 +94,10 @@ class _PredictionCardState extends State<PredictionCard> {
               // 予報画面カードで在庫数量と総容量をまとめて表示
               final subtitle =
                   '${formatRemaining(context, inv)}$daysText';
-                      return Card(
-                // 買い物予報画面の1アイテムをカード表示
-                margin: const EdgeInsets.only(bottom: 12),
-                child: ListTile(
-                  // 商品名と品種の表示
-                  title: Text(
-                    '${inv.itemName} / ${inv.itemType}',
+                      return ListTile(
+                // 商品名と品種の表示
+                title: Text(
+                  '${inv.itemName} / ${inv.itemType}',
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   subtitle: Column(

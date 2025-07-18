@@ -5,6 +5,8 @@ import 'add_category_page.dart';
 import 'presentation/viewmodels/edit_inventory_viewmodel.dart';
 import 'util/unit_localization.dart';
 import 'util/item_type_localization.dart';
+import 'widgets/inventory_form.dart';
+import 'widgets/empty_state.dart';
 
 /// 商品を編集する画面のウィジェット
 class EditInventoryPage extends StatefulWidget {
@@ -86,23 +88,15 @@ class _EditInventoryPageState extends State<EditInventoryPage> {
     if (_viewModel.categories.isEmpty) {
       return Scaffold(
         appBar: AppBar(title: Text(AppLocalizations.of(context)!.inventoryEditTitle)),
-        body: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(AppLocalizations.of(context)!.noCategories),
-              const SizedBox(height: 8),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const AddCategoryPage()),
-                  );
-                },
-                child: Text(AppLocalizations.of(context)!.addCategory),
-              ),
-            ],
-          ),
+        body: EmptyState(
+          message: AppLocalizations.of(context)!.noCategories,
+          buttonLabel: AppLocalizations.of(context)!.addCategory,
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const AddCategoryPage()),
+            );
+          },
         ),
       );
     }
@@ -111,105 +105,15 @@ class _EditInventoryPageState extends State<EditInventoryPage> {
       appBar: AppBar(title: Text(AppLocalizations.of(context)!.inventoryEditTitle)),
       body: Padding(
         padding: const EdgeInsets.all(16),
-        child: Form(
-          key: _viewModel.formKey,
-          child: ListView(
-            children: [
-              TextFormField(
-                initialValue: _viewModel.itemName,
-                decoration: InputDecoration(labelText: AppLocalizations.of(context)!.itemName),
-                onChanged: (v) => _viewModel.setItemName(v),
-                validator: (v) =>
-                    v == null || v.isEmpty ? AppLocalizations.of(context)!.itemNameRequired : null,
-              ),
-              const SizedBox(height: 12),
-              DropdownButtonFormField<Category>(
-                decoration: InputDecoration(labelText: AppLocalizations.of(context)!.category),
-                value: _viewModel.category,
-                items: _viewModel.categories
-                    .map((c) => DropdownMenuItem(value: c, child: Text(c.name)))
-                    .toList(),
-                onChanged: (v) {
-                  if (v == null) return;
-                  setState(() {
-                    _viewModel.changeCategory(v);
-                  });
-                },
-              ),
-              const SizedBox(height: 12),
-              Builder(builder: (context) {
-                // 選択中カテゴリに対応する品種リストを取得。未読み込み時は現在値のみ表示
-                final loadedTypes = _viewModel.typesMap[_viewModel.category?.name];
-                // 未読み込みの場合は現在の品種だけをリスト化
-                final itemTypes = loadedTypes ?? [_viewModel.itemType];
-                // 品種リストに現在の値が存在しない場合のみ更新
-                final selectedType = loadedTypes == null
-                    ? _viewModel.itemType
-                    : itemTypes.contains(_viewModel.itemType)
-                        ? _viewModel.itemType
-                        : itemTypes.first;
-                if (_viewModel.typesLoaded && selectedType != _viewModel.itemType) {
-                  // ビルド完了後に ViewModel の値を更新
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    _viewModel.changeItemType(selectedType);
-                  });
-                }
-                return DropdownButtonFormField<String>(
-                  decoration: InputDecoration(
-                      labelText: AppLocalizations.of(context)!.itemType),
-                  value: itemTypes.contains(_viewModel.itemType)
-                      ? _viewModel.itemType
-                      : null,
-                  items: itemTypes
-                      .map((t) => DropdownMenuItem(
-                            value: t,
-                            child: Text(localizeItemType(context, t)),
-                          ))
-                      .toList(),
-                  onChanged: (v) {
-                    if (v != null) setState(() => _viewModel.changeItemType(v));
-                  },
-                );
-              }),
-              const SizedBox(height: 12),
-              // 1個あたり容量の入力欄を追加
-              TextFormField(
-                initialValue: _viewModel.volume.toString(),
-                decoration: InputDecoration(labelText: AppLocalizations.of(context)!.volume),
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                onChanged: (v) => _viewModel.setVolume(v),
-              ),
-              const SizedBox(height: 12),
-              DropdownButtonFormField<String>(
-                decoration: InputDecoration(labelText: AppLocalizations.of(context)!.unit),
-                value: _viewModel.unit,
-                items: _viewModel.units
-                    .map((u) => DropdownMenuItem(
-                          value: u,
-                          child: Text(localizeUnit(context, u)),
-                        ))
-                    .toList(),
-                onChanged: (v) => setState(() => _viewModel.setUnit(v ?? '')),
-              ),
-              const SizedBox(height: 12),
-              TextFormField(
-                initialValue: _viewModel.note,
-                decoration: InputDecoration(labelText: AppLocalizations.of(context)!.memo),
-                onChanged: (v) => _viewModel.setNote(v),
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton.icon(
-                icon: const Icon(Icons.save),
-                label: Text(AppLocalizations.of(context)!.save),
-                onPressed: () async {
-                  if (_viewModel.formKey.currentState!.validate()) {
-                    await _saveItem();
-                    if (mounted) Navigator.pop(context);
-                  }
-                },
-              )
-            ],
-          ),
+        child: InventoryForm(
+          viewModel: _viewModel,
+          includeQuantity: false,
+          onSave: () async {
+            if (_viewModel.formKey.currentState!.validate()) {
+              await _saveItem();
+              if (mounted) Navigator.pop(context);
+            }
+          },
         ),
       ),
     );

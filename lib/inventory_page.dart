@@ -5,6 +5,8 @@ import 'add_inventory_page.dart';
 import 'inventory_detail_page.dart';
 import 'widgets/inventory_card.dart';
 import 'widgets/settings_menu_button.dart';
+import 'widgets/search_sort_row.dart';
+import 'widgets/empty_state.dart';
 import 'main.dart';
 import 'domain/entities/category.dart';
 import 'domain/entities/inventory.dart';
@@ -60,27 +62,16 @@ class InventoryPageState extends State<InventoryPage> {
     // カテゴリがまだ存在しない場合は案内テキストと追加ボタンを表示
     if (_viewModel.categories.isEmpty) {
       return Scaffold(
-        // 画面名を在庫一覧に固定
         appBar: AppBar(title: Text(AppLocalizations.of(context)!.inventoryList)),
-        body: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // カテゴリ未登録メッセージ
-              Text(AppLocalizations.of(context)!.noCategories),
-              const SizedBox(height: 8),
-              ElevatedButton(
-                onPressed: () {
-                  // カテゴリ追加画面へ遷移
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const AddCategoryPage()),
-                  );
-                },
-                child: Text(AppLocalizations.of(context)!.addCategory),
-              ),
-            ],
-          ),
+        body: EmptyState(
+          message: AppLocalizations.of(context)!.noCategories,
+          buttonLabel: AppLocalizations.of(context)!.addCategory,
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const AddCategoryPage()),
+            );
+          },
         ),
       );
     }
@@ -175,35 +166,21 @@ class _InventoryListState extends State<InventoryList> {
       children: [
         Padding(
           padding: const EdgeInsets.all(8),
-          child: Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _viewModel.controller,
-                  decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)!.searchHint,
-                  ),
-                  // 入力文字列が変わるたびにリストを再検索
-                  onChanged: _viewModel.setSearch,
-                ),
+          child: SearchSortRow(
+            controller: _viewModel.controller,
+            onSearchChanged: _viewModel.setSearch,
+            sortValue: _viewModel.sort,
+            onSortChanged: (v) {
+              if (v != null) _viewModel.setSort(v);
+            },
+            items: [
+              DropdownMenuItem(
+                value: 'alphabet',
+                child: Text(AppLocalizations.of(context)!.sortAlphabet),
               ),
-              const SizedBox(width: 8),
-              // 並び替えドロップダウン。選択が変わるとリストを更新
-              DropdownButton<String>(
-                value: _viewModel.sort,
-                onChanged: (v) {
-                  if (v != null) _viewModel.setSort(v);
-                },
-                items: [
-                  DropdownMenuItem(
-                    value: 'alphabet',
-                    child: Text(AppLocalizations.of(context)!.sortAlphabet),
-                  ),
-                  DropdownMenuItem(
-                    value: 'updated',
-                    child: Text(AppLocalizations.of(context)!.sortUpdated),
-                  ),
-                ],
+              DropdownMenuItem(
+                value: 'updated',
+                child: Text(AppLocalizations.of(context)!.sortUpdated),
               ),
             ],
           ),

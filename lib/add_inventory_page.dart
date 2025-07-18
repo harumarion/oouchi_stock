@@ -8,6 +8,8 @@ import 'add_category_page.dart';
 import 'presentation/viewmodels/add_inventory_viewmodel.dart';
 import 'util/unit_localization.dart';
 import 'util/item_type_localization.dart';
+import 'widgets/inventory_form.dart';
+import 'widgets/empty_state.dart';
 
 // 商品を追加する画面のウィジェット
 
@@ -50,23 +52,15 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
     if (_viewModel.categories.isEmpty) {
       return Scaffold(
         appBar: AppBar(title: Text(AppLocalizations.of(context)!.inventoryAddTitle)),
-        body: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(AppLocalizations.of(context)!.noCategories),
-              const SizedBox(height: 8),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const AddCategoryPage()),
-                  );
-                },
-                child: Text(AppLocalizations.of(context)!.addCategory),
-              ),
-            ],
-          ),
+        body: EmptyState(
+          message: AppLocalizations.of(context)!.noCategories,
+          buttonLabel: AppLocalizations.of(context)!.addCategory,
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const AddCategoryPage()),
+            );
+          },
         ),
       );
     }
@@ -87,160 +81,50 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
-        child: Form(
-          key: _viewModel.formKey,
-          child: ListView(
-            children: [
-              // 商品名入力
-              TextFormField(
-                decoration: InputDecoration(labelText: AppLocalizations.of(context)!.itemName),
-                onChanged: (value) => _viewModel.setItemName(value),
-                validator: (value) =>
-                    value == null || value.isEmpty ? AppLocalizations.of(context)!.itemNameRequired : null,
-              ),
-              const SizedBox(height: 12),
-              // カテゴリ選択
-              DropdownButtonFormField<Category>(
-                decoration: InputDecoration(labelText: AppLocalizations.of(context)!.category),
-                value: _viewModel.category,
-                items: _viewModel.categories
-                    .map((c) => DropdownMenuItem(value: c, child: Text(c.name)))
-                    .toList(),
-                onChanged: (value) {
-                  if (value == null) return;
-                  _viewModel.changeCategory(value);
-                },
-              ),
-              const SizedBox(height: 12),
-              // 品種選択
-              Builder(builder: (context) {
-                final itemTypes =
-                    _viewModel.typesMap[_viewModel.category?.name] ?? ['その他'];
-                if (!itemTypes.contains(_viewModel.itemType)) {
-                  // ビルド中に状態変更すると例外が出るためフレーム後に変更する
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    _viewModel.changeItemType(itemTypes.first);
+        child: InventoryForm(
+          viewModel: _viewModel,
+          includeQuantity: true,
+          quantity: _viewModel.quantity,
+          onQuantityChanged: _viewModel.changeQuantity,
+          onSave: () async {
+            if (_viewModel.formKey.currentState!.validate()) {
+              final ctx = context;
+              try {
+                await _viewModel.save();
+                if (!ctx.mounted) return;
+                final snackBar = ScaffoldMessenger.of(ctx).showSnackBar(
+                  SnackBar(content: Text(AppLocalizations.of(ctx)!.saved)),
+                );
+                await snackBar.closed;
+                if (!ctx.mounted) return;
+                if (Navigator.of(ctx).canPop()) {
+                  Navigator.pop(ctx);
+                } else {
+                  setState(() {
+                    _viewModel.formKey.currentState?.reset();
+                    _viewModel.resetFields();
                   });
                 }
-                return DropdownButtonFormField<String>(
-                  decoration: InputDecoration(labelText: AppLocalizations.of(context)!.itemType),
-                  value: _viewModel.itemType,
-                  items: itemTypes
-                      .map((t) => DropdownMenuItem(
-                            value: t,
-                            child: Text(localizeItemType(context, t)),
-                          ))
-                      .toList(),
-                  onChanged: (value) {
-                    if (value != null) _viewModel.changeItemType(value);
-                  },
-                );
-              }),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Text('${AppLocalizations.of(context)!.pieceCount}:'),
-                  IconButton(
-                    icon: const Icon(Icons.remove),
-                    onPressed: () => _viewModel.changeQuantity(-1),
-                  ),
-                  Text(_viewModel.quantity.toStringAsFixed(0)),
-                  IconButton(
-                    icon: const Icon(Icons.add),
-                    onPressed: () => _viewModel.changeQuantity(1),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              // 1個あたり容量入力
-              TextFormField(
-                decoration: InputDecoration(labelText: AppLocalizations.of(context)!.volume),
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                initialValue: '0',
-                onChanged: (v) => _viewModel.setVolume(v),
-              ),
-              const SizedBox(height: 12),
-              // 単位選択
-              DropdownButtonFormField<String>(
-                decoration: InputDecoration(labelText: AppLocalizations.of(context)!.unit),
-                value: _viewModel.unit,
-                items: _viewModel.units
-                    .map((u) => DropdownMenuItem(
-                          value: u,
-                          child: Text(localizeUnit(context, u)),
-                        ))
-                    .toList(),
-                onChanged: (value) => _viewModel.setUnit(value!),
-              ),
-              const SizedBox(height: 12),
-                // 商品追加画面で総容量を表示（値の後ろに単位を付与）
-                Text(
-                  AppLocalizations.of(context)!.totalVolume(
-                    localizeUnit(context, _viewModel.unit),
-                    _viewModel.totalVolume.toStringAsFixed(2),
-                  ),
-                  style: const TextStyle(fontSize: 20),
-                ),
-              const SizedBox(height: 12),
-              // メモの入力（任意）
-              TextFormField(
-                decoration: InputDecoration(labelText: AppLocalizations.of(context)!.memoOptional),
-                onChanged: (value) => _viewModel.setNote(value),
-              ),
-              const SizedBox(height: 24),
-              // 入力内容を保存するボタン
-              // 保存ボタン。入力が正しい場合は Firestore へ登録
-              ElevatedButton.icon(
-                icon: const Icon(Icons.save),
-                label: Text(AppLocalizations.of(context)!.save),
-                onPressed: () async {
-                  // フォームの入力が正しいか確認
-                  if (_viewModel.formKey.currentState!.validate()) {
-                    // build メソッドの context を保持
-                    final ctx = context;
-                    try {
-                      await _viewModel.save();
-                      if (!ctx.mounted) return;
-                      final snackBar = ScaffoldMessenger.of(ctx).showSnackBar(
-                        SnackBar(content: Text(AppLocalizations.of(ctx)!.saved)),
-                      );
-                      await snackBar.closed;
-                      if (!ctx.mounted) return;
-                      // 画面がスタックに積まれている場合のみ前の画面へ戻る
-                      if (Navigator.of(ctx).canPop()) {
-                        Navigator.pop(ctx);
-                      } else {
-                        // ルート画面から商品追加した場合はフォームをリセットする
-                        setState(() {
-                          _viewModel.formKey.currentState?.reset();
-                          _viewModel.resetFields();
-                        });
-                      }
-                    } on FirebaseException catch (e) {
-                      // Firestore からの例外をログに出力
-                      debugPrint('在庫保存失敗: ${e.message ?? e.code}');
-                      if (ctx.mounted) {
-                        ScaffoldMessenger.of(ctx).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                                '${AppLocalizations.of(ctx)!.saveFailed}: ${e.message ?? e.code}'),
-                          ),
-                        );
-                      }
-                    } catch (e) {
-                      // その他の例外をログに出力
-                      debugPrint('在庫保存失敗: $e');
-                      if (ctx.mounted) {
-                        ScaffoldMessenger.of(ctx).showSnackBar(
-                          SnackBar(content: Text(AppLocalizations.of(ctx)!.saveFailed)),
-                        );
-                      }
-                    }
-                  }
-                },
-              ),
-            ],
-          ),
+              } on FirebaseException catch (e) {
+                debugPrint('在庫保存失敗: ${e.message ?? e.code}');
+                if (ctx.mounted) {
+                  ScaffoldMessenger.of(ctx).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                          '${AppLocalizations.of(ctx)!.saveFailed}: ${e.message ?? e.code}'),
+                    ),
+                  );
+                }
+              } catch (e) {
+                debugPrint('在庫保存失敗: $e');
+                if (ctx.mounted) {
+                  ScaffoldMessenger.of(ctx).showSnackBar(
+                    SnackBar(content: Text(AppLocalizations.of(ctx)!.saveFailed)),
+                  );
+                }
+              }
+            }
+          },
         ),
       ),
     );

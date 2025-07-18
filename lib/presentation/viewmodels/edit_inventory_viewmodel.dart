@@ -10,9 +10,12 @@ import '../../util/date_time_parser.dart';
 import '../../default_item_types.dart';
 // アプリ共通の定数を利用
 import '../../util/constants.dart';
+import 'inventory_form_viewmodel.dart';
 
 /// 在庫編集画面の状態を管理する ViewModel
-class EditInventoryViewModel extends ChangeNotifier {
+// 商品編集フォームの状態を管理する ViewModel
+class EditInventoryViewModel extends ChangeNotifier
+    implements InventoryFormViewModel {
   /// 在庫更新ユースケース
   final UpdateInventory _usecase = UpdateInventory(InventoryRepositoryImpl());
 

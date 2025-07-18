@@ -3,6 +3,8 @@ import 'package:oouchi_stock/i18n/app_localizations.dart';
 import 'add_price_page.dart';
 import 'add_category_page.dart';
 import 'widgets/settings_menu_button.dart';
+import 'widgets/search_sort_row.dart';
+import 'widgets/empty_state.dart';
 import 'presentation/viewmodels/price_list_viewmodel.dart';
 import 'presentation/viewmodels/price_category_list_viewmodel.dart';
 import 'price_detail_page.dart';
@@ -47,23 +49,15 @@ class _PriceListPageState extends State<PriceListPage> {
     if (_viewModel.categories.isEmpty) {
       return Scaffold(
         appBar: AppBar(title: Text(AppLocalizations.of(context)!.priceManagementTitle)),
-        body: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(AppLocalizations.of(context)!.noCategories),
-              const SizedBox(height: 8),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const AddCategoryPage()),
-                  );
-                },
-                child: Text(AppLocalizations.of(context)!.addCategory),
-              ),
-            ],
-          ),
+        body: EmptyState(
+          message: AppLocalizations.of(context)!.noCategories,
+          buttonLabel: AppLocalizations.of(context)!.addCategory,
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const AddCategoryPage()),
+            );
+          },
         ),
       );
     }
@@ -152,49 +146,28 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
       children: [
         Padding(
           padding: const EdgeInsets.all(8),
-          child: Row(
-            children: [
-              Expanded(
-                // セール情報の検索テキストフィールド
-                child: TextField(
-                  controller: _viewModel.controller,
-                  decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)!.searchHint,
-                  ),
-                  // 入力値が変わったら検索条件を更新
-                  onChanged: _viewModel.setSearch,
-                ),
+          child: SearchSortRow(
+            controller: _viewModel.controller,
+            onSearchChanged: _viewModel.setSearch,
+            sortValue: _viewModel.sort,
+            onSortChanged: (v) { if (v != null) _viewModel.setSort(v); },
+            items: [
+              DropdownMenuItem(
+                value: 'alphabet',
+                child: Text(AppLocalizations.of(context)!.sortAlphabet),
               ),
-              const SizedBox(width: 8),
-              DropdownButton<String>(
-                value: _viewModel.sort,
-                onChanged: (v) { if (v != null) _viewModel.setSort(v); },
-                items: [
-                  DropdownMenuItem(
-                    value: 'alphabet',
-                    child: Text(AppLocalizations.of(context)!.sortAlphabet),
-                  ),
-                  DropdownMenuItem(
-                    value: 'updated',
-                    child: Text(AppLocalizations.of(context)!.sortUpdated),
-                  ),
-                  DropdownMenuItem(
-                    value: 'unitPrice',
-                    child: Text(AppLocalizations.of(context)!.sortUnitPrice),
-                  ),
-                ],
+              DropdownMenuItem(
+                value: 'updated',
+                child: Text(AppLocalizations.of(context)!.sortUpdated),
               ),
-              const SizedBox(width: 8),
-              Row(
-                children: [
-                  Text(AppLocalizations.of(context)!.showExpired),
-                  Switch(
-                    value: _viewModel.showExpired,
-                    onChanged: _viewModel.setShowExpired,
-                  ),
-                ],
+              DropdownMenuItem(
+                value: 'unitPrice',
+                child: Text(AppLocalizations.of(context)!.sortUnitPrice),
               ),
             ],
+            showExpiredSwitch: true,
+            showExpired: _viewModel.showExpired,
+            onShowExpiredChanged: _viewModel.setShowExpired,
           ),
         ),
         Expanded(
