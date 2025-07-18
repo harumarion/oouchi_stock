@@ -59,6 +59,7 @@ class _AddCategoryPageState extends State<AddCategoryPage> {
                 onSelected: (c) => setState(() => _viewModel.color = c),
               ),
               const SizedBox(height: 24),
+              // 保存ボタンをタップしたときの処理
               ElevatedButton(
                 onPressed: () async {
                   if (_viewModel.formKey.currentState!.validate()) {

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 /// 画面名: カテゴリ登録・編集ページ
 class ColorPicker extends StatelessWidget {
   final List<Color> colors;
-  final Color selected;
+  final Color? selected;
   final ValueChanged<Color> onSelected;
   const ColorPicker({
     super.key,
@@ -30,7 +30,9 @@ class ColorPicker extends StatelessWidget {
                   color: c,
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: selected == c ? Colors.black : Colors.transparent,
+                    color: selected != null && selected == c
+                        ? Colors.black
+                        : Colors.transparent,
                     width: 3,
                   ),
                 ),

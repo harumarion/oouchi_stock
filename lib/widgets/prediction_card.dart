@@ -85,7 +85,7 @@ class _PredictionCardState extends State<PredictionCard> {
           }
           final inv = snapshot.data!;
           return FutureBuilder<int>(
-                    future: widget.calcDaysLeft(inv),
+            future: widget.calcDaysLeft(inv),
             builder: (context, daysSnapshot) {
               final daysText = daysSnapshot.hasData
                   ? ' ・ ${loc.daysLeft(daysSnapshot.data!.toString())}'
@@ -94,46 +94,50 @@ class _PredictionCardState extends State<PredictionCard> {
               // 予報画面カードで在庫数量と総容量をまとめて表示
               final subtitle =
                   '${formatRemaining(context, inv)}$daysText';
-                      return ListTile(
+
+              return ListTile(
                 // 商品名と品種の表示
                 title: Text(
                   '${inv.itemName} / ${inv.itemType}',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        subtitle,
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodyMedium
-                            ?.copyWith(color: Colors.black87),
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      subtitle,
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyMedium
+                          ?.copyWith(color: Colors.black87),
+                    ),
+                    Text(
+                      widget.item.reason.label(loc),
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ],
+                ),
+                // タップで在庫詳細を開く
+                onTap: () => _openDetail(context),
+                // 買い物リストへ追加するボタン
+                trailing: IconButton(
+                  icon: const Icon(Icons.playlist_add),
+                  onPressed: () async {
+                    await widget.addToBuyList(
+                      BuyItem(
+                        inv.itemName,
+                        inv.category,
+                        inv.id,
+                        BuyItemReason.prediction,
                       ),
-                      Text(
-                        widget.item.reason.label(loc),
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    ],
-                  ),
-                  // タップで在庫詳細を開く
-                  onTap: () => _openDetail(context),
-                  // 買い物リストへ追加するボタン
-                  trailing: IconButton(
-                    icon: const Icon(Icons.playlist_add),
-                    onPressed: () async {
-                      await widget.addToBuyList(
-                        BuyItem(inv.itemName, inv.category, inv.id,
-                            BuyItemReason.prediction),
+                    );
+                    await widget.removePrediction(widget.item);
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(loc.addedBuyItem)),
                       );
-                      await widget.removePrediction(widget.item);
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(loc.addedBuyItem)),
-                        );
-                      }
-                    },
-                  ),
+                    }
+                  },
                 ),
               );
             },
