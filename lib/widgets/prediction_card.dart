@@ -9,6 +9,9 @@ import '../util/buy_item_reason_label.dart';
 
 /// 買い物予報画面で使用するカードウィジェット
 /// 右スワイプで予報リストから削除できる
+///
+/// 画面名: PredictionPage
+/// スワイプで削除、ボタンで買い物リストへ追加する処理を持つ
 class PredictionCard extends StatefulWidget {
   /// 表示するアイテム
   final BuyItem item;
@@ -81,7 +84,10 @@ class _PredictionCardState extends State<PredictionCard> {
             return Card(
               margin: const EdgeInsets.only(bottom: 12),
               child: ListTile(
-                title: Text(widget.item.name),
+                title: Text(
+                  widget.item.name,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
                 // 詳細画面へ遷移するタップイベント
                 onTap: () => _openDetail(context),
               ),
@@ -102,16 +108,28 @@ class _PredictionCardState extends State<PredictionCard> {
                 // 買い物予報画面の1アイテムをカード表示
                 margin: const EdgeInsets.only(bottom: 12),
                 child: ListTile(
-                  // 商品名の後に品種を表示する
-                        title: Text('${inv.itemName} / ${inv.itemType}'),
+                  // 商品名と品種の表示
+                  title: Text(
+                    '${inv.itemName} / ${inv.itemType}',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(subtitle),
-                      Text(widget.item.reason.label(loc),
-                          style: Theme.of(context).textTheme.bodySmall),
+                      Text(
+                        subtitle,
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodyMedium
+                            ?.copyWith(color: Colors.black87),
+                      ),
+                      Text(
+                        widget.item.reason.label(loc),
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
                     ],
                   ),
+                  // タップで在庫詳細を開く
                   onTap: () => _openDetail(context),
                   // 買い物リストへ追加するボタン
                   trailing: IconButton(

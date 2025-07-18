@@ -13,6 +13,7 @@
 - 詳細表示: **18px**
 
 これらのサイズは `lib/theme.dart` の `AppTheme` クラスで定義されており、画面間で一貫した表示を実現します。
+BuyListCard、SaleItemCard、PredictionCard も InventoryCard と同じスタイルを採用し、カード間で統一された読みやすさを確保しています。
 なお、広告表示機能は Android と iOS のみ対応しています。`google_mobile_ads` パッケージのバージョン 4.0.0 以上が必要です。
 動作させるには AndroidManifest と iOS の Info.plist にそれぞれ有効な AdMob の App ID を設定する必要があります。テスト用途であればサンプル ID を利用できます。
 WebView が無効、またはインストールされていない端末では広告初期化時にエラーログが表示されます。広告機能を利用するには Android System WebView もしくは Chrome を有効にしてください。
