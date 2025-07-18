@@ -135,15 +135,15 @@ class _AddPricePageState extends State<AddPricePage> {
                       onChanged: (v) => _viewModel.memo = v,
                     ),
                     const SizedBox(height: 12),
-                    // 合計容量を大きめの文字で表示（値→単位の順）
-                    Text(
-                      AppLocalizations.of(context)!.totalVolume(
-                        localizeUnit(
-                            context, _viewModel.inventory?.unit ?? ''),
-                        _viewModel.totalVolume.toStringAsFixed(2),
+                      // セール情報追加画面: 合計容量を値の後ろに単位を付けて表示
+                      Text(
+                        AppLocalizations.of(context)!.totalVolume(
+                          localizeUnit(
+                              context, _viewModel.inventory?.unit ?? ''),
+                          _viewModel.totalVolume.toStringAsFixed(2),
+                        ),
+                        style: const TextStyle(fontSize: 20),
                       ),
-                      style: const TextStyle(fontSize: 20),
-                    ),
                     // 単価を大きめの文字で表示
                     Text(
                       AppLocalizations.of(context)!
