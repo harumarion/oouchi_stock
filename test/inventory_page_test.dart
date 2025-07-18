@@ -10,8 +10,8 @@ void main() {
     // タブが描画されるまで待機
     await tester.pumpAndSettle();
     expect(find.byType(TextField), findsWidgets);
-    // 買い物リスト追加ボタンが存在するか確認
-    expect(find.byIcon(Icons.playlist_add), findsWidgets);
+    // SegmentedButton が表示されているか確認
+    expect(find.byType(SegmentedButton<int>), findsOneWidget);
     // 右下の FAB が表示されているか確認
     expect(find.byType(FloatingActionButton), findsOneWidget);
   });
