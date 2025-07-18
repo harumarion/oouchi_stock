@@ -26,7 +26,7 @@ void main() {
     expect(find.textContaining('ティッシュ'), findsOneWidget);
   });
 
-  testWidgets('buyOnly オプションで購入ボタンのみ表示',
+  testWidgets('buyOnly オプションで IconButton が表示されない',
       (WidgetTester tester) async {
     final inv = Inventory(
       id: '2',
@@ -47,7 +47,37 @@ void main() {
       stocktake: (_, __, ___, ____) async {},
       buyOnly: true,
     )));
-    expect(find.byType(IconButton), findsOneWidget);
+    expect(find.byType(IconButton), findsNothing);
+  });
+
+  testWidgets('カードタップでボトムシート表示', (WidgetTester tester) async {
+    final inv = Inventory(
+      id: '4',
+      itemName: 'ボトムシートテスト',
+      category: '日用品',
+      itemType: '消耗品',
+      quantity: 1.0,
+      volume: 1,
+      totalVolume: 1,
+      unit: '個',
+      monthlyConsumption: 0,
+      createdAt: DateTime.now(),
+    );
+    await tester.pumpWidget(MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: const Locale('ja'),
+      home: InventoryCard(
+        inventory: inv,
+        updateQuantity: (_, __, ___) async {},
+        stocktake: (_, __, ___, ____) async {},
+      ),
+    ));
+    await tester.tap(find.byType(InkWell));
+    await tester.pumpAndSettle();
+    expect(find.text('現在の在庫'), findsOneWidget);
+    expect(find.text('使った量'), findsOneWidget);
+    expect(find.text('買った量'), findsOneWidget);
   });
 
   testWidgets('長い名前の場合にスクロール表示される', (WidgetTester tester) async {

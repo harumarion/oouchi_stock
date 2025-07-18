@@ -12,7 +12,7 @@ class InventoryCard extends StatelessWidget {
   final Future<void> Function(String id, double amount, String type) updateQuantity;
   /// 棚卸しコールバック
   final Future<void> Function(String id, double before, double after, double diff) stocktake;
-  final VoidCallback? onTap;
+  final VoidCallback? onTap; // 長押し時の詳細画面遷移などに使用
   // 購入ボタンのみ表示するかどうか
   final bool buyOnly;
   // 買い物リストへ追加するときのコールバック
@@ -130,6 +130,53 @@ class InventoryCard extends StatelessWidget {
     }
   }
 
+  void _showActions(BuildContext context) {
+    // 在庫カードタップ時に操作一覧を表示するボトムシート
+    final loc = AppLocalizations.of(context)!;
+    showModalBottomSheet(
+      context: context,
+      builder: (_) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            leading: const Icon(Icons.inventory_2),
+            title: Text(loc.stockAmount),
+            onTap: () async {
+              Navigator.pop(context);
+              await onStock(context);
+            },
+          ),
+          if (!buyOnly)
+            ListTile(
+              leading: const Icon(Icons.content_cut),
+              title: Text(loc.usedAmount),
+              onTap: () async {
+                Navigator.pop(context);
+                await onUsed(context);
+              },
+            ),
+          ListTile(
+            leading: const Icon(Icons.shopping_cart),
+            title: Text(loc.boughtAmount),
+            onTap: () async {
+              Navigator.pop(context);
+              await onBought(context);
+            },
+          ),
+          if (onAddToList != null)
+            ListTile(
+              leading: const Icon(Icons.playlist_add),
+              title: Text(loc.addToBuyList),
+              onTap: () {
+                Navigator.pop(context);
+                onAddToList!();
+              },
+            ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // ホーム画面や在庫一覧で表示される1商品のカードUI
@@ -137,25 +184,27 @@ class InventoryCard extends StatelessWidget {
     final dateText =
         AppLocalizations.of(context)!.daysLeft(_daysLeft(predicted).toString());
     return InkWell(
-      onTap: onTap,
+      onTap: () => _showActions(context),
+      // 長押しで詳細画面へ遷移させる
+      onLongPress: onTap,
       child: Card(
         margin: const EdgeInsets.only(bottom: 12),
         child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                // 商品情報表示エリア。長すぎる文字列は ScrollingText で横に流す
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ScrollingText(
-                        // 在庫カードでは商品名の後に品種を表示
-                        '${inventory.itemName} / ${inventory.itemType}',
-                        // カードタイトル用フォントを利用
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // 商品情報表示エリア。長すぎる文字列は ScrollingText で横に流す
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ScrollingText(
+                      // 在庫カードでは商品名の後に品種を表示
+                      '${inventory.itemName} / ${inventory.itemType}',
+                      // カードタイトル用フォントを利用
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
                     const SizedBox(height: 4),
                     // 数量は単位を付けずに表示 -> 新関数でローカライズ
                     // 在庫一覧画面カードの数量と総容量をまとめて表示
@@ -177,37 +226,13 @@ class InventoryCard extends StatelessWidget {
                           ?.copyWith(color: Colors.black87),
                     ),
                   ],
-                  ),
                 ),
-                // 操作ボタン。buyOnly=true のときは購入ボタンのみ表示
-                Row(
-                  children: [
-                    if (!buyOnly) ...[
-                      IconButton(
-                        icon: const Text('📦', style: TextStyle(fontSize: 20)),
-                        onPressed: () => onStock(context),
-                      ),
-                      IconButton(
-                        icon: const Text('✂️', style: TextStyle(fontSize: 20)),
-                        onPressed: () => onUsed(context),
-                      ),
-                    ],
-                    IconButton(
-                      // 買い物を意味するカートアイコン
-                      icon: const Icon(Icons.shopping_cart),
-                      onPressed: () => onBought(context),
-                    ),
-                    if (onAddToList != null)
-                      IconButton(
-                        icon: const Icon(Icons.playlist_add),
-                        onPressed: onAddToList,
-                      ),
-                  ],
-                ),
-              ],
-            ),
+              ),
+              const Icon(Icons.more_vert),
+            ],
           ),
         ),
-      );
+      ),
+    );
   }
 }
