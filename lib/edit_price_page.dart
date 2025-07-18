@@ -142,15 +142,15 @@ class _EditPricePageState extends State<EditPricePage> {
                           onChanged: (v) => _viewModel.memo = v,
                         ),
                         const SizedBox(height: 12),
-                        // 合計容量を値→単位の順で表示
-                        Text(
-                          loc.totalVolume(
-                            localizeUnit(
-                                context, _viewModel.inventory?.unit ?? ''),
-                            _viewModel.totalVolume.toStringAsFixed(2),
+                          // セール情報編集画面: 合計容量を値の後ろに単位を付けて表示
+                          Text(
+                            loc.totalVolume(
+                              localizeUnit(
+                                  context, _viewModel.inventory?.unit ?? ''),
+                              _viewModel.totalVolume.toStringAsFixed(2),
+                            ),
+                            style: const TextStyle(fontSize: 20),
                           ),
-                          style: const TextStyle(fontSize: 20),
-                        ),
                         Text(
                           loc.unitPrice(_viewModel.unitPrice.toStringAsFixed(2)),
                           style: const TextStyle(fontSize: 20),

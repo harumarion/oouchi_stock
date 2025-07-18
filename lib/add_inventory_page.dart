@@ -173,14 +173,14 @@ class _AddInventoryPageState extends State<AddInventoryPage> {
                 onChanged: (value) => _viewModel.setUnit(value!),
               ),
               const SizedBox(height: 12),
-              // 総容量表示（値→単位の順）
-              Text(
-                AppLocalizations.of(context)!.totalVolume(
-                  localizeUnit(context, _viewModel.unit),
-                  _viewModel.totalVolume.toStringAsFixed(2),
+                // 商品追加画面で総容量を表示（値の後ろに単位を付与）
+                Text(
+                  AppLocalizations.of(context)!.totalVolume(
+                    localizeUnit(context, _viewModel.unit),
+                    _viewModel.totalVolume.toStringAsFixed(2),
+                  ),
+                  style: const TextStyle(fontSize: 20),
                 ),
-                style: const TextStyle(fontSize: 20),
-              ),
               const SizedBox(height: 12),
               // メモの入力（任意）
               TextFormField(
