@@ -22,7 +22,7 @@ void main() {
     expect(find.byType(Switch), findsWidgets);
   });
 
-  testWidgets('PriceCategoryList がカードで表示される', (WidgetTester tester) async {
+  testWidgets('PriceCategoryList が ListTile で表示される', (WidgetTester tester) async {
     final repo = _FakeRepository();
     await tester.pumpWidget(MaterialApp(
       home: PriceCategoryList(
@@ -34,7 +34,7 @@ void main() {
       ),
     ));
     await tester.pump();
-    expect(find.byType(Card), findsWidgets);
+    expect(find.byType(ListTile), findsWidgets);
   });
 
   testWidgets('同じ品種が複数登録されても全て表示される',
@@ -50,7 +50,7 @@ void main() {
       ),
     ));
     await tester.pump();
-    expect(find.byType(Card), findsNWidgets(2));
+    expect(find.byType(ListTile), findsNWidgets(2));
   });
 
   testWidgets('カードタップで詳細画面へ遷移', (WidgetTester tester) async {
@@ -65,7 +65,7 @@ void main() {
       ),
     ));
     await tester.pump();
-    await tester.tap(find.byType(InkWell).first);
+    await tester.tap(find.byType(ListTile).first);
     await tester.pumpAndSettle();
     expect(find.byType(PriceDetailPage), findsOneWidget);
   });
