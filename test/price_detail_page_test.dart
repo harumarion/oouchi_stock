@@ -33,6 +33,8 @@ void main() {
       home: PriceDetailPage(info: info),
     ));
     expect(find.text('テスト商品'), findsOneWidget);
+    // ListTile が複数表示されていることを確認
+    expect(find.byType(ListTile), findsWidgets);
     expect(find.text('日用品'), findsOneWidget);
     expect(find.textContaining('150'), findsWidgets);
     // 編集アイコンが表示されていることを確認
