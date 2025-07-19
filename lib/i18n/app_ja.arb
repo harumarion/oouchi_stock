@@ -150,9 +150,5 @@
   "reasonAutoEmergency": "在庫ゼロのため自動追加",
   "reasonAutoBestTime": "買い時のため自動追加",
   "reasonAutoCautious": "残り日数が少ないため自動追加",
-  "reasonAutoBulk": "セール中で在庫十分のため自動追加",
-  "priorityHigh": "高",
-  "priorityMedium": "中",
-  "priorityLow": "低",
-  "unscheduled": "未定"
+  "reasonAutoBulk": "セール中で在庫十分のため自動追加"
 }
