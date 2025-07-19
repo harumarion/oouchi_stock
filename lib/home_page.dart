@@ -100,12 +100,11 @@ class _HomePageState extends State<HomePage> {
             children: [
               Padding(
                 padding: const EdgeInsets.all(16),
-                // 買い物予報検索用 SearchAnchor
-                child: SearchAnchor.bar(
-                  searchController: _viewModel.controller,
-                  barHintText: AppLocalizations.of(context)!.searchHint,
-                  suggestionsBuilder: (context, controller) => const [],
-                  barLeading: const Icon(Icons.search),
+                // 買い物予報検索用 SearchBar。予測画面へ遷移せず直接入力
+                child: SearchBar(
+                  controller: _viewModel.controller,
+                  hintText: AppLocalizations.of(context)!.searchHint,
+                  leading: const Icon(Icons.search),
                   onChanged: _viewModel.setSearch,
                 ),
               ),

@@ -107,14 +107,12 @@ class BuyListPageState extends State<BuyListPage> {
               Padding(
                 padding: const EdgeInsets.all(16),
                 // 検索バー。商品名を入力し右端の + ボタンで手動追加
-                child: SearchAnchor.bar(
-                  searchController: _searchController,
+                child: SearchBar(
+                  controller: _searchController,
                   // 商品追加が目的のため虫眼鏡アイコンは非表示
-                  barLeading: const SizedBox.shrink(),
-                  barHintText: loc.enterItemName,
-                  // 予測候補は表示しない
-                  suggestionsBuilder: (context, controller) => const [],
-                  barTrailing: [
+                  leading: const SizedBox.shrink(),
+                  hintText: loc.enterItemName,
+                  trailing: [
                     // 検索バー右側の + ボタン押下時、入力欄のテキストを買い物リストへ追加
                     IconButton(
                       onPressed: () async {
