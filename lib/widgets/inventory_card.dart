@@ -131,7 +131,7 @@ class InventoryCard extends StatelessWidget {
   }
 
   void _showActions(BuildContext context) {
-    // 在庫カードタップ時に操作一覧を表示するボトムシート
+    // メニューボタンを押したときに操作一覧を表示するボトムシート
     final loc = AppLocalizations.of(context)!;
     showModalBottomSheet(
       context: context,
@@ -184,9 +184,8 @@ class InventoryCard extends StatelessWidget {
     final dateText =
         AppLocalizations.of(context)!.daysLeft(_daysLeft(predicted).toString());
     return InkWell(
-      onTap: () => _showActions(context),
-      // 長押しで詳細画面へ遷移させる
-      onLongPress: onTap,
+      // カードタップで詳細画面へ遷移
+      onTap: onTap,
       child: Card(
         margin: const EdgeInsets.only(bottom: 12),
         child: Padding(
@@ -228,7 +227,11 @@ class InventoryCard extends StatelessWidget {
                   ],
                 ),
               ),
-              const Icon(Icons.more_vert),
+              // 追加メニューを開くボタン
+              IconButton(
+                icon: const Icon(Icons.more_vert),
+                onPressed: () => _showActions(context),
+              ),
             ],
           ),
         ),
