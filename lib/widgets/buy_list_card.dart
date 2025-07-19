@@ -172,95 +172,49 @@ class _BuyListCardState extends State<BuyListCard> {
 
   /// 手入力アイテム用タイル
   Widget _buildManualTile(BuildContext context, AppLocalizations loc) {
-    final dateText = widget.item.plannedDate != null
-        ? DateFormat.yMd().format(widget.item.plannedDate!)
-        : loc.unscheduled;
-    final chip = _priorityChip(loc);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [Text(dateText, style: Theme.of(context).textTheme.titleLarge), chip],
-          ),
-        ),
-        ListTile(
-          title: Text(
-            widget.item.name,
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          subtitle: Text(
-            widget.item.reason.label(loc),
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-          onLongPress: () => _onLongPress(context),
-        ),
-      ],
+    return ListTile(
+      title: Text(
+        widget.item.name,
+        style: Theme.of(context).textTheme.titleMedium,
+      ),
+      subtitle: Text(
+        widget.item.reason.label(loc),
+        style: Theme.of(context).textTheme.bodySmall,
+      ),
+      onLongPress: () => _onLongPress(context),
     );
   }
 
-  /// 重要度表示用チップ
+  /// 重要度表示用チップ（削除済み）
   Widget _priorityChip(AppLocalizations loc) {
-    late Color color;
-    late String label;
-    switch (widget.item.priority) {
-      case BuyItemPriority.high:
-        color = Colors.red;
-        label = loc.priorityHigh;
-        break;
-      case BuyItemPriority.medium:
-        color = Colors.orange;
-        label = loc.priorityMedium;
-        break;
-      case BuyItemPriority.low:
-        color = Colors.green;
-        label = loc.priorityLow;
-        break;
-    }
-    return Chip(label: Text(label), backgroundColor: color);
+    return const SizedBox.shrink();
   }
 
   Widget _buildInventoryTile(
       BuildContext context, Inventory inv, int days, AppLocalizations loc) {
-    final dateText = widget.item.plannedDate != null
-        ? DateFormat.yMd().format(widget.item.plannedDate!)
-        : loc.unscheduled;
-    final chip = _priorityChip(loc);
-    final subtitle = '${formatRemaining(context, inv)} ・ ${loc.daysLeft(days.toString())}';
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [Text(dateText, style: Theme.of(context).textTheme.titleLarge), chip],
+    final subtitle =
+        '${formatRemaining(context, inv)} ・ ${loc.daysLeft(days.toString())}';
+    return ListTile(
+      title: Text(
+        '${inv.itemName} / ${inv.itemType}',
+        style: Theme.of(context).textTheme.titleMedium,
+      ),
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            subtitle,
+            style:
+                Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.black87),
           ),
-        ),
-        ListTile(
-          title: Text(
-            '${inv.itemName} / ${inv.itemType}',
-            style: Theme.of(context).textTheme.titleMedium,
+          Text(
+            widget.item.reason.label(loc),
+            style: Theme.of(context).textTheme.bodySmall,
           ),
-          subtitle: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                subtitle,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.black87),
-              ),
-              Text(
-                widget.item.reason.label(loc),
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ],
-          ),
-          onTap: () => _openDetail(context),
-          onLongPress: () => _onLongPress(context),
-        ),
-      ],
+        ],
+      ),
+      onTap: () => _openDetail(context),
+      onLongPress: () => _onLongPress(context),
     );
   }
 

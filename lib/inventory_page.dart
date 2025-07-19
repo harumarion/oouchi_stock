@@ -39,6 +39,10 @@ class InventoryPageState extends State<InventoryPage> {
     super.initState();
     _viewModel = InventoryPageViewModel();
     _viewModel.addListener(() {
+      // カテゴリ削除時にインデックスが範囲外にならないよう調整
+      if (_index >= _viewModel.categories.length) {
+        _index = 0;
+      }
       if (mounted) setState(() {});
     });
     _viewModel.loadCategories(widget.categories);

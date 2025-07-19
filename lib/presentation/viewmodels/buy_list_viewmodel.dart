@@ -136,13 +136,8 @@ class BuyListViewModel extends ChangeNotifier {
     _invSub = strategy.watch(repository).listen((list) async {
       for (final inv in list) {
         if (_ignoredIds.contains(inv.id)) continue;
-        final days = await _calcDaysLeft(inv);
-        final date = DateTime.now().add(Duration(days: days));
-        final pr = days <= 3
-            ? BuyItemPriority.high
-            : (days <= 7 ? BuyItemPriority.medium : BuyItemPriority.low);
-        await addUsecase(BuyItem(inv.itemName, inv.category, inv.id,
-            BuyItemReason.autoCautious, date, pr));
+        await addUsecase(BuyItem(
+            inv.itemName, inv.category, inv.id, BuyItemReason.autoCautious));
       }
     });
   }
@@ -164,8 +159,7 @@ class BuyListViewModel extends ChangeNotifier {
   Future<void> addManualItem() async {
     final text = itemController.text.trim();
     if (text.isEmpty) return;
-    await addUsecase(BuyItem(text, '', null, BuyItemReason.manual,
-        DateTime.now(), BuyItemPriority.medium));
+    await addUsecase(BuyItem(text, '', null, BuyItemReason.manual));
     itemController.clear();
   }
 

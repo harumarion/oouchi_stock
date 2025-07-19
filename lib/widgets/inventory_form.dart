@@ -5,7 +5,6 @@ import '../presentation/viewmodels/inventory_form_viewmodel.dart';
 import '../util/unit_localization.dart';
 import '../util/item_type_localization.dart';
 import '../util/input_validators.dart';
-import 'numeric_keyboard.dart';
 
 /// 商品登録・編集共通の入力フォームウィジェット
 /// 画面名: 在庫追加・編集ページ
@@ -91,10 +90,11 @@ class InventoryForm extends StatelessWidget {
               ],
             ),
           if (includeQuantity) const SizedBox(height: 12),
-          // 容量入力欄。フォーカス時に数値キーパッドを表示する
-          NumericTextFormField(
-            label: loc.volume,
-            initial: viewModel.volume.toString(),
+          // 容量入力欄。数値キーボードが表示される
+          TextFormField(
+            decoration: InputDecoration(labelText: loc.volume),
+            initialValue: viewModel.volume.toString(),
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
             onChanged: viewModel.setVolume,
             validator: (v) => positiveNumberValidator(context, v),
           ),
