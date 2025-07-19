@@ -99,22 +99,24 @@ class _HomePageState extends State<HomePage> {
           body: Column(
             children: [
               Padding(
-                padding: const EdgeInsets.all(16),
-                // 買い物予報検索用 SearchBar。予測画面へ遷移せず直接入力
-                child: SearchBar(
-                  controller: _viewModel.controller,
-                  hintText: AppLocalizations.of(context)!.searchHint,
-                  leading: const Icon(Icons.search),
-                  onChanged: _viewModel.setSearch,
-                ),
-              ),
-              Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 // 共通カテゴリ切り替えボタンを表示
                 child: CategorySegmentedButton(
                   categories: _viewModel.categories,
                   index: _index,
+                  // カテゴリ選択時に表示リストを更新
                   onChanged: (i) => setState(() => _index = i),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                // 買い物予報検索用 SearchAnchor
+                child: SearchAnchor.bar(
+                  searchController: _viewModel.controller,
+                  barHintText: AppLocalizations.of(context)!.searchHint,
+                  barLeading: const Icon(Icons.search),
+                  // 入力時にフィルター文字列を更新
+                  onChanged: _viewModel.setSearch,
                 ),
               ),
               Expanded(
