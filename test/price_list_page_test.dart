@@ -103,6 +103,28 @@ void main() {
     expect(tile.trailing, isA<Row>());
   });
 
+  // メニューボタン押下で「買い物リストへ追加」のみ表示されるかテスト
+  testWidgets('メニューに買い物リスト追加のみ表示', (WidgetTester tester) async {
+    final repo = _FakeRepository('テスト商品');
+    await tester.pumpWidget(MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: const Locale('ja'),
+      home: PriceCategoryList(
+        category: '日用品',
+        viewModel: PriceCategoryListViewModel(
+          category: '日用品',
+          watch: WatchPriceByCategory(repo),
+        ),
+      ),
+    ));
+    await tester.pump();
+    await tester.tap(find.byIcon(Icons.more_vert));
+    await tester.pumpAndSettle();
+    expect(find.text('買い物リストへ追加'), findsOneWidget);
+    expect(find.byType(ListTile), findsOneWidget);
+  });
+
   testWidgets('価格情報が1行表示され単価が次行に表示される',
       (WidgetTester tester) async {
     final repo = _FakeRepository('テスト商品');
