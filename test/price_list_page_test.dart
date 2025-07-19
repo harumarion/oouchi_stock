@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:oouchi_stock/price_list_page.dart';
 import 'package:oouchi_stock/price_detail_page.dart';
 import 'package:oouchi_stock/domain/entities/price_info.dart';
+import 'package:oouchi_stock/widgets/card_menu_button.dart';
 import 'package:oouchi_stock/domain/repositories/price_repository.dart';
 import 'package:oouchi_stock/domain/usecases/watch_price_by_category.dart';
 import 'package:oouchi_stock/presentation/viewmodels/price_category_list_viewmodel.dart';
@@ -18,7 +19,7 @@ void main() {
   testWidgets('設定メニューが表示される', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(home: PriceListPage()));
     await tester.pumpAndSettle();
-    expect(find.byIcon(Icons.more_vert), findsOneWidget);
+    expect(find.byType(CardMenuButton), findsOneWidget);
     expect(find.byType(Switch), findsWidgets);
   });
 

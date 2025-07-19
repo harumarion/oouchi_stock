@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:oouchi_stock/widgets/prediction_card.dart';
+import 'package:oouchi_stock/widgets/card_menu_button.dart';
 import 'package:oouchi_stock/domain/entities/buy_item.dart';
 import 'package:oouchi_stock/domain/entities/category.dart';
 import 'package:oouchi_stock/domain/entities/inventory.dart';
@@ -64,6 +65,6 @@ void main() {
     // カードウィジェットとして表示されることを確認
     expect(find.byType(Card), findsOneWidget);
     // メニューボタンが表示されていることを確認
-    expect(find.byIcon(Icons.more_vert), findsOneWidget);
+    expect(find.byType(CardMenuButton), findsOneWidget);
   });
 }

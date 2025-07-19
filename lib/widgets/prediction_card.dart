@@ -7,6 +7,7 @@ import '../inventory_detail_page.dart';
 import '../util/inventory_display.dart';
 import '../util/buy_item_reason_label.dart';
 import 'item_card.dart';
+import 'card_menu_button.dart';
 
 /// 買い物予報画面で使用するカードウィジェット
 /// 右スワイプで予報リストから削除できる
@@ -167,8 +168,7 @@ class _PredictionCardState extends State<PredictionCard> {
                 // タップで在庫詳細を開く
                 onTap: () => _openDetail(context),
                 // メニューボタンを押すとボトムシートで操作一覧を表示
-                trailing: IconButton(
-                  icon: const Icon(Icons.more_vert),
+                trailing: CardMenuButton(
                   onPressed: () => _showActions(context, inv),
                 ),
               );

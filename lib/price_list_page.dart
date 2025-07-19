@@ -11,6 +11,7 @@ import 'price_detail_page.dart';
 import 'main.dart';
 import 'widgets/scrolling_text.dart';
 import 'domain/entities/price_info.dart';
+import 'widgets/card_menu_button.dart';
 
 /// セール情報管理画面
 class PriceListPage extends StatefulWidget {
@@ -354,8 +355,7 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
                               ],
                             ),
                             // メニューボタンはカード右端に固定
-                            IconButton(
-                              icon: const Icon(Icons.more_vert),
+                            CardMenuButton(
                               onPressed: () => _showActions(context, p),
                             ),
                           ],
