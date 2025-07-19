@@ -151,6 +151,22 @@ void main() {
     await tester.pump();
     expect(find.text('商品B'), findsOneWidget);
   });
+
+  testWidgets('検索バーとリストの横幅が一致する', (WidgetTester tester) async {
+    final repo = _FakeRepository('テスト商品');
+    await tester.pumpWidget(MaterialApp(
+      home: PriceCategoryList(
+        category: '日用品',
+        viewModel: PriceCategoryListViewModel(
+          category: '日用品',
+          watch: WatchPriceByCategory(repo),
+        ),
+      ),
+    ));
+    await tester.pump();
+    final listView = tester.widget<ListView>(find.byType(ListView));
+    expect(listView.padding, const EdgeInsets.fromLTRB(16, 16, 16, 96));
+  });
 }
 
 class _FakeRepository implements PriceRepository {

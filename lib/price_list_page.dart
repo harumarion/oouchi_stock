@@ -262,8 +262,10 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
               } else {
                 items.sort((a, b) => b.checkedAt.compareTo(a.checkedAt));
               }
+                  // セール情報管理画面のリスト表示部分
+                  // 検索バーとの余白を統一するため左右16、上16を指定
                   return ListView.builder(
-                    padding: const EdgeInsets.only(bottom: 96),
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
                     itemCount: items.length,
                     itemBuilder: (context, index) {
                   final p = items[index];
