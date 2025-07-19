@@ -194,13 +194,12 @@ class _InventoryListState extends State<InventoryList> {
           // 検索バーのみを表示。並び替えドロップダウンは不要となったため削除
           title: Row(
             children: [
-              // 在庫検索用 SearchAnchor。虫眼鏡アイコンは表示
+              // 在庫検索用 SearchBar。画面遷移せずその場で入力できる
               Expanded(
-                child: SearchAnchor.bar(
-                  searchController: _viewModel.controller,
-                  barHintText: AppLocalizations.of(context)!.searchHint,
-                  suggestionsBuilder: (context, controller) => const [],
-                  barLeading: const Icon(Icons.search),
+                child: SearchBar(
+                  controller: _viewModel.controller,
+                  hintText: AppLocalizations.of(context)!.searchHint,
+                  leading: const Icon(Icons.search),
                   onChanged: _viewModel.setSearch,
                 ),
               ),

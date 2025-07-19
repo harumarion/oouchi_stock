@@ -114,7 +114,6 @@ class _HomePageState extends State<HomePage> {
                 child: SearchAnchor.bar(
                   searchController: _viewModel.controller,
                   barHintText: AppLocalizations.of(context)!.searchHint,
-                  suggestionsBuilder: (context, controller) => const [],
                   barLeading: const Icon(Icons.search),
                   // 入力時にフィルター文字列を更新
                   onChanged: _viewModel.setSearch,

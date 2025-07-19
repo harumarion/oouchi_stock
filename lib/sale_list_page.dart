@@ -55,12 +55,11 @@ class _SaleListPageState extends State<SaleListPage> {
         children: [
           Padding(
             padding: const EdgeInsets.all(16),
-            // セール一覧検索用 SearchAnchor
-            child: SearchAnchor.bar(
-              searchController: _viewModel.controller,
-              barHintText: loc.searchHint,
-              suggestionsBuilder: (context, controller) => const [],
-              barLeading: const Icon(Icons.search),
+            // セール一覧検索用 SearchBar
+            child: SearchBar(
+              controller: _viewModel.controller,
+              hintText: loc.searchHint,
+              leading: const Icon(Icons.search),
               onChanged: _viewModel.setSearch,
             ),
           ),
