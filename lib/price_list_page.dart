@@ -167,6 +167,8 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
   }
 
   /// メニューボタン押下時に操作一覧を表示する
+  ///
+  /// セール情報管理画面では「買い物リストへ追加」のみ表示する
   void _showActions(BuildContext context, PriceInfo info) {
     final loc = AppLocalizations.of(context)!;
     showModalBottomSheet(
@@ -174,17 +176,7 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
       builder: (_) => Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          ListTile(
-            leading: const Icon(Icons.info),
-            title: Text(loc.openDetail),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => PriceDetailPage(info: info)),
-              );
-            },
-          ),
+          // 買い物リストへ追加
           ListTile(
             leading: const Icon(Icons.playlist_add),
             title: Text(loc.addToBuyList),
@@ -194,20 +186,6 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
               if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text(loc.addedBuyItem)),
-                );
-              }
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.delete),
-            title: Text(loc.delete),
-            onTap: () async {
-              Navigator.pop(context);
-              setState(() { _removedIds.add(info.id); });
-              await _viewModel.delete(info.id);
-              if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(loc.deleted)),
                 );
               }
             },
@@ -263,8 +241,10 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
               } else {
                 items.sort((a, b) => b.checkedAt.compareTo(a.checkedAt));
               }
+                  // セール情報管理画面のリスト表示部分
+                  // 検索バーとの余白を統一するため左右16、上16を指定
                   return ListView.builder(
-                    padding: const EdgeInsets.only(bottom: 96),
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
                     itemCount: items.length,
                     itemBuilder: (context, index) {
                   final p = items[index];

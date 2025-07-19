@@ -60,6 +60,8 @@ class _PredictionCardState extends State<PredictionCard> {
   }
 
   /// メニューボタン押下時に表示するボトムシート
+  ///
+  /// 買い物予報画面では「買い物リストへ追加」のみ表示する
   void _showActions(BuildContext context, Inventory inv) {
     final loc = AppLocalizations.of(context)!;
     showModalBottomSheet(
@@ -67,14 +69,7 @@ class _PredictionCardState extends State<PredictionCard> {
       builder: (_) => Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          ListTile(
-            leading: const Icon(Icons.info),
-            title: Text(loc.openDetail),
-            onTap: () {
-              Navigator.pop(context);
-              _openDetail(context);
-            },
-          ),
+          // 買い物リストへ追加
           ListTile(
             leading: const Icon(Icons.playlist_add),
             title: Text(loc.addToBuyList),
@@ -90,15 +85,6 @@ class _PredictionCardState extends State<PredictionCard> {
                   SnackBar(content: Text(loc.addedBuyItem)),
                 );
               }
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.delete),
-            title: Text(loc.removePrediction),
-            onTap: () async {
-              Navigator.pop(context);
-              setState(() => _removed = true);
-              await widget.removePrediction(widget.item);
             },
           ),
         ],
