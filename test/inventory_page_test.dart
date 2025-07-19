@@ -30,4 +30,17 @@ void main() {
     final appBar = tester.widget<AppBar>(find.byType(AppBar).first);
     expect(appBar.centerTitle, isFalse);
   });
+
+  testWidgets('カテゴリ変更で一覧も更新される', (WidgetTester tester) async {
+    final categories = [
+      Category(id: 1, name: 'A', createdAt: DateTime.now()),
+      Category(id: 2, name: 'B', createdAt: DateTime.now()),
+    ];
+    await tester.pumpWidget(MaterialApp(home: InventoryPage(categories: categories)));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('B'));
+    await tester.pumpAndSettle();
+    final list = tester.widget<InventoryList>(find.byType(InventoryList));
+    expect(list.category, 'B');
+  });
 }

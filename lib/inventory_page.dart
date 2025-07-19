@@ -112,6 +112,8 @@ class InventoryPageState extends State<InventoryPage> {
               ),
               Expanded(
                 child: InventoryList(
+                  // カテゴリ変更時に状態をリセットするためキーを指定
+                  key: ValueKey(_viewModel.categories[_index].id),
                   category: _viewModel.categories[_index].name,
                   categories: _viewModel.categories,
                 ),
