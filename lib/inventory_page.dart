@@ -171,6 +171,19 @@ class _InventoryListState extends State<InventoryList> {
   }
 
   @override
+  void didUpdateWidget(covariant InventoryList oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // カテゴリが変更されたときは ViewModel を再生成してストリームを更新
+    if (oldWidget.category != widget.category) {
+      _viewModel.dispose();
+      _viewModel = InventoryListViewModel(category: widget.category)
+        ..addListener(() {
+          if (mounted) setState(() {});
+        });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return CustomScrollView(
       slivers: [
