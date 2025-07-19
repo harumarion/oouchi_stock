@@ -138,7 +138,7 @@ class InventoryPageState extends State<InventoryPage> {
 }
 
 /// 指定カテゴリの在庫を一覧表示するウィジェット。
-/// 検索バーを SliverAppBar として表示する。
+/// 検索バーを他画面と同じウィジェットで表示する。
 class InventoryList extends StatefulWidget {
   final String category;
   final List<Category> categories;
@@ -186,24 +186,16 @@ class _InventoryListState extends State<InventoryList> {
   Widget build(BuildContext context) {
     return CustomScrollView(
       slivers: [
-        SliverAppBar(
-          floating: true,
-          snap: true,
-          pinned: false,
-          automaticallyImplyLeading: false,
-          // 検索バーのみを表示。並び替えドロップダウンは不要となったため削除
-          title: Row(
-            children: [
-              // 在庫検索用 SearchBar。画面遷移せずその場で入力できる
-              Expanded(
-                child: SearchBar(
-                  controller: _viewModel.controller,
-                  hintText: AppLocalizations.of(context)!.searchHint,
-                  leading: const Icon(Icons.search),
-                  onChanged: _viewModel.setSearch,
-                ),
-              ),
-            ],
+        // 他画面と同じ検索バーを SliverToBoxAdapter で表示
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: SearchBar(
+              controller: _viewModel.controller,
+              hintText: AppLocalizations.of(context)!.searchHint,
+              leading: const Icon(Icons.search),
+              onChanged: _viewModel.setSearch,
+            ),
           ),
         ),
         StreamBuilder<List<Inventory>>(
