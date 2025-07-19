@@ -32,11 +32,14 @@ class BuyListPage extends StatefulWidget {
 class BuyListPageState extends State<BuyListPage> {
   /// 画面状態を管理する ViewModel
   late final BuyListViewModel _viewModel;
+  /// 検索バー制御用コントローラ
+  late final SearchController _searchController;
 
   @override
   void initState() {
     super.initState();
     _viewModel = widget.viewModel ?? BuyListViewModel();
+    _searchController = SearchController();
     _viewModel.addListener(() {
       if (mounted) setState(() {});
     });
@@ -51,6 +54,7 @@ class BuyListPageState extends State<BuyListPage> {
   @override
   void dispose() {
     _viewModel.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -84,17 +88,28 @@ class BuyListPageState extends State<BuyListPage> {
             children: [
               Padding(
                 padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _viewModel.itemController,
-                        decoration: InputDecoration(labelText: loc.enterItemName),
-                      ),
-                    ),
-                    // 追加ボタンをタップしたときの処理
+                child: SearchAnchor.bar(
+                  searchController: _searchController,
+                  barHintText: loc.enterItemName,
+                  suggestionsBuilder: (context, controller) {
+                    final query = controller.text;
+                    final list = _viewModel.suggestions
+                        .where((e) => e.contains(query))
+                        .toList();
+                    return list
+                        .map((s) => ListTile(
+                              title: Text(s),
+                              onTap: () {
+                                controller.closeView(s);
+                                _searchController.text = s;
+                              },
+                            ))
+                        .toList();
+                  },
+                  trailing: [
                     IconButton(
                       onPressed: () async {
+                        _viewModel.itemController.text = _searchController.text;
                         await _viewModel.addManualItem();
                         if (!mounted) return;
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -102,7 +117,7 @@ class BuyListPageState extends State<BuyListPage> {
                         );
                       },
                       icon: const Icon(Icons.add),
-                    ),
+                    )
                   ],
                 ),
               ),

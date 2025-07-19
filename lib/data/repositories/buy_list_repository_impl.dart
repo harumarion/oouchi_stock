@@ -114,7 +114,10 @@ class BuyListRepositoryImpl implements BuyListRepository {
     await _init();
     final prefs = await _prefs;
     final list = prefs.getStringList(_key) ?? [];
-    list.removeWhere((key) => key.endsWith('|$inventoryId'));
+    list.removeWhere((key) {
+      final parts = key.split('|');
+      return parts.length >= 3 && parts[2] == inventoryId;
+    });
     await prefs.setStringList(_key, list);
     _items = list.map(BuyItem.fromKey).toList();
     await removeIgnoredId(inventoryId);

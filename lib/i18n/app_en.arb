@@ -150,5 +150,9 @@
   "reasonAutoEmergency": "Auto added: out of stock",
   "reasonAutoBestTime": "Auto added: best time",
   "reasonAutoCautious": "Auto added: running low",
-  "reasonAutoBulk": "Auto added: sale & enough stock"
+  "reasonAutoBulk": "Auto added: sale & enough stock",
+  "priorityHigh": "High",
+  "priorityMedium": "Medium",
+  "priorityLow": "Low",
+  "unscheduled": "Unscheduled"
 }
