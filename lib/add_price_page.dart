@@ -19,12 +19,18 @@ class AddPricePage extends StatefulWidget {
 class _AddPricePageState extends State<AddPricePage> {
   /// 画面状態を管理する ViewModel
   late final AddPriceViewModel _viewModel;
+  /// 期限入力欄に表示する日付テキスト
+  late final TextEditingController _expiryController;
 
   @override
   void initState() {
     super.initState();
     // 初期表示時にセール終了日のデフォルトを設定
     _viewModel = AddPriceViewModel();
+    _expiryController = TextEditingController(
+      text:
+          '${_viewModel.expiry.year}/${_viewModel.expiry.month}/${_viewModel.expiry.day}',
+    );
     _viewModel.addListener(() {
       if (mounted) setState(() {});
     });
@@ -33,6 +39,7 @@ class _AddPricePageState extends State<AddPricePage> {
   @override
   void dispose() {
     _viewModel.dispose();
+    _expiryController.dispose();
     super.dispose();
   }
 
@@ -77,9 +84,14 @@ class _AddPricePageState extends State<AddPricePage> {
                       onChanged: (v) => setState(() => _viewModel.inventory = v),
                     ),
                     const SizedBox(height: 12),
-                    ListTile(
-                      title: Text(AppLocalizations.of(context)!.expiry('${_viewModel.expiry.year}/${_viewModel.expiry.month}/${_viewModel.expiry.day}')),
-                      trailing: const Icon(Icons.calendar_today),
+                    // 期限入力欄。タップするとカレンダー形式のダイアログが表示される
+                    TextFormField(
+                      controller: _expiryController,
+                      readOnly: true,
+                      decoration: InputDecoration(
+                        labelText: AppLocalizations.of(context)!.expiryLabel,
+                        suffixIcon: const Icon(Icons.calendar_today),
+                      ),
                       onTap: () async {
                         final picked = await showDatePicker(
                           context: context,
@@ -87,7 +99,13 @@ class _AddPricePageState extends State<AddPricePage> {
                           lastDate: DateTime(2100),
                           initialDate: _viewModel.expiry,
                         );
-                        if (picked != null) setState(() => _viewModel.expiry = picked);
+                        if (picked != null) {
+                          setState(() {
+                            _viewModel.expiry = picked;
+                            _expiryController.text =
+                                '${picked.year}/${picked.month}/${picked.day}';
+                          });
+                        }
                       },
                     ),
                     const SizedBox(height: 12),
@@ -137,22 +155,6 @@ class _AddPricePageState extends State<AddPricePage> {
                       decoration: InputDecoration(labelText: AppLocalizations.of(context)!.memoOptional),
                       onChanged: (v) => _viewModel.memo = v,
                     ),
-                    const SizedBox(height: 12),
-                      // セール情報追加画面: 合計容量を値の後ろに単位を付けて表示
-                      Text(
-                        AppLocalizations.of(context)!.totalVolume(
-                          localizeUnit(
-                              context, _viewModel.inventory?.unit ?? ''),
-                          _viewModel.totalVolume.toStringAsFixed(2),
-                        ),
-                        style: const TextStyle(fontSize: 20),
-                      ),
-                    // 単価を大きめの文字で表示
-                    Text(
-                      AppLocalizations.of(context)!
-                          .unitPrice(_viewModel.unitPrice.toStringAsFixed(2)),
-                      style: const TextStyle(fontSize: 20),
-                    ),
                     const SizedBox(height: 24),
                     ElevatedButton(
                       onPressed: () async {
@@ -179,6 +181,38 @@ class _AddPricePageState extends State<AddPricePage> {
                 ),
               ),
             ),
+      bottomNavigationBar: !_viewModel.loaded || _viewModel.inventories.isEmpty
+          ? null
+          : _buildSummaryCard(context),
+    );
+  }
+
+  /// 合計容量と単価を表示するカード
+  Widget _buildSummaryCard(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.all(16),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              AppLocalizations.of(context)!.totalVolume(
+                localizeUnit(context, _viewModel.inventory?.unit ?? ''),
+                _viewModel.totalVolume.toStringAsFixed(2),
+              ),
+              style: const TextStyle(fontSize: 16),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              AppLocalizations.of(context)!
+                  .unitPrice(_viewModel.unitPrice.toStringAsFixed(2)),
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
