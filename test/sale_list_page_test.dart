@@ -10,5 +10,9 @@ void main() {
     expect(find.byType(AppBar), findsOneWidget);
     // サンプルデータ削除に伴いカードは表示されない
     expect(find.byType(SaleItemCard), findsNothing);
+    // 通知アイコンボタンが表示されていることを確認
+    expect(find.byIcon(Icons.notifications), findsOneWidget);
+    // 並び替えメニューが存在することを確認
+    expect(find.byType(PopupMenuButton), findsOneWidget);
   });
 }

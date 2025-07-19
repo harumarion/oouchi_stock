@@ -86,12 +86,24 @@ class SaleItemCard extends StatelessWidget {
                       color: expired ? Colors.red : Colors.black87),
             ),
             const SizedBox(height: 4),
-            Text(
-              loc.stockInfo(item.stock),
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyMedium
-                  ?.copyWith(color: Colors.black87),
+            Row(
+              children: [
+                // 在庫数表示と合わせてアイコンを配置
+                if (item.stock <= 0)
+                  const Icon(Icons.inventory_2, color: Colors.red)
+                else if (item.stock <= 3)
+                  const Icon(Icons.inventory_2, color: Colors.orange)
+                else
+                  const Icon(Icons.inventory_2, color: Colors.green),
+                const SizedBox(width: 4),
+                Text(
+                  loc.stockInfo(item.stock),
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyMedium
+                      ?.copyWith(color: Colors.black87),
+                ),
+              ],
             ),
             const SizedBox(height: 8),
             Align(
