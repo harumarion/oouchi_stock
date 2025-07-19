@@ -23,7 +23,7 @@ void main() {
   });
 
   testWidgets('PriceCategoryList が ListTile で表示される', (WidgetTester tester) async {
-    final repo = _FakeRepository();
+    final repo = _FakeRepository('テスト商品');
     await tester.pumpWidget(MaterialApp(
       home: PriceCategoryList(
         category: '日用品',
@@ -39,7 +39,7 @@ void main() {
 
   testWidgets('同じ品種が複数登録されても全て表示される',
       (WidgetTester tester) async {
-    final repo = _FakeRepository();
+    final repo = _FakeRepository('テスト商品');
     await tester.pumpWidget(MaterialApp(
       home: PriceCategoryList(
         category: '日用品',
@@ -54,7 +54,7 @@ void main() {
   });
 
   testWidgets('カードタップで詳細画面へ遷移', (WidgetTester tester) async {
-    final repo = _FakeRepository();
+    final repo = _FakeRepository('テスト商品');
     await tester.pumpWidget(MaterialApp(
       home: PriceCategoryList(
         category: '日用品',
@@ -71,7 +71,7 @@ void main() {
   });
 
   testWidgets('カードをスワイプして削除できる', (WidgetTester tester) async {
-    final repo = _FakeRepository();
+    final repo = _FakeRepository('テスト商品');
     await tester.pumpWidget(MaterialApp(
       home: PriceCategoryList(
         category: '日用品',
@@ -87,7 +87,7 @@ void main() {
 
   testWidgets('価格情報が1行表示され単価が次行に表示される',
       (WidgetTester tester) async {
-    final repo = _FakeRepository();
+    final repo = _FakeRepository('テスト商品');
     await tester.pumpWidget(MaterialApp(
       locale: const Locale('ja'),
       home: PriceCategoryList(
@@ -102,9 +102,43 @@ void main() {
     expect(find.text('通常価格: 200 セール価格: 150 差額: -50'), findsOneWidget);
     expect(find.text('単価: 150.00'), findsOneWidget);
   });
+
+  testWidgets('カテゴリ変更でリストが更新される', (WidgetTester tester) async {
+    final repoA = _FakeRepository('商品A');
+    final repoB = _FakeRepository('商品B');
+    final key = GlobalKey();
+    await tester.pumpWidget(MaterialApp(
+      home: PriceCategoryList(
+        key: key,
+        category: 'A',
+        viewModel: PriceCategoryListViewModel(
+          category: 'A',
+          watch: WatchPriceByCategory(repoA),
+        ),
+      ),
+    ));
+    await tester.pump();
+    expect(find.text('商品A'), findsOneWidget);
+
+    await tester.pumpWidget(MaterialApp(
+      home: PriceCategoryList(
+        key: key,
+        category: 'B',
+        viewModel: PriceCategoryListViewModel(
+          category: 'B',
+          watch: WatchPriceByCategory(repoB),
+        ),
+      ),
+    ));
+    await tester.pump();
+    expect(find.text('商品B'), findsOneWidget);
+  });
 }
 
 class _FakeRepository implements PriceRepository {
+  _FakeRepository(this.itemName);
+  final String itemName;
+
   @override
   Future<String> addPriceInfo(PriceInfo info) async => '';
 
@@ -116,7 +150,7 @@ class _FakeRepository implements PriceRepository {
           checkedAt: DateTime.now(),
           category: category,
           itemType: '洗剤',
-          itemName: 'テスト商品',
+          itemName: itemName,
           count: 1,
           unit: '個',
           volume: 1,
@@ -127,25 +161,6 @@ class _FakeRepository implements PriceRepository {
           approvalUrl: '',
           memo: '',
           unitPrice: 150,
-          expiry: DateTime.now().add(const Duration(days: 1)),
-        ),
-        PriceInfo(
-          id: '2',
-          inventoryId: '1',
-          checkedAt: DateTime.now(),
-          category: category,
-          itemType: '洗剤',
-          itemName: 'テスト商品2',
-          count: 1,
-          unit: '個',
-          volume: 1,
-          totalVolume: 1,
-          regularPrice: 250,
-          salePrice: 230,
-          shop: '店',
-          approvalUrl: '',
-          memo: '',
-          unitPrice: 230,
           expiry: DateTime.now().add(const Duration(days: 1)),
         )
       ]);

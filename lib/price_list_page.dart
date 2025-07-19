@@ -130,7 +130,7 @@ class PriceCategoryList extends StatefulWidget {
 
 class _PriceCategoryListState extends State<PriceCategoryList> {
   /// カテゴリリストを管理する ViewModel
-  late final PriceCategoryListViewModel _viewModel;
+  late PriceCategoryListViewModel _viewModel;
   /// Dismissible処理中に保持する削除済みID一覧
   final Set<String> _removedIds = {};
 
@@ -140,6 +140,20 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
     _viewModel = widget.viewModel ??
         PriceCategoryListViewModel(category: widget.category);
     _viewModel.addListener(() { if (mounted) setState(() {}); });
+  }
+
+  @override
+  void didUpdateWidget(covariant PriceCategoryList oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // カテゴリやViewModelが変更された場合は新しいものに差し替える
+    if (widget.category != oldWidget.category ||
+        widget.viewModel != oldWidget.viewModel) {
+      _viewModel.dispose();
+      _viewModel = widget.viewModel ??
+          PriceCategoryListViewModel(category: widget.category)
+            ..addListener(() { if (mounted) setState(() {}); });
+      setState(() {});
+    }
   }
 
   @override
