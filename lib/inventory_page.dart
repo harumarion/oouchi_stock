@@ -196,21 +196,35 @@ class _InventoryListState extends State<InventoryList> {
           snap: true,
           pinned: false,
           automaticallyImplyLeading: false,
-          title: SearchSortRow(
-            controller: _viewModel.controller,
-            onSearchChanged: _viewModel.setSearch,
-            sortValue: _viewModel.sort,
-            onSortChanged: (v) {
-              if (v != null) _viewModel.setSort(v);
-            },
-            items: [
-              DropdownMenuItem(
-                value: 'alphabet',
-                child: Text(AppLocalizations.of(context)!.sortAlphabet),
+          // 検索バーと並び替えドロップダウンを並べて表示
+          title: Row(
+            children: [
+              // 在庫検索用 SearchAnchor。虫眼鏡アイコンは表示
+              Expanded(
+                child: SearchAnchor.bar(
+                  searchController: _viewModel.controller,
+                  barHintText: AppLocalizations.of(context)!.searchHint,
+                  suggestionsBuilder: (context, controller) => const [],
+                  barLeading: const Icon(Icons.search),
+                  onChanged: _viewModel.setSearch,
+                ),
               ),
-              DropdownMenuItem(
-                value: 'updated',
-                child: Text(AppLocalizations.of(context)!.sortUpdated),
+              const SizedBox(width: 8),
+              DropdownButton<String>(
+                value: _viewModel.sort,
+                onChanged: (v) {
+                  if (v != null) _viewModel.setSort(v);
+                },
+                items: [
+                  DropdownMenuItem(
+                    value: 'alphabet',
+                    child: Text(AppLocalizations.of(context)!.sortAlphabet),
+                  ),
+                  DropdownMenuItem(
+                    value: 'updated',
+                    child: Text(AppLocalizations.of(context)!.sortUpdated),
+                  ),
+                ],
               ),
             ],
           ),

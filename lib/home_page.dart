@@ -103,25 +103,49 @@ class _HomePageState extends State<HomePage> {
                 ],
               ),
             ),
-            body: TabBarView(
+            body: Column(
               children: [
-                for (final c in _viewModel.categories)
-                  map[c.name]!.isEmpty
-                      ? EmptyState(message: AppLocalizations.of(context)!.noBuyItems)
-                      : ListView(
-                          padding: const EdgeInsets.all(16),
-                          children: [
-                            for (final item in map[c.name]!)
-                              PredictionCard(
-                                item: item,
-                                categories: _viewModel.categories,
-                                watchInventory: _viewModel.watchInventory,
-                                addToBuyList: _viewModel.addPredictionToBuyList,
-                                removePrediction: _viewModel.removePredictionItem,
-                                calcDaysLeft: _viewModel.calcDaysLeft,
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  // 買い物予報検索用 SearchAnchor
+                  child: SearchAnchor.bar(
+                    searchController: _viewModel.controller,
+                    barHintText: AppLocalizations.of(context)!.searchHint,
+                    suggestionsBuilder: (context, controller) => const [],
+                    barLeading: const Icon(Icons.search),
+                    onChanged: _viewModel.setSearch,
+                  ),
+                ),
+                Expanded(
+                  child: TabBarView(
+                    children: [
+                      for (final c in _viewModel.categories)
+                        map[c.name]!
+                                .where((e) =>
+                                    e.name.contains(_viewModel.search) ||
+                                    e.category.contains(_viewModel.search))
+                                .isEmpty
+                            ? EmptyState(message: AppLocalizations.of(context)!.noBuyItems)
+                            : ListView(
+                                padding: const EdgeInsets.all(16),
+                                children: [
+                                  for (final item in map[c.name]!
+                                      .where((e) =>
+                                          e.name.contains(_viewModel.search) ||
+                                          e.category.contains(_viewModel.search)))
+                                    PredictionCard(
+                                      item: item,
+                                      categories: _viewModel.categories,
+                                      watchInventory: _viewModel.watchInventory,
+                                      addToBuyList: _viewModel.addPredictionToBuyList,
+                                      removePrediction: _viewModel.removePredictionItem,
+                                      calcDaysLeft: _viewModel.calcDaysLeft,
+                                    ),
+                                ],
                               ),
-                          ],
-                        ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),

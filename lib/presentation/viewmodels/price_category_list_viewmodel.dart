@@ -36,7 +36,7 @@ class PriceCategoryListViewModel extends ChangeNotifier {
   bool showExpired = false;
 
   /// 入力コントローラー
-  final TextEditingController controller = TextEditingController();
+  final SearchController controller = SearchController();
 
   /// セール情報ストリーム
   Stream<List<PriceInfo>> get stream => _watch(category);

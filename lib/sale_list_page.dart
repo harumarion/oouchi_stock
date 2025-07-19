@@ -24,7 +24,7 @@ class _SaleListPageState extends State<SaleListPage> {
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
-    final sorted = _viewModel.sortedItems;
+    final sorted = _viewModel.filteredItems;
     return Scaffold(
       appBar: AppBar(
         title: Text(loc.saleListTitle()),
@@ -53,6 +53,17 @@ class _SaleListPageState extends State<SaleListPage> {
       ),
       body: Column(
         children: [
+          Padding(
+            padding: const EdgeInsets.all(16),
+            // セール一覧検索用 SearchAnchor
+            child: SearchAnchor.bar(
+              searchController: _viewModel.controller,
+              barHintText: loc.searchHint,
+              suggestionsBuilder: (context, controller) => const [],
+              barLeading: const Icon(Icons.search),
+              onChanged: _viewModel.setSearch,
+            ),
+          ),
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.all(16),

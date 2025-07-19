@@ -10,7 +10,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(home: InventoryPage(categories: categories)));
     // タブが描画されるまで待機
     await tester.pumpAndSettle();
-    expect(find.byType(TextField), findsWidgets);
+    expect(find.byType(SearchAnchor), findsWidgets);
     // SegmentedButton が表示されているか確認
     expect(find.byType(SegmentedButton<int>), findsOneWidget);
     // 右下の FAB が表示されているか確認

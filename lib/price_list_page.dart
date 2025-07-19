@@ -145,11 +145,12 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
       children: [
         Padding(
           padding: const EdgeInsets.all(8),
-          // 検索バーのみ表示し、並び替えや期限表示切替は下部ボトムシートで実施
-          child: TextField(
-            controller: _viewModel.controller,
-            decoration:
-                InputDecoration(labelText: AppLocalizations.of(context)!.searchHint),
+          // SearchAnchor を使用して検索バーを表示
+          child: SearchAnchor.bar(
+            searchController: _viewModel.controller,
+            barHintText: AppLocalizations.of(context)!.searchHint,
+            suggestionsBuilder: (context, controller) => const [],
+            barLeading: const Icon(Icons.search),
             onChanged: _viewModel.setSearch,
           ),
         ),
