@@ -15,6 +15,12 @@ class SaleListViewModel extends ChangeNotifier {
   /// 並び替え条件
   String sort = 'end';
 
+  /// 検索文字列
+  String search = '';
+
+  /// 検索バーのコントローラ
+  final SearchController controller = SearchController();
+
   final AddBuyItem addBuyItem = AddBuyItem(BuyListRepositoryImpl());
 
   /// セール一覧画面で「買い物リストに追加」ボタンを押したときの処理
@@ -42,6 +48,12 @@ class SaleListViewModel extends ChangeNotifier {
     return sorted;
   }
 
+  /// 検索結果を取得
+  List<SaleItem> get filteredItems =>
+      sortedItems
+          .where((e) => e.name.contains(search) || e.itemType.contains(search))
+          .toList();
+
   /// 並び替え条件を更新
   void updateSort(String value) {
     sort = value;
@@ -52,5 +64,17 @@ class SaleListViewModel extends ChangeNotifier {
   void updateNotify(bool value) {
     notify = value;
     notifyListeners();
+  }
+
+  /// 検索文字列を更新
+  void setSearch(String value) {
+    search = value;
+    notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
   }
 }

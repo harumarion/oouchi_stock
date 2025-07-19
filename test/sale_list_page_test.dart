@@ -8,6 +8,7 @@ void main() {
   testWidgets('SaleListPage 初期表示', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(home: SaleListPage()));
     expect(find.byType(AppBar), findsOneWidget);
+    expect(find.byType(SearchAnchor), findsOneWidget);
     // サンプルデータ削除に伴いカードは表示されない
     expect(find.byType(SaleItemCard), findsNothing);
     // 通知アイコンボタンが表示されていることを確認

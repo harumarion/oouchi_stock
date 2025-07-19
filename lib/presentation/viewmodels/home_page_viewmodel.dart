@@ -40,6 +40,12 @@ class HomePageViewModel extends ChangeNotifier {
   late final RemovePredictionItem removePrediction =
       RemovePredictionItem(_predictionRepo);
 
+  /// 検索文字列
+  String search = '';
+
+  /// 検索バーのコントローラ
+  final SearchController controller = SearchController();
+
   /// 買い物リストへ商品を追加するユースケースを公開
   AddBuyItem get addBuyItem => _addBuyItem;
 
@@ -62,6 +68,12 @@ class HomePageViewModel extends ChangeNotifier {
   void updateCategories(List<Category> list) {
     categories = List<Category>.from(list);
     categoriesLoaded = true;
+    notifyListeners();
+  }
+
+  /// 検索文字列を更新
+  void setSearch(String value) {
+    search = value;
     notifyListeners();
   }
 
@@ -106,6 +118,7 @@ class HomePageViewModel extends ChangeNotifier {
   @override
   void dispose() {
     _catSub?.cancel();
+    controller.dispose();
     super.dispose();
   }
 }
