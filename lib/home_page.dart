@@ -107,13 +107,17 @@ class _HomePageState extends State<HomePage> {
               children: [
                 Padding(
                   padding: const EdgeInsets.all(16),
-                  // 買い物予報検索用 SearchAnchor
-                  child: SearchAnchor.bar(
-                    searchController: _viewModel.controller,
-                    barHintText: AppLocalizations.of(context)!.searchHint,
-                    suggestionsBuilder: (context, controller) => const [],
-                    barLeading: const Icon(Icons.search),
+                  // 買い物予報画面の検索バー。予測入力を行わない
+                  child: TextField(
+                    controller: _viewModel.controller,
+                    decoration: InputDecoration(
+                      prefixIcon: const Icon(Icons.search),
+                      labelText: AppLocalizations.of(context)!.searchHint,
+                      border: const OutlineInputBorder(),
+                    ),
                     onChanged: _viewModel.setSearch,
+                    enableSuggestions: false,
+                    autocorrect: false,
                   ),
                 ),
                 Expanded(
