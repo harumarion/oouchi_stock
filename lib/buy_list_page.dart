@@ -88,6 +88,7 @@ class BuyListPageState extends State<BuyListPage> {
             children: [
               Padding(
                 padding: const EdgeInsets.all(16),
+                // 検索バー。入力した商品名で候補を表示し、右端の + ボタンで手動追加
                 child: SearchAnchor.bar(
                   searchController: _searchController,
                   barHintText: loc.enterItemName,
@@ -106,7 +107,8 @@ class BuyListPageState extends State<BuyListPage> {
                             ))
                         .toList();
                   },
-                  trailing: [
+                  barTrailing: [
+                    // 検索バー右側の + ボタン押下時、入力欄のテキストを買い物リストへ追加
                     IconButton(
                       onPressed: () async {
                         _viewModel.itemController.text = _searchController.text;
