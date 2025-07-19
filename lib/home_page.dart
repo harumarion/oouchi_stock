@@ -6,10 +6,11 @@ import "domain/entities/buy_item.dart";
 import 'widgets/settings_menu_button.dart';
 import 'widgets/prediction_card.dart';
 import 'widgets/empty_state.dart';
+import 'widgets/category_segmented_button.dart';
 import 'main.dart';
 import 'presentation/viewmodels/home_page_viewmodel.dart';
 
-/// ホーム画面。起動時に表示され、買い物リストを管理する。
+/// 買い物予報画面。自動判定された商品をカテゴリ別に表示する。
 class HomePage extends StatefulWidget {
   final List<Category>? categories;
   const HomePage({super.key, this.categories});
@@ -18,8 +19,11 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
+/// HomePage の状態を管理するクラス
 class _HomePageState extends State<HomePage> {
   late final HomePageViewModel _viewModel;
+  // カテゴリ切り替え用インデックス
+  int _index = 0;
 
   @override
   void initState() {
@@ -79,75 +83,69 @@ class _HomePageState extends State<HomePage> {
         for (final item in items) {
           map[item.category]?.add(item);
         }
-        return DefaultTabController(
-          length: _viewModel.categories.length,
-          child: Scaffold(
-            appBar: AppBar(
-              title: Text(AppLocalizations.of(context)!.buyListTitle),
-              actions: [
-                SettingsMenuButton(
-                  categories: _viewModel.categories,
-                  onCategoriesChanged: _viewModel.updateCategories,
-                  onLocaleChanged: (l) => context.findAncestorStateOfType<MyAppState>()?.updateLocale(l),
-                  onConditionChanged: _viewModel.loadCondition,
-                )
-              ],
-              bottom: TabBar(
-                isScrollable: true,
-                tabs: [
-                  for (final c in _viewModel.categories)
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width / 3,
-                      child: Tab(text: c.name),
-                    )
-                ],
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(AppLocalizations.of(context)!.buyListTitle),
+            actions: [
+              SettingsMenuButton(
+                categories: _viewModel.categories,
+                onCategoriesChanged: _viewModel.updateCategories,
+                onLocaleChanged: (l) =>
+                    context.findAncestorStateOfType<MyAppState>()?.updateLocale(l),
+                onConditionChanged: _viewModel.loadCondition,
+              )
+            ],
+          ),
+          body: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16),
+                // 買い物予報検索用 SearchAnchor
+                child: SearchAnchor.bar(
+                  searchController: _viewModel.controller,
+                  barHintText: AppLocalizations.of(context)!.searchHint,
+                  suggestionsBuilder: (context, controller) => const [],
+                  barLeading: const Icon(Icons.search),
+                  onChanged: _viewModel.setSearch,
+                ),
               ),
-            ),
-            body: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  // 買い物予報検索用 SearchAnchor
-                  child: SearchAnchor.bar(
-                    searchController: _viewModel.controller,
-                    barHintText: AppLocalizations.of(context)!.searchHint,
-                    suggestionsBuilder: (context, controller) => const [],
-                    barLeading: const Icon(Icons.search),
-                    onChanged: _viewModel.setSearch,
-                  ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                // 共通カテゴリ切り替えボタンを表示
+                child: CategorySegmentedButton(
+                  categories: _viewModel.categories,
+                  index: _index,
+                  onChanged: (i) => setState(() => _index = i),
                 ),
-                Expanded(
-                  child: TabBarView(
-                    children: [
-                      for (final c in _viewModel.categories)
-                        map[c.name]!
-                                .where((e) =>
-                                    e.name.contains(_viewModel.search) ||
-                                    e.category.contains(_viewModel.search))
-                                .isEmpty
-                            ? EmptyState(message: AppLocalizations.of(context)!.noBuyItems)
-                            : ListView(
-                                padding: const EdgeInsets.all(16),
-                                children: [
-                                  for (final item in map[c.name]!
-                                      .where((e) =>
-                                          e.name.contains(_viewModel.search) ||
-                                          e.category.contains(_viewModel.search)))
-                                    PredictionCard(
-                                      item: item,
-                                      categories: _viewModel.categories,
-                                      watchInventory: _viewModel.watchInventory,
-                                      addToBuyList: _viewModel.addPredictionToBuyList,
-                                      removePrediction: _viewModel.removePredictionItem,
-                                      calcDaysLeft: _viewModel.calcDaysLeft,
-                                    ),
-                                ],
-                              ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+              ),
+              Expanded(
+                child: map[_viewModel.categories[_index].name]!
+                        .where((e) =>
+                            e.name.contains(_viewModel.search) ||
+                            e.category.contains(_viewModel.search))
+                        .isEmpty
+                    ? EmptyState(
+                        message: AppLocalizations.of(context)!.noBuyItems,
+                      )
+                    : ListView(
+                        padding: const EdgeInsets.all(16),
+                        children: [
+                          for (final item in map[_viewModel.categories[_index].name]!
+                              .where((e) =>
+                                  e.name.contains(_viewModel.search) ||
+                                  e.category.contains(_viewModel.search)))
+                            PredictionCard(
+                              item: item,
+                              categories: _viewModel.categories,
+                              watchInventory: _viewModel.watchInventory,
+                              addToBuyList: _viewModel.addPredictionToBuyList,
+                              removePrediction: _viewModel.removePredictionItem,
+                              calcDaysLeft: _viewModel.calcDaysLeft,
+                            ),
+                        ],
+                      ),
+              ),
+            ],
           ),
         );
       },
