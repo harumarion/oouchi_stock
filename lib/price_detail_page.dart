@@ -65,27 +65,27 @@ class _PriceDetailPageState extends State<PriceDetailPage> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          _buildRow(context, loc.category, info.category),
-          _buildRow(context, loc.itemType, info.itemType),
-          _buildRow(context, loc.itemName, info.itemName),
-          _buildRow(context, loc.checkedDate(_formatDate(info.checkedAt)), ''),
-          _buildRow(context, loc.expiry(_formatDate(info.expiry)), ''),
+          _buildTile(context, loc.category, info.category),
+          _buildTile(context, loc.itemType, info.itemType),
+          _buildTile(context, loc.itemName, info.itemName),
+          _buildTile(context, loc.checkedDate(_formatDate(info.checkedAt)), ''),
+          _buildTile(context, loc.expiry(_formatDate(info.expiry)), ''),
           // 数量は単位を付けずに表示
-          _buildRow(
+          _buildTile(
             context,
             loc.count,
             info.count.toString(),
           ),
           // 総容量は単位付きで表示
-          _buildRow(context, loc.totalVolumeLabel,
+          _buildTile(context, loc.totalVolumeLabel,
               '${info.totalVolume.toString()}${localizeUnit(context, info.unit)}'),
-          _buildRow(context, loc.regularPrice, info.regularPrice.toString()),
-          _buildRow(context, loc.salePrice, info.salePrice.toString()),
-          _buildRow(context, loc.unitPriceLabel, info.unitPrice.toStringAsFixed(2)),
-          _buildRow(context, loc.shop, info.shop),
+          _buildTile(context, loc.regularPrice, info.regularPrice.toString()),
+          _buildTile(context, loc.salePrice, info.salePrice.toString()),
+          _buildTile(context, loc.unitPriceLabel, info.unitPrice.toStringAsFixed(2)),
+          _buildTile(context, loc.shop, info.shop),
           if (info.approvalUrl.isNotEmpty)
-            _buildRow(context, loc.approvalUrl, info.approvalUrl, textStyle),
-          if (info.memo.isNotEmpty) _buildRow(context, loc.memo, info.memo, textStyle),
+            _buildTile(context, loc.approvalUrl, info.approvalUrl, textStyle),
+          if (info.memo.isNotEmpty) _buildTile(context, loc.memo, info.memo, textStyle),
         ],
       ),
     );
@@ -93,37 +93,18 @@ class _PriceDetailPageState extends State<PriceDetailPage> {
 
   String _formatDate(DateTime d) => '${d.year}/${d.month}/${d.day}';
 
-  /// ラベルと値を横並びで表示する共通行ウィジェット
+  /// ラベルと値を ListTile 形式で表示する共通ウィジェット
   /// [context] テーマ取得に利用する BuildContext
   /// [label] 左側に表示するラベル
   /// [value] 右側に表示する値
   /// [style] 任意で指定するテキストスタイル
-  Widget _buildRow(
+  Widget _buildTile(
       BuildContext context, String label, String value,
       [TextStyle? style]) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
-            child: Text(
-              label,
-              // ラベルにも詳細ページ用スタイルを適用
-              style: Theme.of(context).textTheme.bodyLarge,
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              value,
-              textAlign: TextAlign.right,
-              // 値のテキストスタイルも統一
-              style: style ?? Theme.of(context).textTheme.bodyLarge,
-            ),
-          ),
-        ],
-      ),
+    return ListTile(
+      title: Text(label, style: Theme.of(context).textTheme.bodyLarge),
+      trailing:
+          Text(value, style: style ?? Theme.of(context).textTheme.bodyLarge),
     );
   }
 }
