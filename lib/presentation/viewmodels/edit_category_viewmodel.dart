@@ -19,26 +19,8 @@ class EditCategoryViewModel extends ChangeNotifier {
   /// カテゴリ名
   String name;
 
-  /// 選択中のカラー
-  Color? color;
-
-  /// 選択候補の色一覧
-  final List<Color> colors = const [
-    Colors.red,
-    Colors.green,
-    Colors.blue,
-    Colors.orange,
-    Colors.purple,
-    Colors.brown,
-    Colors.pink,
-    Colors.cyan,
-  ];
-
   EditCategoryViewModel(this.original)
-      : name = original.name,
-        color = original.color != null
-            ? Color(0xFF000000 | int.parse(original.color!.substring(1), radix: 16))
-            : null;
+      : name = original.name;
 
   /// 入力値を保存
   Future<void> save() async {
@@ -46,9 +28,8 @@ class EditCategoryViewModel extends ChangeNotifier {
       id: original.id,
       name: name,
       createdAt: original.createdAt,
-      color: color == null
-          ? null
-          : '#${color!.value.toRadixString(16).padLeft(8, '0').substring(2)}',
+      // 色は編集不可のため元の値を保持
+      color: original.color,
     );
     await _usecase(updated);
   }
