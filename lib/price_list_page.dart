@@ -306,39 +306,57 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
                     ),
                     child: Card(
                       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      child: ListTile(
+                      child: InkWell(
+                        // カードタップでセール詳細画面へ遷移
                         onTap: () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(builder: (_) => PriceDetailPage(info: p)),
                           );
                         },
-                        // カード右側に操作メニューをまとめて配置
-                        title: ScrollingText(
-                          '${p.itemName} / ${p.itemType}',
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                        subtitle: Text(AppLocalizations.of(context)!.expiry(_formatDate(p.expiry))),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Column(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Text(
-                                  '${AppLocalizations.of(context)!.regularPriceLabel(p.regularPrice.toStringAsFixed(0))} '
-                                  '${AppLocalizations.of(context)!.salePriceLabel(p.salePrice.toStringAsFixed(0))} '
-                                  '${AppLocalizations.of(context)!.priceDiffLabel(diffStr)}',
+                        child: Padding(
+                          // 価格情報とメニューを右側に配置し、商品名の領域を拡大する
+                          padding: const EdgeInsets.all(16),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // 商品名と品種を左側にまとめて表示するエリア
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    ScrollingText(
+                                      '${p.itemName} / ${p.itemType}',
+                                      style: Theme.of(context).textTheme.titleMedium,
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      AppLocalizations.of(context)!.expiry(_formatDate(p.expiry)),
+                                      style: Theme.of(context).textTheme.bodyMedium,
+                                    ),
+                                  ],
                                 ),
-                                Text(AppLocalizations.of(context)!.unitPrice(p.unitPrice.toStringAsFixed(2))),
-                              ],
-                            ),
-                            // メニューボタンはカード右端に固定
-                            CardMenuButton(
-                              onPressed: () => _showActions(context, p),
-                            ),
-                          ],
+                              ),
+                              const SizedBox(width: 8),
+                              // 右側に価格情報を縦並びで表示する
+                              Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Text(
+                                    '${AppLocalizations.of(context)!.regularPriceLabel(p.regularPrice.toStringAsFixed(0))} '
+                                    '${AppLocalizations.of(context)!.salePriceLabel(p.salePrice.toStringAsFixed(0))} '
+                                    '${AppLocalizations.of(context)!.priceDiffLabel(diffStr)}',
+                                  ),
+                                  Text(AppLocalizations.of(context)!.unitPrice(p.unitPrice.toStringAsFixed(2))),
+                                ],
+                              ),
+                              // メニューボタンを価格情報の右端に配置
+                              CardMenuButton(
+                                onPressed: () => _showActions(context, p),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
