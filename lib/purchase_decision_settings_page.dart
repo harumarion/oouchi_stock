@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:oouchi_stock/i18n/app_localizations.dart';
 import 'domain/entities/purchase_decision_settings.dart';
+import 'widgets/number_text_form_field.dart';
 
 /// 購入判定のしきい値を編集する画面
 /// 設定画面のメニュー「購入判定設定」をタップすると表示され、
@@ -15,12 +16,6 @@ class PurchaseDecisionSettingsPage extends StatefulWidget {
 
 class _PurchaseDecisionSettingsPageState
     extends State<PurchaseDecisionSettingsPage> {
-  // 慎重判定日数入力コントローラ
-  late TextEditingController _cautiousController;
-  // 買い時日数入力コントローラ
-  late TextEditingController _bestController;
-  // 値引き率入力コントローラ
-  late TextEditingController _percentController;
 
   // 慎重判定日数の初期値
   int _cautious = 3;
@@ -32,9 +27,6 @@ class _PurchaseDecisionSettingsPageState
   @override
   void initState() {
     super.initState();
-    _cautiousController = TextEditingController();
-    _bestController = TextEditingController();
-    _percentController = TextEditingController();
     // 初期表示時に保存済み設定を読み込む
     _load();
   }
@@ -42,21 +34,16 @@ class _PurchaseDecisionSettingsPageState
   Future<void> _load() async {
     // 保存済み設定の読み込み
     final s = await loadPurchaseDecisionSettings();
+    if (!mounted) return;
     setState(() {
       _cautious = s.cautiousDays;
       _best = s.bestTimeDays;
       _percent = s.discountPercent;
-      _cautiousController.text = _cautious.toString();
-      _bestController.text = _best.toString();
-      _percentController.text = _percent.toString();
     });
   }
 
   Future<void> _save() async {
     // 保存ボタン押下時に現在の入力値を設定として保持
-    _cautious = int.tryParse(_cautiousController.text) ?? _cautious;
-    _best = int.tryParse(_bestController.text) ?? _best;
-    _percent = double.tryParse(_percentController.text) ?? _percent;
     await savePurchaseDecisionSettings(PurchaseDecisionSettings(
       cautiousDays: _cautious,
       bestTimeDays: _best,
@@ -66,9 +53,6 @@ class _PurchaseDecisionSettingsPageState
 
   @override
   void dispose() {
-    _cautiousController.dispose();
-    _bestController.dispose();
-    _percentController.dispose();
     super.dispose();
   }
 
@@ -82,22 +66,20 @@ class _PurchaseDecisionSettingsPageState
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          TextField(
-            decoration:
-                InputDecoration(labelText: loc.cautiousDaysLabel),
-            keyboardType: TextInputType.number,
-            controller: _cautiousController,
+          NumberTextFormField(
+            label: loc.cautiousDaysLabel,
+            initial: _cautious.toString(),
+            onChanged: (v) => _cautious = int.tryParse(v) ?? _cautious,
           ),
-          TextField(
-            decoration: InputDecoration(labelText: loc.bestDaysLabel),
-            keyboardType: TextInputType.number,
-            controller: _bestController,
+          NumberTextFormField(
+            label: loc.bestDaysLabel,
+            initial: _best.toString(),
+            onChanged: (v) => _best = int.tryParse(v) ?? _best,
           ),
-          TextField(
-            decoration: InputDecoration(labelText: loc.discountPercentLabel),
-            keyboardType:
-                const TextInputType.numberWithOptions(decimal: true),
-            controller: _percentController,
+          NumberTextFormField(
+            label: loc.discountPercentLabel,
+            initial: _percent.toString(),
+            onChanged: (v) => _percent = double.tryParse(v) ?? _percent,
           ),
           const SizedBox(height: 16),
           ElevatedButton(
