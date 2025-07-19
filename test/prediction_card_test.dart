@@ -66,4 +66,27 @@ void main() {
     // メニューボタンが表示されていることを確認
     expect(find.byIcon(Icons.more_vert), findsOneWidget);
   });
+
+  // メニューボタンをタップした際に「買い物リストへ追加」だけが表示されるかテスト
+  testWidgets('メニューに買い物リスト追加のみ表示', (WidgetTester tester) async {
+    final item = BuyItem('テスト', '日用品', 'inv1', BuyItemReason.autoCautious);
+    final categories = [Category(id: 1, name: '日用品', createdAt: DateTime.now())];
+    await tester.pumpWidget(MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: const Locale('ja'),
+      home: PredictionCard(
+        item: item,
+        categories: categories,
+        watchInventory: _FakeInventoryRepository().watchInventory,
+        addToBuyList: (_) async {},
+        removePrediction: (_) async {},
+        calcDaysLeft: (_) async => 7,
+      ),
+    ));
+    await tester.tap(find.byIcon(Icons.more_vert));
+    await tester.pumpAndSettle();
+    expect(find.text('買い物リストへ追加'), findsOneWidget);
+    expect(find.byType(ListTile), findsOneWidget);
+  });
 }

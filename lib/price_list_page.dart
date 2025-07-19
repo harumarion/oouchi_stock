@@ -166,6 +166,8 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
   }
 
   /// メニューボタン押下時に操作一覧を表示する
+  ///
+  /// セール情報管理画面では「買い物リストへ追加」のみ表示する
   void _showActions(BuildContext context, PriceInfo info) {
     final loc = AppLocalizations.of(context)!;
     showModalBottomSheet(
@@ -173,17 +175,7 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
       builder: (_) => Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          ListTile(
-            leading: const Icon(Icons.info),
-            title: Text(loc.openDetail),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => PriceDetailPage(info: info)),
-              );
-            },
-          ),
+          // 買い物リストへ追加
           ListTile(
             leading: const Icon(Icons.playlist_add),
             title: Text(loc.addToBuyList),
@@ -193,20 +185,6 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
               if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text(loc.addedBuyItem)),
-                );
-              }
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.delete),
-            title: Text(loc.delete),
-            onTap: () async {
-              Navigator.pop(context);
-              setState(() { _removedIds.add(info.id); });
-              await _viewModel.delete(info.id);
-              if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(loc.deleted)),
                 );
               }
             },
