@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:oouchi_stock/i18n/app_localizations.dart';
 import 'presentation/viewmodels/edit_category_viewmodel.dart';
-import 'widgets/color_picker.dart';
 
 import 'domain/entities/category.dart';
 
@@ -42,17 +41,6 @@ class _EditCategoryPageState extends State<EditCategoryPage> {
                 decoration: InputDecoration(labelText: AppLocalizations.of(context)!.categoryName),
                 onChanged: (v) => _viewModel.name = v,
                 validator: (v) => v == null || v.isEmpty ? AppLocalizations.of(context)!.required : null,
-              ),
-              const SizedBox(height: 16),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(AppLocalizations.of(context)!.selectColor),
-              ),
-              // 共通ウィジェットで色を選択
-              ColorPicker(
-                colors: _viewModel.colors,
-                selected: _viewModel.color,
-                onSelected: (c) => setState(() => _viewModel.color = c),
               ),
               const SizedBox(height: 24),
               // 保存ボタンをタップしたときにカテゴリ名を更新
