@@ -167,8 +167,9 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.all(8),
-          // SearchBar を使用した検索入力欄。画面遷移なしで入力できる
+          // セール情報管理画面の検索バー。全画面で余白を統一するため
+          // 16px のパディングを指定
+          padding: const EdgeInsets.all(16),
           child: SearchBar(
             controller: _viewModel.controller,
             hintText: AppLocalizations.of(context)!.searchHint,

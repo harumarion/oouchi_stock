@@ -101,8 +101,9 @@ class InventoryPageState extends State<InventoryPage> {
           body: Column(
             children: [
               Padding(
-                padding: const EdgeInsets.all(8),
-                // 共通カテゴリ切り替えウィジェットを使用
+                // 在庫一覧画面のカテゴリ切り替えボタン。全画面で余白を統一するため
+                // 横16pxのパディングに変更
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: CategorySegmentedButton(
                   categories: _viewModel.categories,
                   index: _index,
