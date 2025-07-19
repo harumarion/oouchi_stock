@@ -191,7 +191,7 @@ class _InventoryListState extends State<InventoryList> {
           snap: true,
           pinned: false,
           automaticallyImplyLeading: false,
-          // 検索バーと並び替えドロップダウンを並べて表示
+          // 検索バーのみを表示。並び替えドロップダウンは不要となったため削除
           title: Row(
             children: [
               // 在庫検索用 SearchAnchor。虫眼鏡アイコンは表示
@@ -203,23 +203,6 @@ class _InventoryListState extends State<InventoryList> {
                   barLeading: const Icon(Icons.search),
                   onChanged: _viewModel.setSearch,
                 ),
-              ),
-              const SizedBox(width: 8),
-              DropdownButton<String>(
-                value: _viewModel.sort,
-                onChanged: (v) {
-                  if (v != null) _viewModel.setSort(v);
-                },
-                items: [
-                  DropdownMenuItem(
-                    value: 'alphabet',
-                    child: Text(AppLocalizations.of(context)!.sortAlphabet),
-                  ),
-                  DropdownMenuItem(
-                    value: 'updated',
-                    child: Text(AppLocalizations.of(context)!.sortUpdated),
-                  ),
-                ],
               ),
             ],
           ),
@@ -250,11 +233,8 @@ class _InventoryListState extends State<InventoryList> {
                 .toList();
             _removedIds.removeWhere((id) => list.every((e) => e.id != id));
             list = list.where((e) => !_removedIds.contains(e.id)).toList();
-            if (_viewModel.sort == 'alphabet') {
-              list.sort((a, b) => a.itemName.compareTo(b.itemName));
-            } else {
-              list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-            }
+            // 並び替え機能は廃止したため、常に最終更新日時順で表示
+            list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
             return SliverPadding(
               padding: const EdgeInsets.all(16),
               sliver: SliverList(
