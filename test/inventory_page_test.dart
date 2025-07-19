@@ -42,5 +42,7 @@ void main() {
     await tester.pumpAndSettle();
     final list = tester.widget<InventoryList>(find.byType(InventoryList));
     expect(list.category, 'B');
+    final key = list.key as ValueKey<int>;
+    expect(key.value, 2);
   });
 }
