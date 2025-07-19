@@ -154,12 +154,11 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
       children: [
         Padding(
           padding: const EdgeInsets.all(8),
-          // SearchAnchor を使用して検索バーを表示
-          child: SearchAnchor.bar(
-            searchController: _viewModel.controller,
-            barHintText: AppLocalizations.of(context)!.searchHint,
-            suggestionsBuilder: (context, controller) => const [],
-            barLeading: const Icon(Icons.search),
+          // SearchBar を使用した検索入力欄。画面遷移なしで入力できる
+          child: SearchBar(
+            controller: _viewModel.controller,
+            hintText: AppLocalizations.of(context)!.searchHint,
+            leading: const Icon(Icons.search),
             onChanged: _viewModel.setSearch,
           ),
         ),

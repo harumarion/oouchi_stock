@@ -12,7 +12,8 @@ void main() {
     await tester.pumpWidget(MaterialApp(home: HomePage(categories: categories)));
     await tester.pump();
     expect(find.byType(CategorySegmentedButton), findsOneWidget);
-    expect(find.byType(SearchAnchor), findsOneWidget);
+    // SearchBar が表示されていることを確認
+    expect(find.byType(SearchBar), findsOneWidget);
   });
 
   testWidgets('カテゴリがない場合はメッセージと追加ボタンを表示', (WidgetTester tester) async {

@@ -53,7 +53,8 @@ void main() {
     final categories = [Category(id: 1, name: '日用品', createdAt: DateTime.now())];
     await tester.pumpWidget(MaterialApp(home: BuyListPage(categories: categories)));
     await tester.pump();
-    expect(find.byType(SearchAnchor), findsOneWidget);
+    // SearchBar が表示されることを確認
+    expect(find.byType(SearchBar), findsOneWidget);
   });
 
   testWidgets('設定メニューボタンが表示される', (WidgetTester tester) async {
