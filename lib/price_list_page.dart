@@ -332,25 +332,32 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
                             MaterialPageRoute(builder: (_) => PriceDetailPage(info: p)),
                           );
                         },
-                        leading: IconButton(
-                          icon: const Icon(Icons.more_vert),
-                          onPressed: () => _showActions(context, p),
-                        ),
+                        // カード右側に操作メニューをまとめて配置
                         title: ScrollingText(
                           '${p.itemName} / ${p.itemType}',
                           style: Theme.of(context).textTheme.titleMedium,
                         ),
                         subtitle: Text(AppLocalizations.of(context)!.expiry(_formatDate(p.expiry))),
-                        trailing: Column(
+                        trailing: Row(
                           mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            Text(
-                              '${AppLocalizations.of(context)!.regularPriceLabel(p.regularPrice.toStringAsFixed(0))} '
-                              '${AppLocalizations.of(context)!.salePriceLabel(p.salePrice.toStringAsFixed(0))} '
-                              '${AppLocalizations.of(context)!.priceDiffLabel(diffStr)}',
+                            Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text(
+                                  '${AppLocalizations.of(context)!.regularPriceLabel(p.regularPrice.toStringAsFixed(0))} '
+                                  '${AppLocalizations.of(context)!.salePriceLabel(p.salePrice.toStringAsFixed(0))} '
+                                  '${AppLocalizations.of(context)!.priceDiffLabel(diffStr)}',
+                                ),
+                                Text(AppLocalizations.of(context)!.unitPrice(p.unitPrice.toStringAsFixed(2))),
+                              ],
                             ),
-                            Text(AppLocalizations.of(context)!.unitPrice(p.unitPrice.toStringAsFixed(2))),
+                            // メニューボタンはカード右端に固定
+                            IconButton(
+                              icon: const Icon(Icons.more_vert),
+                              onPressed: () => _showActions(context, p),
+                            ),
                           ],
                         ),
                       ),
