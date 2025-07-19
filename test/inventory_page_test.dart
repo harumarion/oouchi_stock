@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:oouchi_stock/inventory_page.dart';
+import 'package:oouchi_stock/inventory_page.dart' show InventoryPage, InventoryList;
 import 'package:oouchi_stock/domain/entities/category.dart';
+import 'package:oouchi_stock/widgets/settings_menu_button.dart';
 
 void main() {
   testWidgets('InventoryPage 検索バー表示', (WidgetTester tester) async {
@@ -44,5 +45,21 @@ void main() {
     expect(list.category, 'B');
     final key = list.key as ValueKey<int>;
     expect(key.value, 2);
+  });
+
+  testWidgets('カテゴリ削除後も一覧を表示できる', (WidgetTester tester) async {
+    final categories = [
+      Category(id: 1, name: 'A', createdAt: DateTime.now()),
+      Category(id: 2, name: 'B', createdAt: DateTime.now()),
+    ];
+    await tester.pumpWidget(MaterialApp(home: InventoryPage(categories: categories)));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('B'));
+    await tester.pumpAndSettle();
+    final settings = tester.widget<SettingsMenuButton>(find.byType(SettingsMenuButton));
+    settings.onCategoriesChanged([categories.first]);
+    await tester.pumpAndSettle();
+    final list = tester.widget<InventoryList>(find.byType(InventoryList));
+    expect(list.category, 'A');
   });
 }
