@@ -7,6 +7,7 @@ import 'widgets/inventory_card.dart';
 import 'widgets/settings_menu_button.dart';
 import 'widgets/search_sort_row.dart';
 import 'widgets/empty_state.dart';
+import 'widgets/category_segmented_button.dart';
 import 'main.dart';
 import 'domain/entities/category.dart';
 import 'domain/entities/inventory.dart';
@@ -101,17 +102,11 @@ class InventoryPageState extends State<InventoryPage> {
             children: [
               Padding(
                 padding: const EdgeInsets.all(8),
-                child: SegmentedButton<int>(
-                  showSelectedIcon: false,
-                  segments: [
-                    for (var i = 0; i < _viewModel.categories.length; i++)
-                      ButtonSegment<int>(
-                        value: i,
-                        label: Text(_viewModel.categories[i].name),
-                      )
-                  ],
-                  selected: {_index},
-                  onSelectionChanged: (s) => setState(() => _index = s.first),
+                // 共通カテゴリ切り替えウィジェットを使用
+                child: CategorySegmentedButton(
+                  categories: _viewModel.categories,
+                  index: _index,
+                  onChanged: (i) => setState(() => _index = i),
                 ),
               ),
               Expanded(

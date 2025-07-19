@@ -4,6 +4,7 @@ import 'add_price_page.dart';
 import 'add_category_page.dart';
 import 'widgets/settings_menu_button.dart';
 import 'widgets/empty_state.dart';
+import 'widgets/category_segmented_button.dart';
 import 'presentation/viewmodels/price_list_viewmodel.dart';
 import 'presentation/viewmodels/price_category_list_viewmodel.dart';
 import 'price_detail_page.dart';
@@ -22,12 +23,20 @@ class PriceListPage extends StatefulWidget {
 class _PriceListPageState extends State<PriceListPage> {
   /// 画面全体の状態を管理する ViewModel
   late final PriceListViewModel _viewModel;
+  // SegmentedButton で選択中のカテゴリインデックス
+  int _index = 0;
 
   @override
   void initState() {
     super.initState();
     _viewModel = PriceListViewModel();
-    _viewModel.addListener(() { if (mounted) setState(() {}); });
+    _viewModel.addListener(() {
+      // カテゴリ更新時にインデックスが範囲外にならないよう調整
+      if (_index >= _viewModel.categories.length) {
+        _index = 0;
+      }
+      if (mounted) setState(() {});
+    });
     _viewModel.load();
   }
 
@@ -60,46 +69,46 @@ class _PriceListPageState extends State<PriceListPage> {
         ),
       );
     }
-    return DefaultTabController(
-      length: _viewModel.categories.length,
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(AppLocalizations.of(context)!.priceManagementTitle),
-          actions: [
-            SettingsMenuButton(
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(AppLocalizations.of(context)!.priceManagementTitle),
+        actions: [
+          SettingsMenuButton(
+            categories: _viewModel.categories,
+            onCategoriesChanged: (l) {},
+            onLocaleChanged: (l) =>
+                context.findAncestorStateOfType<MyAppState>()?.updateLocale(l),
+            onConditionChanged: () {},
+          )
+        ],
+      ),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            // 共通カテゴリ切り替えウィジェットを使用
+            child: CategorySegmentedButton(
               categories: _viewModel.categories,
-              onCategoriesChanged: (l) {},
-              onLocaleChanged: (l) => context.findAncestorStateOfType<MyAppState>()?.updateLocale(l),
-              onConditionChanged: () {},
-            )
-          ],
-          bottom: TabBar(
-            isScrollable: true,
-            tabs: [
-              for (final c in _viewModel.categories)
-                SizedBox(
-                  width: MediaQuery.of(context).size.width / 3,
-                  child: Tab(text: c.name),
-                )
-            ],
+              index: _index,
+              onChanged: (i) => setState(() => _index = i),
+            ),
           ),
-        ),
-        body: TabBarView(
-          children: [
-            for (final c in _viewModel.categories) PriceCategoryList(category: c.name)
-          ],
-        ),
-       floatingActionButton: FloatingActionButton(
-         heroTag: 'priceListFab',
-          // セール情報を追加する画面へ遷移
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const AddPricePage()),
-            );
-          },
-          child: const Icon(Icons.add),
-        ),
+          Expanded(
+            child:
+                PriceCategoryList(category: _viewModel.categories[_index].name),
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        heroTag: 'priceListFab',
+        // セール情報を追加する画面へ遷移
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const AddPricePage()),
+          );
+        },
+        child: const Icon(Icons.add),
       ),
     );
   }
