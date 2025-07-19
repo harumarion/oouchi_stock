@@ -110,14 +110,11 @@ class _HomePageState extends State<HomePage> {
               ),
               Padding(
                 padding: const EdgeInsets.all(16),
-                // 買い物予報検索用 SearchAnchor
-                // 予測変換は表示せず、入力した文字列で検索を行う
-                child: SearchAnchor.bar(
-                  searchController: _viewModel.controller,
-                  // SearchAnchor.bar は必須のため空リストを返す
-                  suggestionsBuilder: (context, controller) => const [],
-                  barHintText: AppLocalizations.of(context)!.searchHint,
-                  barLeading: const Icon(Icons.search),
+                // 買い物予報検索用 SearchBar。画面遷移せずに入力文字列で検索する
+                child: SearchBar(
+                  controller: _viewModel.controller,
+                  hintText: AppLocalizations.of(context)!.searchHint,
+                  leading: const Icon(Icons.search),
                   // 入力時にフィルター文字列を更新
                   onChanged: _viewModel.setSearch,
                 ),
