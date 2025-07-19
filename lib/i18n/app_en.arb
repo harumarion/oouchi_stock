@@ -19,6 +19,7 @@
   "saved": "Saved",
   "saveFailed": "Failed to save",
   "delete": "Delete",
+  "edit": "Edit",
   "deleted": "Deleted",
   "deleteFailed": "Failed to delete",
   "deleteConfirm": "Delete this item?",

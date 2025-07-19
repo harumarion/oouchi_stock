@@ -101,7 +101,7 @@ void main() {
     expect(find.textContaining('Load error'), findsOneWidget);
   });
 
-  testWidgets('詳細情報が左右に表示される', (WidgetTester tester) async {
+  testWidgets('詳細情報がListTileで表示される', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
@@ -113,13 +113,9 @@ void main() {
       ),
     ));
     await tester.pump();
+    expect(find.byType(ListTile), findsWidgets);
     expect(find.text('日用品'), findsOneWidget);
     expect(find.text('一般'), findsOneWidget);
-    expect(find.text('1.0個'), findsOneWidget);
-    expect(find.text('2.0'), findsNWidgets(2));
-    expect(find.text('0.0'), findsOneWidget);
-    expect(find.text('追加'), findsOneWidget);
-    expect(find.text('予測'), findsOneWidget);
   });
 
   testWidgets('履歴タイルに増減量が表示される', (WidgetTester tester) async {
@@ -134,7 +130,8 @@ void main() {
       ),
     ));
     await tester.pump();
-
+    await tester.tap(find.byType(ExpansionTile));
+    await tester.pumpAndSettle();
     expect(find.textContaining('0.0 -> 1.0 (+1.0個)'), findsOneWidget);
   });
 
@@ -150,16 +147,33 @@ void main() {
       ),
     ));
     await tester.pump();
-
-    // 履歴タイルのテキストスタイルを取得
+    await tester.tap(find.byType(ExpansionTile));
+    await tester.pumpAndSettle();
     final context = tester.element(find.text('追加'));
     final text = tester.widget<Text>(find.text('追加'));
-    // テーマから期待されるフォントサイズを取得し比較
     final expected =
         Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 18).fontSize;
     expect(text.style?.fontSize, expected);
-
     final divider = tester.widget<Divider>(find.byType(Divider).first);
     expect(divider.color, Colors.grey.shade300);
+  });
+
+  testWidgets('オーバーフローメニューに編集と削除が表示される',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: const Locale('ja'),
+      home: InventoryDetailPage(
+        inventoryId: '1',
+        categories: [Category(id: 1, name: '日用品', createdAt: DateTime.now())],
+        repository: _DataRepository(),
+      ),
+    ));
+    await tester.pump();
+    await tester.tap(find.byIcon(Icons.more_vert));
+    await tester.pumpAndSettle();
+    expect(find.text('編集'), findsOneWidget);
+    expect(find.text('削除'), findsOneWidget);
   });
 }

@@ -5,18 +5,25 @@ import 'presentation/viewmodels/inventory_detail_viewmodel.dart';
 import 'domain/entities/category.dart';
 import 'util/unit_localization.dart';
 import 'edit_inventory_page.dart';
+import 'domain/usecases/delete_inventory_with_relations.dart';
+import 'data/repositories/inventory_repository_impl.dart';
+import 'data/repositories/price_repository_impl.dart';
+import 'data/repositories/buy_list_repository_impl.dart';
+import 'data/repositories/buy_prediction_repository_impl.dart';
 
 import "domain/entities/history_entry.dart";
 import "domain/entities/inventory.dart";
 import "domain/repositories/inventory_repository.dart";
-/// 商品詳細画面。履歴と予測日を表示する
+/// 商品詳細画面。大きな商品画像と詳細情報、履歴を折りたたみ表示する
 class InventoryDetailPage extends StatelessWidget {
+  // 在庫詳細を取得する ViewModel
   final InventoryDetailViewModel viewModel;
+  // カテゴリ一覧。プレースホルダー色の取得に利用
   final List<Category> categories;
   InventoryDetailPage({
     super.key,
-    required String inventoryId,
-    required this.categories,
+    required String inventoryId, // 表示対象の在庫ID
+    required this.categories, // カテゴリ一覧
     InventoryRepository? repository,
   }) : viewModel = InventoryDetailViewModel(inventoryId: inventoryId, repository: repository);
 
@@ -37,31 +44,81 @@ class InventoryDetailPage extends StatelessWidget {
           return Scaffold(body: Center(child: Text(AppLocalizations.of(context)!.loadError('not found'))));
         }
         return Scaffold(
-          appBar: AppBar(title: Text(inv.itemName), actions: [
-            IconButton(
-              icon: const Icon(Icons.edit),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => EditInventoryPage(
-                      id: viewModel.inventoryId,
-                      itemName: inv.itemName,
-                      category: categories.firstWhere(
-                        (e) => e.name == inv.category,
-                        orElse: () => Category(id: 0, name: inv.category, createdAt: DateTime.now(), color: null),
+          appBar: AppBar(
+            title: Text(inv.itemName),
+            actions: [
+              // 画面右上のメニュー。編集・削除操作をまとめる
+              PopupMenuButton<String>(
+                onSelected: (value) async {
+                  if (value == 'edit') {
+                    // 編集画面を開く
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => EditInventoryPage(
+                          id: viewModel.inventoryId,
+                          itemName: inv.itemName,
+                          category: categories.firstWhere(
+                            (e) => e.name == inv.category,
+                            orElse: () => Category(id: 0, name: inv.category, createdAt: DateTime.now(), color: null),
+                          ),
+                          itemType: inv.itemType,
+                          quantity: inv.quantity,
+                          volume: inv.volume,
+                          unit: inv.unit,
+                          note: inv.note,
+                        ),
                       ),
-                      itemType: inv.itemType,
-                      quantity: inv.quantity,
-                      volume: inv.volume,
-                      unit: inv.unit,
-                      note: inv.note,
-                    ),
+                    );
+                  } else if (value == 'delete') {
+                    final res = await showDialog<bool>(
+                      context: context,
+                      builder: (_) => AlertDialog(
+                        content: Text(AppLocalizations.of(context)!.deleteConfirm),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, false),
+                            child: Text(AppLocalizations.of(context)!.cancel),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, true),
+                            child: Text(AppLocalizations.of(context)!.delete),
+                          ),
+                        ],
+                      ),
+                    );
+                    if (res == true) {
+                      try {
+                        await DeleteInventoryWithRelations(
+                          InventoryRepositoryImpl(),
+                          PriceRepositoryImpl(),
+                          BuyListRepositoryImpl(),
+                          BuyPredictionRepositoryImpl(),
+                        )(inv.id);
+                        if (context.mounted) Navigator.pop(context);
+                      } catch (e) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(AppLocalizations.of(context)!.deleteFailed)),
+                          );
+                        }
+                      }
+                    }
+                  }
+                },
+                itemBuilder: (_) => [
+                  PopupMenuItem(
+                    value: 'edit',
+                    child: Text(AppLocalizations.of(context)!.edit),
                   ),
-                );
-              },
-            )
-          ]),
+                  PopupMenuItem(
+                    value: 'delete',
+                    child: Text(AppLocalizations.of(context)!.delete),
+                  ),
+                ],
+              )
+            ],
+          ),
           body: StreamBuilder<List<HistoryEntry>>(
             stream: viewModel.historyStream(),
             builder: (context, snapshot) {
@@ -77,50 +134,63 @@ class InventoryDetailPage extends StatelessWidget {
                     (inv.totalVolume / inv.monthlyConsumption * 30).ceil();
                 predicted = DateTime.now().add(Duration(days: days));
               }
-              // 詳細ページ用フォントスタイルを取得
               final textStyle = Theme.of(context).textTheme.bodyLarge;
+              Color color = Colors.grey;
+              final cat = categories.firstWhere(
+                (c) => c.name == inv.category,
+                orElse: () => Category(
+                  id: 0,
+                  name: inv.category,
+                  createdAt: DateTime.now(),
+                  color: null,
+                ),
+              );
+              if (cat.color != null) {
+                color = Color(int.parse('ff${cat.color!.replaceFirst('#', '')}', radix: 16));
+              }
               return ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
-                  _buildDetailRow(AppLocalizations.of(context)!.category, inv.category, textStyle),
-                  _buildDetailRow(AppLocalizations.of(context)!.itemType, inv.itemType, textStyle),
-                  _buildDetailRow(
-                    AppLocalizations.of(context)!.quantity,
-                    // 数量は単位なしで表示
-                    inv.quantity.toStringAsFixed(1),
-                    textStyle,
+                  // 商品画像またはカテゴリカラーのプレースホルダー
+                  Container(
+                    key: const Key('itemImage'),
+                    height: 200,
+                    color: color,
                   ),
-                  // 1個あたり容量の表示行
-                  // 1個あたり容量を単位付きで表示
-                  _buildDetailRow(
-                    AppLocalizations.of(context)!.volume,
-                    '${inv.volume.toStringAsFixed(1)}${localizeUnit(context, inv.unit)}',
-                    textStyle,
+                  ListTile(
+                    title: Text(AppLocalizations.of(context)!.category, style: textStyle),
+                    trailing: Text(inv.category, style: textStyle),
                   ),
-                  // 総容量の表示行
-                  // 総容量を単位付きで表示
-                  _buildDetailRow(
-                    AppLocalizations.of(context)!.totalVolumeLabel,
-                    '${inv.totalVolume.toStringAsFixed(1)}${localizeUnit(context, inv.unit)}',
-                    textStyle,
+                  ListTile(
+                    title: Text(AppLocalizations.of(context)!.itemType, style: textStyle),
+                    trailing: Text(inv.itemType, style: textStyle),
                   ),
-                  _buildDetailRow(AppLocalizations.of(context)!.monthlyConsumption, inv.monthlyConsumption.toStringAsFixed(1), textStyle),
-                  const SizedBox(height: 8),
-                  _buildDetailRow(AppLocalizations.of(context)!.predictLabel, _formatDate(predicted), textStyle),
-                  const SizedBox(height: 16),
-                  Text(
-                    AppLocalizations.of(context)!.history,
-                    // 履歴見出しも同じスタイルを使用
-                    style: Theme.of(context).textTheme.bodyLarge,
+                  ListTile(
+                    title: Text(AppLocalizations.of(context)!.quantity, style: textStyle),
+                    trailing: Text(inv.quantity.toStringAsFixed(1), style: textStyle),
                   ),
-                  SizedBox(
-                    height: MediaQuery.of(context).size.height / 3,
-                    child: ListView(
-                      children: list
-                          .map((e) =>
-                              _buildHistoryTile(context, e, localizeUnit(context, inv.unit)))
-                          .toList(),
-                    ),
+                  ListTile(
+                    title: Text(AppLocalizations.of(context)!.volume, style: textStyle),
+                    trailing: Text('${inv.volume.toStringAsFixed(1)}${localizeUnit(context, inv.unit)}', style: textStyle),
+                  ),
+                  ListTile(
+                    title: Text(AppLocalizations.of(context)!.totalVolumeLabel, style: textStyle),
+                    trailing: Text('${inv.totalVolume.toStringAsFixed(1)}${localizeUnit(context, inv.unit)}', style: textStyle),
+                  ),
+                  ListTile(
+                    title: Text(AppLocalizations.of(context)!.monthlyConsumption, style: textStyle),
+                    trailing: Text(inv.monthlyConsumption.toStringAsFixed(1), style: textStyle),
+                  ),
+                  ListTile(
+                    title: Text(AppLocalizations.of(context)!.predictLabel, style: textStyle),
+                    trailing: Text(_formatDate(predicted), style: textStyle),
+                  ),
+                  ExpansionTile(
+                    title: Text(AppLocalizations.of(context)!.history, style: textStyle),
+                    children: [
+                      for (final e in list)
+                        _buildHistoryTile(context, e, localizeUnit(context, inv.unit)),
+                    ],
                   ),
                 ],
               );
@@ -131,19 +201,6 @@ class InventoryDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailRow(String label, String value, TextStyle? style) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(child: Text(label, style: style)),
-          const SizedBox(width: 8),
-          Expanded(child: Text(value, style: style, textAlign: TextAlign.right)),
-        ],
-      ),
-    );
-  }
 
   String _formatDate(DateTime date) {
     return DateFormat('yyyy/MM/dd HH:mm').format(date);
