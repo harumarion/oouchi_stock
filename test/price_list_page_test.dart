@@ -85,6 +85,24 @@ void main() {
     expect(find.byType(Dismissible), findsWidgets);
   });
 
+  // カード右上のメニューボタン配置を確認するテスト
+  testWidgets('メニューボタンが右側に配置される', (WidgetTester tester) async {
+    final repo = _FakeRepository('テスト商品');
+    await tester.pumpWidget(MaterialApp(
+      home: PriceCategoryList(
+        category: '日用品',
+        viewModel: PriceCategoryListViewModel(
+          category: '日用品',
+          watch: WatchPriceByCategory(repo),
+        ),
+      ),
+    ));
+    await tester.pump();
+    final tile = tester.widget<ListTile>(find.byType(ListTile).first);
+    expect(tile.leading, isNull);
+    expect(tile.trailing, isA<Row>());
+  });
+
   testWidgets('価格情報が1行表示され単価が次行に表示される',
       (WidgetTester tester) async {
     final repo = _FakeRepository('テスト商品');
