@@ -189,7 +189,8 @@ class InventoryCard extends StatelessWidget {
       // カードタップで詳細画面へ遷移
       onTap: onTap,
       child: Card(
-        margin: const EdgeInsets.only(bottom: 12),
+        // 各画面でカード幅を統一するため間隔は上下のみ指定
+        margin: const EdgeInsets.symmetric(vertical: 8),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Row(

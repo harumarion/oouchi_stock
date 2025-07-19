@@ -305,7 +305,8 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
                       child: const Icon(Icons.delete, color: Colors.white),
                     ),
                     child: Card(
-                      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      // 幅を画面いっぱいにするため左右マージンは持たせない
+                      margin: const EdgeInsets.symmetric(vertical: 8),
                       child: ListTile(
                         onTap: () {
                           Navigator.push(

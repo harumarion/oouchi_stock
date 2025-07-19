@@ -77,7 +77,9 @@ class _PriceHistoryPageState extends State<PriceHistoryPage> {
           // すでに削除したIDは表示しない
           list = list.where((e) => !_removedIds.contains(e.id)).toList();
           final loc = AppLocalizations.of(context)!;
+          // 一覧全体の余白をここで指定する
           return ListView(
+            padding: const EdgeInsets.all(16),
             children: [
               for (final p in list)
                 Dismissible(
@@ -116,7 +118,8 @@ class _PriceHistoryPageState extends State<PriceHistoryPage> {
                     child: const Icon(Icons.delete, color: Colors.white),
                   ),
                   child: Card(
-                    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    // カード自身の左右余白をなくし、親リストの余白と統一
+                    margin: const EdgeInsets.symmetric(vertical: 8),
                     child: Padding(
                       padding: const EdgeInsets.all(16),
                       child: Column(
