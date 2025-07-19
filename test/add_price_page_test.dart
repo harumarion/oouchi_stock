@@ -15,4 +15,10 @@ void main() {
     await tester.pump();
     expect(find.textContaining('確認日'), findsNothing);
   });
+
+  testWidgets('在庫がない場合は単価カードが表示されない', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(home: AddPricePage()));
+    await tester.pump();
+    expect(find.byType(Card), findsNothing);
+  });
 }
