@@ -19,6 +19,7 @@
   "saved": "保存しました",
   "saveFailed": "保存に失敗しました",
   "delete": "削除",
+  "edit": "編集",
   "deleted": "削除しました",
   "deleteFailed": "削除に失敗しました",
   "deleteConfirm": "削除しますか?",
