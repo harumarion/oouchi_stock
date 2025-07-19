@@ -7,6 +7,8 @@ import 'domain/entities/category.dart';
 import 'widgets/settings_menu_button.dart';
 import 'widgets/buy_list_card.dart';
 import 'widgets/empty_state.dart';
+import 'widgets/category_segmented_button.dart';
+import 'add_category_page.dart';
 // 言語変更時にアプリ全体のロケールを更新するため MyAppState を参照
 import 'main.dart';
 
@@ -34,6 +36,8 @@ class BuyListPageState extends State<BuyListPage> {
   late final BuyListViewModel _viewModel;
   /// 検索バー制御用コントローラ
   late final SearchController _searchController;
+  // SegmentedButton で選択中のカテゴリインデックス
+  int _index = 0;
 
   @override
   void initState() {
@@ -41,6 +45,10 @@ class BuyListPageState extends State<BuyListPage> {
     _viewModel = widget.viewModel ?? BuyListViewModel();
     _searchController = SearchController();
     _viewModel.addListener(() {
+      // カテゴリ数が変化した際にインデックスを調整
+      if (_index >= _viewModel.categories.length) {
+        _index = 0;
+      }
       if (mounted) setState(() {});
     });
     _viewModel.load(initialCategories: widget.categories);
@@ -70,7 +78,29 @@ class BuyListPageState extends State<BuyListPage> {
         if (!snapshot.hasData) {
           return const Scaffold(body: Center(child: CircularProgressIndicator()));
         }
-        final list = snapshot.data!;
+        var list = snapshot.data!;
+        // カテゴリが存在しない場合は追加を促す画面を表示
+        if (_viewModel.categories.isEmpty) {
+          return Scaffold(
+            appBar: AppBar(title: Text(loc.buyList)),
+            body: EmptyState(
+              message: loc.noCategories,
+              buttonLabel: loc.addCategory,
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const AddCategoryPage()),
+                );
+              },
+            ),
+          );
+        }
+        // 選択中カテゴリに一致するアイテムのみ表示する
+        list = list
+            .where((e) =>
+                e.category == _viewModel.categories[_index].name ||
+                e.category.isEmpty)
+            .toList();
         return Scaffold(
           appBar: AppBar(
             title: Text(loc.buyList),
@@ -123,6 +153,15 @@ class BuyListPageState extends State<BuyListPage> {
                       icon: const Icon(Icons.add),
                     )
                   ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                // 共通カテゴリ切り替えウィジェットを使用
+                child: CategorySegmentedButton(
+                  categories: _viewModel.categories,
+                  index: _index,
+                  onChanged: (i) => setState(() => _index = i),
                 ),
               ),
               Expanded(

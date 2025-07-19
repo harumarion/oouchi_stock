@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:oouchi_stock/inventory_page.dart' show InventoryPage, InventoryList;
 import 'package:oouchi_stock/domain/entities/category.dart';
 import 'package:oouchi_stock/widgets/settings_menu_button.dart';
+import 'package:oouchi_stock/widgets/category_segmented_button.dart';
 
 void main() {
   testWidgets('InventoryPage 検索バー表示', (WidgetTester tester) async {
@@ -10,9 +11,9 @@ void main() {
     await tester.pumpWidget(MaterialApp(home: InventoryPage(categories: categories)));
     // タブが描画されるまで待機
     await tester.pumpAndSettle();
-    expect(find.byType(SearchAnchor), findsWidgets);
-    // SegmentedButton が表示されているか確認
-    expect(find.byType(SegmentedButton<int>), findsOneWidget);
+    expect(find.byType(TextField), findsWidgets);
+    // 共通カテゴリ切り替えウィジェットが表示されているか確認
+    expect(find.byType(CategorySegmentedButton), findsOneWidget);
     // 右下の FAB が表示されているか確認
     expect(find.byType(FloatingActionButton), findsOneWidget);
   });
