@@ -4,6 +4,7 @@ import 'presentation/viewmodels/add_price_viewmodel.dart';
 import 'util/input_validators.dart';
 import 'util/unit_localization.dart';
 import 'widgets/inventory_dropdown.dart';
+import 'widgets/numeric_keyboard.dart';
 import 'add_inventory_page.dart';
 
 // セール情報追加画面
@@ -90,32 +91,34 @@ class _AddPricePageState extends State<AddPricePage> {
                       },
                     ),
                     const SizedBox(height: 12),
-                    TextFormField(
-                      decoration: InputDecoration(labelText: AppLocalizations.of(context)!.count),
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      initialValue: '0',
+                    // 数量入力欄。キーパッドで数値を入力する
+                    NumericTextFormField(
+                      label: AppLocalizations.of(context)!.count,
+                      initial: '0',
                       onChanged: (v) => setState(() => _viewModel.count = double.tryParse(v) ?? 0),
                       validator: (v) => positiveNumberValidator(context, v),
                     ),
                     const SizedBox(height: 12),
-                    TextFormField(
-                      decoration: InputDecoration(labelText: AppLocalizations.of(context)!.volume),
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      initialValue: '0',
+                    // 容量入力欄。キーパッドで数値を入力する
+                    NumericTextFormField(
+                      label: AppLocalizations.of(context)!.volume,
+                      initial: '0',
                       onChanged: (v) => setState(() => _viewModel.volume = double.tryParse(v) ?? 0),
                       validator: (v) => positiveNumberValidator(context, v),
                     ),
                     const SizedBox(height: 12),
-                    TextFormField(
-                      decoration: InputDecoration(labelText: AppLocalizations.of(context)!.regularPrice),
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    // 通常価格入力欄
+                    NumericTextFormField(
+                      label: AppLocalizations.of(context)!.regularPrice,
+                      initial: '',
                       onChanged: (v) => setState(() => _viewModel.regularPrice = double.tryParse(v) ?? 0),
                       validator: (v) => nonNegativeNumberValidator(context, v),
                     ),
                     const SizedBox(height: 12),
-                    TextFormField(
-                      decoration: InputDecoration(labelText: AppLocalizations.of(context)!.salePrice),
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    // セール価格入力欄
+                    NumericTextFormField(
+                      label: AppLocalizations.of(context)!.salePrice,
+                      initial: '',
                       onChanged: (v) => setState(() => _viewModel.salePrice = double.tryParse(v) ?? 0),
                       validator: (v) => nonNegativeNumberValidator(context, v),
                     ),

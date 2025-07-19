@@ -65,9 +65,13 @@ void main() {
     );
     await tester.pump();
 
-    // 容量入力欄は2番目のTextFormField
-    await tester.enterText(find.byType(TextFormField).at(1), '2');
-    await tester.pump();
+    // 容量入力欄は2番目の TextFormField
+    await tester.tap(find.byType(TextFormField).at(1));
+    await tester.pumpAndSettle();
+    // キーパッドから2を入力してOKを押す
+    await tester.tap(find.text('2'));
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
 
     // 値の後ろに単位を表示した総容量を確認
     expect(find.text('総容量: 2.0個'), findsOneWidget);
