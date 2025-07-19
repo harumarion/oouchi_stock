@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import '../settings_page.dart';
 import '../domain/entities/category.dart';
 import '../i18n/app_localizations.dart';
-import '../price_list_page.dart';
 
-/// 設定画面のみを表示する共通メニューボタン。
+/// 画面右上のメニューから設定画面を開くためのボタン。
 class SettingsMenuButton extends StatelessWidget {
   final List<Category> categories; // 設定画面に渡すカテゴリ一覧
   final ValueChanged<List<Category>> onCategoriesChanged; // カテゴリ更新時のコールバック
@@ -36,12 +35,6 @@ class SettingsMenuButton extends StatelessWidget {
               ),
             ),
           );
-        } else if (value == 'price') {
-          // セール情報管理画面を開く
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const PriceListPage()),
-          );
         }
       },
       itemBuilder: (context) => [
@@ -50,14 +43,6 @@ class SettingsMenuButton extends StatelessWidget {
           child: Text(
             AppLocalizations.of(context)!.settings,
             // メニュー項目にはカードタイトルと同じフォントを使用
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-        ),
-        PopupMenuItem(
-          value: 'price',
-          child: Text(
-            AppLocalizations.of(context)!.priceManagementTitle,
-            // 同上
             style: Theme.of(context).textTheme.titleMedium,
           ),
         ),
