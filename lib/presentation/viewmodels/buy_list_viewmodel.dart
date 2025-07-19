@@ -50,6 +50,9 @@ class BuyListViewModel extends ChangeNotifier {
   /// 条件設定
   BuyListConditionSettings? condition;
 
+  /// 商品名候補リスト
+  List<String> suggestions = [];
+
   StreamSubscription<List<Inventory>>? _invSub;
 
   /// 手動削除した在庫ID一覧
@@ -123,17 +126,23 @@ class BuyListViewModel extends ChangeNotifier {
       categories = await applyCategoryOrder(categories);
     }
     condition = await loadBuyListConditionSettings();
+    final invList = await repository.fetchAll();
+    suggestions = invList.map((e) => e.itemName).toSet().toList();
     await _loadIgnored();
     loaded = true;
     notifyListeners();
     final strategy = createStrategy(condition!);
     // 条件に合致した在庫を監視し、買い物リストへ自動追加
-    _invSub = strategy.watch(repository).listen((list) {
+    _invSub = strategy.watch(repository).listen((list) async {
       for (final inv in list) {
-        // ユーザーが削除した在庫IDは追加しない
         if (_ignoredIds.contains(inv.id)) continue;
-        addUsecase(BuyItem(
-            inv.itemName, inv.category, inv.id, BuyItemReason.autoCautious));
+        final days = await _calcDaysLeft(inv);
+        final date = DateTime.now().add(Duration(days: days));
+        final pr = days <= 3
+            ? BuyItemPriority.high
+            : (days <= 7 ? BuyItemPriority.medium : BuyItemPriority.low);
+        await addUsecase(BuyItem(inv.itemName, inv.category, inv.id,
+            BuyItemReason.autoCautious, date, pr));
       }
     });
   }
@@ -155,7 +164,8 @@ class BuyListViewModel extends ChangeNotifier {
   Future<void> addManualItem() async {
     final text = itemController.text.trim();
     if (text.isEmpty) return;
-    await addUsecase(BuyItem(text, '', null, BuyItemReason.manual));
+    await addUsecase(BuyItem(text, '', null, BuyItemReason.manual,
+        DateTime.now(), BuyItemPriority.medium));
     itemController.clear();
   }
 

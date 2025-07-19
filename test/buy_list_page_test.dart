@@ -53,7 +53,7 @@ void main() {
     final categories = [Category(id: 1, name: '日用品', createdAt: DateTime.now())];
     await tester.pumpWidget(MaterialApp(home: BuyListPage(categories: categories)));
     await tester.pump();
-    expect(find.byType(TextField), findsOneWidget);
+    expect(find.byType(SearchAnchor), findsOneWidget);
     // タブは廃止されたため存在しない
     expect(find.byType(TabBar), findsNothing);
   });

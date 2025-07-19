@@ -7,6 +7,7 @@ import '../i18n/app_localizations.dart';
 import '../inventory_detail_page.dart';
 import '../util/inventory_display.dart';
 import '../util/buy_item_reason_label.dart';
+import 'package:intl/intl.dart';
 import 'item_card.dart';
 
 /// BuyListPage で使用される、買い物リストを表示するカードウィジェット
@@ -106,6 +107,19 @@ class _BuyListCardState extends State<BuyListCard> {
     );
   }
 
+  /// 長押しで購入数入力ダイアログを表示し在庫を更新
+  Future<void> _onLongPress(BuildContext context) async {
+    if (widget.item.inventoryId == null) return;
+    final v = await _inputAmountDialog(context);
+    if (v == null) return;
+    try {
+      await widget.updateQuantity(widget.item.inventoryId!, v, 'bought');
+    } catch (_) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.updateFailed)));
+    }
+  }
+
   /// カードを右スワイプしたときに呼ばれる削除確認処理
   Future<bool> _confirmDismiss(BuildContext context) async {
     final loc = AppLocalizations.of(context)!;
@@ -156,6 +170,100 @@ class _BuyListCardState extends State<BuyListCard> {
     );
   }
 
+  /// 手入力アイテム用タイル
+  Widget _buildManualTile(BuildContext context, AppLocalizations loc) {
+    final dateText = widget.item.plannedDate != null
+        ? DateFormat.yMd().format(widget.item.plannedDate!)
+        : loc.unscheduled;
+    final chip = _priorityChip(loc);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [Text(dateText, style: Theme.of(context).textTheme.titleLarge), chip],
+          ),
+        ),
+        ListTile(
+          title: Text(
+            widget.item.name,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          subtitle: Text(
+            widget.item.reason.label(loc),
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          onLongPress: () => _onLongPress(context),
+        ),
+      ],
+    );
+  }
+
+  /// 重要度表示用チップ
+  Widget _priorityChip(AppLocalizations loc) {
+    late Color color;
+    late String label;
+    switch (widget.item.priority) {
+      case BuyItemPriority.high:
+        color = Colors.red;
+        label = loc.priorityHigh;
+        break;
+      case BuyItemPriority.medium:
+        color = Colors.orange;
+        label = loc.priorityMedium;
+        break;
+      case BuyItemPriority.low:
+        color = Colors.green;
+        label = loc.priorityLow;
+        break;
+    }
+    return Chip(label: Text(label), backgroundColor: color);
+  }
+
+  Widget _buildInventoryTile(
+      BuildContext context, Inventory inv, int days, AppLocalizations loc) {
+    final dateText = widget.item.plannedDate != null
+        ? DateFormat.yMd().format(widget.item.plannedDate!)
+        : loc.unscheduled;
+    final chip = _priorityChip(loc);
+    final subtitle = '${formatRemaining(context, inv)} ・ ${loc.daysLeft(days.toString())}';
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [Text(dateText, style: Theme.of(context).textTheme.titleLarge), chip],
+          ),
+        ),
+        ListTile(
+          title: Text(
+            '${inv.itemName} / ${inv.itemType}',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                subtitle,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.black87),
+              ),
+              Text(
+                widget.item.reason.label(loc),
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
+          ),
+          onTap: () => _openDetail(context),
+          onLongPress: () => _onLongPress(context),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
@@ -171,19 +279,7 @@ class _BuyListCardState extends State<BuyListCard> {
         widget.onRemove(widget.item);
       },
       child: widget.item.inventoryId == null
-            // 手入力アイテムは理由も表示
-            ? ListTile(
-                title: Text(
-                  widget.item.name,
-                  // 在庫リストカードと統一したタイトルフォント
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                subtitle: Text(
-                  widget.item.reason.label(loc),
-                  // 理由表示は補足用のスタイル
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              )
+            ? _buildManualTile(context, loc)
             : StreamBuilder<Inventory?>(
                 stream: widget.watchInventory(widget.item.inventoryId!),
                 builder: (context, snapshot) {
@@ -201,38 +297,8 @@ class _BuyListCardState extends State<BuyListCard> {
                   return FutureBuilder<int>(
                     future: widget.calcDaysLeft(inv),
                     builder: (context, daysSnapshot) {
-                      final daysText = daysSnapshot.hasData
-                          ? ' ・ ${loc.daysLeft(daysSnapshot.data!.toString())}'
-                          : '';
-                      // 数量は単位を付けずに表示 -> 新関数でローカライズ
-                      // 買い物リスト画面のカードで在庫数量と総容量をまとめて表示
-                      final subtitle =
-                          '${formatRemaining(context, inv)}$daysText';
-                      return ListTile(
-                        // 商品名と品種をまとめて表示
-                        title: Text(
-                          '${inv.itemName} / ${inv.itemType}',
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              subtitle,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium
-                                  ?.copyWith(color: Colors.black87),
-                            ),
-                            Text(
-                              widget.item.reason.label(loc),
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
-                          ],
-                        ),
-                        // カードタップで在庫詳細画面へ遷移
-                        onTap: () => _openDetail(context),
-                      );
+                      final days = daysSnapshot.data ?? 0;
+                      return _buildInventoryTile(context, inv, days, loc);
                     },
                   );
                 },
