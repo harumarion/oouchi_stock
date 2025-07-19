@@ -50,8 +50,6 @@ class BuyListViewModel extends ChangeNotifier {
   /// 条件設定
   BuyListConditionSettings? condition;
 
-  /// 商品名候補リスト
-  List<String> suggestions = [];
 
   StreamSubscription<List<Inventory>>? _invSub;
 
@@ -126,8 +124,7 @@ class BuyListViewModel extends ChangeNotifier {
       categories = await applyCategoryOrder(categories);
     }
     condition = await loadBuyListConditionSettings();
-    final invList = await repository.fetchAll();
-    suggestions = invList.map((e) => e.itemName).toSet().toList();
+    // 在庫一覧の監視に備えて手動削除IDを読み込み
     await _loadIgnored();
     loaded = true;
     notifyListeners();
