@@ -58,6 +58,53 @@ class _PredictionCardState extends State<PredictionCard> {
     );
   }
 
+  /// メニューボタン押下時に表示するボトムシート
+  void _showActions(BuildContext context, Inventory inv) {
+    final loc = AppLocalizations.of(context)!;
+    showModalBottomSheet(
+      context: context,
+      builder: (_) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            leading: const Icon(Icons.info),
+            title: Text(loc.openDetail),
+            onTap: () {
+              Navigator.pop(context);
+              _openDetail(context);
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.playlist_add),
+            title: Text(loc.addToBuyList),
+            onTap: () async {
+              Navigator.pop(context);
+              await widget.addToBuyList(
+                BuyItem(inv.itemName, inv.category, inv.id,
+                    BuyItemReason.prediction),
+              );
+              await widget.removePrediction(widget.item);
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(loc.addedBuyItem)),
+                );
+              }
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.delete),
+            title: Text(loc.removePrediction),
+            onTap: () async {
+              Navigator.pop(context);
+              setState(() => _removed = true);
+              await widget.removePrediction(widget.item);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
@@ -119,25 +166,10 @@ class _PredictionCardState extends State<PredictionCard> {
                 ),
                 // タップで在庫詳細を開く
                 onTap: () => _openDetail(context),
-                // 買い物リストへ追加するボタン
+                // メニューボタンを押すとボトムシートで操作一覧を表示
                 trailing: IconButton(
-                  icon: const Icon(Icons.playlist_add),
-                  onPressed: () async {
-                    await widget.addToBuyList(
-                      BuyItem(
-                        inv.itemName,
-                        inv.category,
-                        inv.id,
-                        BuyItemReason.prediction,
-                      ),
-                    );
-                    await widget.removePrediction(widget.item);
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(loc.addedBuyItem)),
-                      );
-                    }
-                  },
+                  icon: const Icon(Icons.more_vert),
+                  onPressed: () => _showActions(context, inv),
                 ),
               );
             },

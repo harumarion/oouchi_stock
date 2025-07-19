@@ -63,5 +63,7 @@ void main() {
     expect(find.text('テスト / 一般'), findsOneWidget);
     // カードウィジェットとして表示されることを確認
     expect(find.byType(Card), findsOneWidget);
+    // メニューボタンが表示されていることを確認
+    expect(find.byIcon(Icons.more_vert), findsOneWidget);
   });
 }
