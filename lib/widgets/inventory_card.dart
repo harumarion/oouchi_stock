@@ -4,6 +4,7 @@ import '../util/inventory_display.dart';
 import "scrolling_text.dart"; // 長いテキストを流すウィジェット
 import "../domain/entities/inventory.dart";
 import 'number_text_form_field.dart';
+import 'card_menu_button.dart';
 
 // 在庫カードウィジェット
 // ホーム画面で1つの商品を表示し、数量操作などのボタンを提供する
@@ -228,11 +229,8 @@ class InventoryCard extends StatelessWidget {
                   ],
                 ),
               ),
-              // 追加メニューを開くボタン
-              IconButton(
-                icon: const Icon(Icons.more_vert),
-                onPressed: () => _showActions(context),
-              ),
+              // 追加メニューを開く共通ボタン
+              CardMenuButton(onPressed: () => _showActions(context)),
             ],
           ),
         ),

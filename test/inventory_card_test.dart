@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:oouchi_stock/widgets/inventory_card.dart';
+import 'package:oouchi_stock/widgets/card_menu_button.dart';
 import 'package:oouchi_stock/domain/entities/inventory.dart';
 
 void main() {
@@ -47,7 +48,7 @@ void main() {
       stocktake: (_, __, ___, ____) async {},
       buyOnly: true,
     )));
-    expect(find.byType(IconButton), findsOneWidget);
+    expect(find.byType(CardMenuButton), findsOneWidget);
   });
 
   testWidgets('メニューボタンタップでボトムシート表示',
@@ -74,7 +75,7 @@ void main() {
         stocktake: (_, __, ___, ____) async {},
       ),
     ));
-    await tester.tap(find.byType(IconButton));
+    await tester.tap(find.byType(CardMenuButton));
     await tester.pumpAndSettle();
     expect(find.text('在庫調整'), findsOneWidget);
     expect(find.text('使用量入力'), findsOneWidget);
