@@ -18,8 +18,8 @@ void main() {
     expect(find.text('言語'), findsOneWidget);
     expect(find.text('買い物予報条件設定'), findsOneWidget);
     expect(find.text('広告を表示'), findsOneWidget);
-    expect(find.byKey(const Key('backupTile')), findsOneWidget);
-    expect(find.byKey(const Key('restoreTile')), findsOneWidget);
+    expect(find.byKey(const Key('backupButton')), findsOneWidget);
+    expect(find.byKey(const Key('restoreButton')), findsOneWidget);
   });
 
   testWidgets('バックアップ確認ダイアログ表示', (WidgetTester tester) async {
