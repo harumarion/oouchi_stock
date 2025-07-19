@@ -11,6 +11,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(home: HomePage(categories: categories)));
     await tester.pump();
     expect(find.byType(TabBar), findsOneWidget);
+    expect(find.byType(SearchAnchor), findsOneWidget);
   });
 
   testWidgets('カテゴリがない場合はメッセージと追加ボタンを表示', (WidgetTester tester) async {

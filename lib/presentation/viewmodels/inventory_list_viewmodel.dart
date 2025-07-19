@@ -45,7 +45,7 @@ class InventoryListViewModel extends ChangeNotifier {
   String sort = 'updated';
 
   /// 検索バーのコントローラ
-  final TextEditingController controller = TextEditingController();
+  final SearchController controller = SearchController();
 
   InventoryListViewModel({required this.category});
 

@@ -121,6 +121,8 @@ class BuyListPageState extends State<BuyListPage> {
                 // 検索バー。入力した商品名で候補を表示し、右端の + ボタンで手動追加
                 child: SearchAnchor.bar(
                   searchController: _searchController,
+                  // 商品追加が目的のため虫眼鏡アイコンは非表示
+                  barLeading: const SizedBox.shrink(),
                   barHintText: loc.enterItemName,
                   suggestionsBuilder: (context, controller) {
                     final query = controller.text;
