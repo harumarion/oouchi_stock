@@ -7,7 +7,6 @@ import '../i18n/app_localizations.dart';
 import '../inventory_detail_page.dart';
 import '../util/inventory_display.dart';
 import '../util/buy_item_reason_label.dart';
-import 'package:intl/intl.dart';
 import 'item_card.dart';
 import 'number_text_form_field.dart';
 
@@ -186,12 +185,6 @@ class _BuyListCardState extends State<BuyListCard> {
       onLongPress: () => _onLongPress(context),
     );
   }
-
-  /// 重要度表示用チップ（削除済み）
-  Widget _priorityChip(AppLocalizations loc) {
-    return const SizedBox.shrink();
-  }
-
   Widget _buildInventoryTile(
       BuildContext context, Inventory inv, int days, AppLocalizations loc) {
     final subtitle =

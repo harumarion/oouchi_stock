@@ -6,8 +6,6 @@ import 'widgets/settings_menu_button.dart';
 import 'main.dart';
 import 'add_category_page.dart';
 import 'presentation/viewmodels/add_inventory_viewmodel.dart';
-import 'util/unit_localization.dart';
-import 'util/item_type_localization.dart';
 import 'widgets/inventory_form.dart';
 import 'widgets/empty_state.dart';
 

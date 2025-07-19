@@ -98,8 +98,6 @@ class _CategorySettingsPageState extends State<CategorySettingsPage> {
       title: Text(loc.selectColor),
       showColorCode: true,
     );
-    if (result == null) return;
-
     try {
       final snapshot = await userCollection('categories')
           .where('id', isEqualTo: category.id)

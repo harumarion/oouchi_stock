@@ -5,7 +5,6 @@ import 'add_inventory_page.dart';
 import 'inventory_detail_page.dart';
 import 'widgets/inventory_card.dart';
 import 'widgets/settings_menu_button.dart';
-import 'widgets/search_sort_row.dart';
 import 'widgets/empty_state.dart';
 import 'widgets/category_segmented_button.dart';
 import 'main.dart';
