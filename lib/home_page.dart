@@ -99,6 +99,16 @@ class _HomePageState extends State<HomePage> {
           body: Column(
             children: [
               Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                // 共通カテゴリ切り替えボタンを表示
+                child: CategorySegmentedButton(
+                  categories: _viewModel.categories,
+                  index: _index,
+                  // カテゴリ選択時に表示リストを更新
+                  onChanged: (i) => setState(() => _index = i),
+                ),
+              ),
+              Padding(
                 padding: const EdgeInsets.all(16),
                 // 買い物予報検索用 SearchAnchor
                 child: SearchAnchor.bar(
@@ -106,16 +116,8 @@ class _HomePageState extends State<HomePage> {
                   barHintText: AppLocalizations.of(context)!.searchHint,
                   suggestionsBuilder: (context, controller) => const [],
                   barLeading: const Icon(Icons.search),
+                  // 入力時にフィルター文字列を更新
                   onChanged: _viewModel.setSearch,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                // 共通カテゴリ切り替えボタンを表示
-                child: CategorySegmentedButton(
-                  categories: _viewModel.categories,
-                  index: _index,
-                  onChanged: (i) => setState(() => _index = i),
                 ),
               ),
               Expanded(
