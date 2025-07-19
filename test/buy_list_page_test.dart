@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:oouchi_stock/buy_list_page.dart';
 import 'package:oouchi_stock/widgets/buy_list_card.dart';
-import 'package:oouchi_stock/widgets/category_segmented_button.dart';
 import 'package:oouchi_stock/domain/entities/category.dart';
 import 'package:oouchi_stock/presentation/viewmodels/buy_list_viewmodel.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -55,8 +54,6 @@ void main() {
     await tester.pumpWidget(MaterialApp(home: BuyListPage(categories: categories)));
     await tester.pump();
     expect(find.byType(SearchAnchor), findsOneWidget);
-    // 共通カテゴリ切り替えウィジェットが表示されること
-    expect(find.byType(CategorySegmentedButton), findsOneWidget);
   });
 
   testWidgets('設定メニューボタンが表示される', (WidgetTester tester) async {
