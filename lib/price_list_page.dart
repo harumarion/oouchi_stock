@@ -46,6 +46,8 @@ class _PriceListPageState extends State<PriceListPage> {
     super.dispose();
   }
 
+
+
   @override
   Widget build(BuildContext context) {
     if (!_viewModel.loaded) {
@@ -112,6 +114,7 @@ class _PriceListPageState extends State<PriceListPage> {
       ),
     );
   }
+
 }
 
 /// カテゴリ別セール一覧ウィジェット
@@ -160,6 +163,57 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
   void dispose() {
     _viewModel.dispose();
     super.dispose();
+  }
+
+  /// メニューボタン押下時に操作一覧を表示する
+  void _showActions(BuildContext context, PriceInfo info) {
+    final loc = AppLocalizations.of(context)!;
+    showModalBottomSheet(
+      context: context,
+      builder: (_) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            leading: const Icon(Icons.info),
+            title: Text(loc.openDetail),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => PriceDetailPage(info: info)),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.playlist_add),
+            title: Text(loc.addToBuyList),
+            onTap: () async {
+              Navigator.pop(context);
+              await _viewModel.addToBuyList(info);
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(loc.addedBuyItem)),
+                );
+              }
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.delete),
+            title: Text(loc.delete),
+            onTap: () async {
+              Navigator.pop(context);
+              setState(() { _removedIds.add(info.id); });
+              await _viewModel.delete(info.id);
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(loc.deleted)),
+                );
+              }
+            },
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -279,15 +333,8 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
                           );
                         },
                         leading: IconButton(
-                          icon: const Icon(Icons.playlist_add),
-                          onPressed: () async {
-                            await _viewModel.addToBuyList(p);
-                            if (mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(AppLocalizations.of(context)!.addedBuyItem)),
-                              );
-                            }
-                          },
+                          icon: const Icon(Icons.more_vert),
+                          onPressed: () => _showActions(context, p),
                         ),
                         title: ScrollingText(
                           '${p.itemName} / ${p.itemType}',

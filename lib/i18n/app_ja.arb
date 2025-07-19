@@ -150,5 +150,7 @@
   "reasonAutoEmergency": "在庫ゼロのため自動追加",
   "reasonAutoBestTime": "買い時のため自動追加",
   "reasonAutoCautious": "残り日数が少ないため自動追加",
-  "reasonAutoBulk": "セール中で在庫十分のため自動追加"
+  "reasonAutoBulk": "セール中で在庫十分のため自動追加",
+  "openDetail": "詳細を見る",
+  "removePrediction": "予報から削除"
 }
