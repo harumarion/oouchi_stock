@@ -3,6 +3,7 @@ import "../i18n/app_localizations.dart";
 import '../util/inventory_display.dart';
 import "scrolling_text.dart"; // 長いテキストを流すウィジェット
 import "../domain/entities/inventory.dart";
+import 'number_text_form_field.dart';
 
 // 在庫カードウィジェット
 // ホーム画面で1つの商品を表示し、数量操作などのボタンを提供する
@@ -50,16 +51,16 @@ class InventoryCard extends StatelessWidget {
     String title,
     {double initialValue = 1.0}
   ) async {
-    final controller =
-        TextEditingController(text: initialValue.toStringAsFixed(1));
+    String value = initialValue.toStringAsFixed(1);
     return showDialog<double>(
       context: context,
       builder: (context) {
         return AlertDialog(
           title: Text(title),
-          content: TextField(
-            controller: controller,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          content: NumberTextFormField(
+            label: '',
+            initial: value,
+            onChanged: (v) => value = v,
           ),
           actions: [
             TextButton(
@@ -68,7 +69,7 @@ class InventoryCard extends StatelessWidget {
             ),
             TextButton(
               onPressed: () {
-                final v = double.tryParse(controller.text);
+                final v = double.tryParse(value);
                 Navigator.pop(context, v);
               },
               child: Text(AppLocalizations.of(context)!.ok),

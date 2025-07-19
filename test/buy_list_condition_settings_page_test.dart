@@ -14,14 +14,14 @@ void main() {
   testWidgets('入力値が状態として保持される', (tester) async {
     await tester.pumpWidget(const MaterialApp(home: BuyListConditionSettingsPage()));
     // しきい値に5を入力
-    await tester.enterText(find.byType(TextField).at(0), '5');
+    await tester.enterText(find.byType(TextFormField).at(0), '5');
     // 日数に10を入力
-    await tester.enterText(find.byType(TextField).at(1), '10');
+    await tester.enterText(find.byType(TextFormField).at(1), '10');
     // ラジオボタンを切り替える
     await tester.tap(find.byType(RadioListTile<BuyListConditionType>).at(1));
     await tester.pump();
     // 入力値が保持されていることを確認
-    expect(find.widgetWithText(TextField, '5'), findsOneWidget);
-    expect(find.widgetWithText(TextField, '10'), findsOneWidget);
+    expect(find.widgetWithText(TextFormField, '5'), findsOneWidget);
+    expect(find.widgetWithText(TextFormField, '10'), findsOneWidget);
   });
 }

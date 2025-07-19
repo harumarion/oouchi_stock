@@ -9,6 +9,7 @@ import '../util/inventory_display.dart';
 import '../util/buy_item_reason_label.dart';
 import 'package:intl/intl.dart';
 import 'item_card.dart';
+import 'number_text_form_field.dart';
 
 /// BuyListPage で使用される、買い物リストを表示するカードウィジェット
 ///
@@ -56,22 +57,22 @@ class _BuyListCardState extends State<BuyListCard> {
 
   /// 削除時の数量入力ダイアログを表示
   Future<double?> _inputAmountDialog(BuildContext context) async {
-    final controller = TextEditingController(text: '1');
+    String value = '1';
     return showDialog<double>(
       context: context,
       builder: (context) {
-        return StatefulBuilder(builder: (context, setState) {
-          void add() {
-            final v = double.tryParse(controller.text) ?? 0;
-            controller.text = (v + 1).toStringAsFixed(0);
-            setState(() {});
-          }
+          return StatefulBuilder(builder: (context, setState) {
+            void add() {
+              final v = double.tryParse(value) ?? 0;
+              setState(() => value = (v + 1).toStringAsFixed(0));
+            }
 
-          void remove() {
-            final v = double.tryParse(controller.text) ?? 0;
-            if (v > 0) controller.text = (v - 1).toStringAsFixed(0);
-            setState(() {});
-          }
+            void remove() {
+              final v = double.tryParse(value) ?? 0;
+              if (v > 0) {
+                setState(() => value = (v - 1).toStringAsFixed(0));
+              }
+            }
 
           return AlertDialog(
             title: Text(AppLocalizations.of(context)!.boughtAmount),
@@ -79,10 +80,11 @@ class _BuyListCardState extends State<BuyListCard> {
               children: [
                 IconButton(onPressed: remove, icon: const Icon(Icons.remove)),
                 Expanded(
-                  child: TextField(
-                    controller: controller,
-                    keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
+                  child: NumberTextFormField(
+                    key: ValueKey(value),
+                    label: '',
+                    initial: value,
+                    onChanged: (v) => value = v,
                   ),
                 ),
                 IconButton(onPressed: add, icon: const Icon(Icons.add)),
@@ -95,7 +97,7 @@ class _BuyListCardState extends State<BuyListCard> {
               ),
               TextButton(
                 onPressed: () {
-                  final v = double.tryParse(controller.text);
+                  final v = double.tryParse(value);
                   Navigator.pop(context, v);
                 },
                 child: Text(AppLocalizations.of(context)!.ok),
