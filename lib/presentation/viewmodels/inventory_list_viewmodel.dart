@@ -20,7 +20,7 @@ import '../../domain/usecases/purchase_decision.dart';
 import '../../domain/entities/purchase_decision_settings.dart';
 
 /// 在庫一覧の1タブ分の状態を管理する ViewModel
-/// 検索ワードや並び替え条件を保持し、在庫データのストリームを提供する
+/// 検索ワードを保持し、在庫データのストリームを提供する
 class InventoryListViewModel extends ChangeNotifier {
   /// 表示対象カテゴリ名
   final String category;
@@ -41,9 +41,6 @@ class InventoryListViewModel extends ChangeNotifier {
   /// 検索文字列
   String search = '';
 
-  /// 並び替え条件 ('alphabet' または 'updated')
-  String sort = 'updated';
-
   /// 検索バーのコントローラ
   final SearchController controller = SearchController();
 
@@ -58,11 +55,6 @@ class InventoryListViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// 並び替え条件を更新
-  void setSort(String value) {
-    sort = value;
-    notifyListeners();
-  }
 
   /// 在庫を買い物リストへ追加
   Future<void> addToBuyList(Inventory inv) async {

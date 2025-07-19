@@ -16,6 +16,8 @@ void main() {
     expect(find.byType(CategorySegmentedButton), findsOneWidget);
     // 右下の FAB が表示されているか確認
     expect(find.byType(FloatingActionButton), findsOneWidget);
+    // 並び替え用ドロップダウンが存在しないことを確認
+    expect(find.byType(DropdownButton<String>), findsNothing);
   });
 
   testWidgets('カテゴリがない場合はメッセージと追加ボタンを表示', (WidgetTester tester) async {
