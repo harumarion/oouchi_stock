@@ -3,7 +3,6 @@ import 'package:oouchi_stock/i18n/app_localizations.dart';
 import 'add_price_page.dart';
 import 'add_category_page.dart';
 import 'widgets/settings_menu_button.dart';
-import 'widgets/search_sort_row.dart';
 import 'widgets/empty_state.dart';
 import 'presentation/viewmodels/price_list_viewmodel.dart';
 import 'presentation/viewmodels/price_category_list_viewmodel.dart';
@@ -146,34 +145,20 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
       children: [
         Padding(
           padding: const EdgeInsets.all(8),
-          child: SearchSortRow(
+          // 検索バーのみ表示し、並び替えや期限表示切替は下部ボトムシートで実施
+          child: TextField(
             controller: _viewModel.controller,
-            onSearchChanged: _viewModel.setSearch,
-            sortValue: _viewModel.sort,
-            onSortChanged: (v) { if (v != null) _viewModel.setSort(v); },
-            items: [
-              DropdownMenuItem(
-                value: 'alphabet',
-                child: Text(AppLocalizations.of(context)!.sortAlphabet),
-              ),
-              DropdownMenuItem(
-                value: 'updated',
-                child: Text(AppLocalizations.of(context)!.sortUpdated),
-              ),
-              DropdownMenuItem(
-                value: 'unitPrice',
-                child: Text(AppLocalizations.of(context)!.sortUnitPrice),
-              ),
-            ],
-            showExpiredSwitch: true,
-            showExpired: _viewModel.showExpired,
-            onShowExpiredChanged: _viewModel.setShowExpired,
+            decoration:
+                InputDecoration(labelText: AppLocalizations.of(context)!.searchHint),
+            onChanged: _viewModel.setSearch,
           ),
         ),
         Expanded(
-          child: StreamBuilder<List<PriceInfo>>(
-            stream: _viewModel.stream,
-            builder: (context, snapshot) {
+          child: Stack(
+            children: [
+              StreamBuilder<List<PriceInfo>>(
+                stream: _viewModel.stream,
+                builder: (context, snapshot) {
               if (snapshot.hasError) {
                 final err = snapshot.error?.toString() ?? 'unknown';
                 return Center(child: Text(AppLocalizations.of(context)!.loadError(err)));
@@ -199,9 +184,10 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
               } else {
                 items.sort((a, b) => b.checkedAt.compareTo(a.checkedAt));
               }
-              return ListView.builder(
-                itemCount: items.length,
-                itemBuilder: (context, index) {
+                  return ListView.builder(
+                    padding: const EdgeInsets.only(bottom: 96),
+                    itemCount: items.length,
+                    itemBuilder: (context, index) {
                   final p = items[index];
                   // セール価格と通常価格の差額（正負をそのまま表示）
                   final diff = p.salePrice - p.regularPrice;
@@ -259,68 +245,106 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
                       padding: const EdgeInsets.only(left: 16),
                       child: const Icon(Icons.delete, color: Colors.white),
                     ),
-                    child: InkWell(
-                      // 商品タップ時に詳細ページへ遷移
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => PriceDetailPage(info: p)),
-                        );
-                      },
-                      child: Card(
-                        margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        child: Padding(
-                          padding: const EdgeInsets.all(12),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: ScrollingText(
-                                      // 商品名の後に品種を表示する
-                                      '${p.itemName} / ${p.itemType}',
-                                      // カードタイトルスタイルを使用
-                                      style: Theme.of(context).textTheme.titleMedium,
-                                    ),
-                                  ),
-                                  // 買い物リストに追加するアイコンボタン
-                                  IconButton(
-                                    icon: const Icon(Icons.playlist_add),
-                                    onPressed: () async {
-                                      await _viewModel.addToBuyList(p);
-                                      if (mounted) {
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          SnackBar(content: Text(AppLocalizations.of(context)!.addedBuyItem)),
-                                        );
-                                      }
-                                    },
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 4),
-                              Text(AppLocalizations.of(context)!.expiry(_formatDate(p.expiry))),
-                              const SizedBox(height: 4),
-                              // 価格情報を1行で表示（通常価格、セール価格、差額）
-                              Text(
-                                '${AppLocalizations.of(context)!.regularPriceLabel(p.regularPrice.toStringAsFixed(0))} '
-                                '${AppLocalizations.of(context)!.salePriceLabel(p.salePrice.toStringAsFixed(0))} '
-                                '${AppLocalizations.of(context)!.priceDiffLabel(diffStr)}',
-                              ),
-                              // 単価は次の行で表示
-                              Text(AppLocalizations.of(context)!.unitPrice(p.unitPrice.toStringAsFixed(2))),
-                            ],
-                          ),
+                    child: Card(
+                      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      child: ListTile(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => PriceDetailPage(info: p)),
+                          );
+                        },
+                        leading: IconButton(
+                          icon: const Icon(Icons.playlist_add),
+                          onPressed: () async {
+                            await _viewModel.addToBuyList(p);
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(AppLocalizations.of(context)!.addedBuyItem)),
+                              );
+                            }
+                          },
+                        ),
+                        title: ScrollingText(
+                          '${p.itemName} / ${p.itemType}',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        subtitle: Text(AppLocalizations.of(context)!.expiry(_formatDate(p.expiry))),
+                        trailing: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              '${AppLocalizations.of(context)!.regularPriceLabel(p.regularPrice.toStringAsFixed(0))} '
+                              '${AppLocalizations.of(context)!.salePriceLabel(p.salePrice.toStringAsFixed(0))} '
+                              '${AppLocalizations.of(context)!.priceDiffLabel(diffStr)}',
+                            ),
+                            Text(AppLocalizations.of(context)!.unitPrice(p.unitPrice.toStringAsFixed(2))),
+                          ],
                         ),
                       ),
                     ),
                   );
                 },
-              );
-            },
+                  );
+                },
+              ),
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: _buildBottomSheet(context),
+              ),
+            ],
           ),
         ),
       ],
+    );
+  }
+
+  /// 並び替えチップと期限表示スイッチを表示するボトムシート
+  Widget _buildBottomSheet(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
+    return Material(
+      elevation: 4,
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(8),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Wrap(
+                spacing: 8,
+                children: [
+                  ChoiceChip(
+                    label: Text(loc.sortAlphabet),
+                    selected: _viewModel.sort == 'alphabet',
+                    onSelected: (_) => _viewModel.setSort('alphabet'),
+                  ),
+                  ChoiceChip(
+                    label: Text(loc.sortUpdated),
+                    selected: _viewModel.sort == 'updated',
+                    onSelected: (_) => _viewModel.setSort('updated'),
+                  ),
+                  ChoiceChip(
+                    label: Text(loc.sortUnitPrice),
+                    selected: _viewModel.sort == 'unitPrice',
+                    onSelected: (_) => _viewModel.setSort('unitPrice'),
+                  ),
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(loc.showExpired),
+                  Switch(
+                    value: _viewModel.showExpired,
+                    onChanged: _viewModel.setShowExpired,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
