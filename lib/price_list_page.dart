@@ -305,7 +305,7 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
                       child: const Icon(Icons.delete, color: Colors.white),
                     ),
                     child: Card(
-                      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      margin: const EdgeInsets.symmetric(vertical: 8),
                       child: InkWell(
                         // カードタップでセール詳細画面へ遷移
                         onTap: () {

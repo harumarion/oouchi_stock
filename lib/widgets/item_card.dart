@@ -17,8 +17,10 @@ class ItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // どの画面でもカード幅を統一するため左右の余白は親ウィジェットで管理
+    // カード間の縦方向の間隔のみここで定義する
     final card = Card(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.symmetric(vertical: 8),
       child: child,
     );
     if (dismissDirection != null) {
