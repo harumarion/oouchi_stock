@@ -106,6 +106,7 @@ Firebase の設定を変更した場合は `flutterfire configure` を再度実�
 ```bash
 flutter test
 ```
+Flutter がインストールされていない環境では、`scripts/setup_flutter.sh` を実行してからテストを行ってください。
 
 テスト前に Firebase の設定ファイルが生成されていることを確認してください。
 すべてのウィジェットに対するテストコードを含めています。
