@@ -14,6 +14,8 @@ void main() {
     expect(find.byType(CategorySegmentedButton), findsOneWidget);
     // SearchBar が表示されていることを確認
     expect(find.byType(SearchBar), findsOneWidget);
+    // SearchAnchor が存在するが候補表示は行わないことを確認
+    expect(find.byType(SearchAnchor), findsOneWidget);
   });
 
   testWidgets('カテゴリがない場合はメッセージと追加ボタンを表示', (WidgetTester tester) async {
