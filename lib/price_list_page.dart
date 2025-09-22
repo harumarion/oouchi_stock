@@ -364,8 +364,8 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
                 ),
               ),
             ),
-          ),
-      },
+          );
+        },
     );
   }
 
