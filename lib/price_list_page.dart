@@ -213,157 +213,8 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
         Expanded(
           child: Stack(
             children: [
-              StreamBuilder<List<PriceInfo>>(
-                stream: _viewModel.stream,
-                builder: (context, snapshot) {
-              if (snapshot.hasError) {
-                final err = snapshot.error?.toString() ?? 'unknown';
-                return Center(child: Text(AppLocalizations.of(context)!.loadError(err)));
-              }
-              if (!snapshot.hasData) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              // Firestoreから取得した最新データ
-              var items = snapshot.data!
-                  .where((e) => e.itemName.contains(_viewModel.search) ||
-                      e.category.contains(_viewModel.search) ||
-                      e.itemType.contains(_viewModel.search))
-                  .where((e) => _viewModel.showExpired || e.expiry.isAfter(DateTime.now().subtract(const Duration(days: 1))))
-                  .toList();
-              // Firestore側で削除完了したIDは一覧から除外
-              _removedIds.removeWhere((id) => items.every((e) => e.id != id));
-              // スワイプ直後に除外したIDも非表示にする
-              items = items.where((e) => !_removedIds.contains(e.id)).toList();
-              if (_viewModel.sort == 'alphabet') {
-                items.sort((a, b) => a.itemType.compareTo(b.itemType));
-              } else if (_viewModel.sort == 'unitPrice') {
-                items.sort((a, b) => a.unitPrice.compareTo(b.unitPrice));
-              } else {
-                items.sort((a, b) => b.checkedAt.compareTo(a.checkedAt));
-              }
-                  // セール情報管理画面のリスト表示部分
-                  // 検索バーとの余白を統一するため左右16、上16を指定
-                  return ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
-                    itemCount: items.length,
-                    itemBuilder: (context, index) {
-                  final p = items[index];
-                  // セール価格と通常価格の差額（正負をそのまま表示）
-                  final diff = p.salePrice - p.regularPrice;
-                  final diffStr = diff > 0
-                      ? '+${diff.toStringAsFixed(0)}'
-                      : diff.toStringAsFixed(0);
-                  return Dismissible(
-                    key: ValueKey(p.id),
-                    direction: DismissDirection.startToEnd,
-                    // スワイプ時に削除確認ダイアログを表示
-                    confirmDismiss: (_) async {
-                      final loc = AppLocalizations.of(context)!;
-                      final res = await showDialog<bool>(
-                        context: context,
-                        builder: (_) => AlertDialog(
-                          content: Text(loc.deleteConfirm),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(context, false),
-                              child: Text(loc.cancel),
-                            ),
-                            TextButton(
-                              onPressed: () => Navigator.pop(context, true),
-                              child: Text(loc.delete),
-                            ),
-                          ],
-                        ),
-                      );
-                      return res ?? false;
-                    },
-                    // 削除処理本体
-                    onDismissed: (_) async {
-                      setState(() {
-                        // Dismissible アニメーション完了後に残らないようIDを記録
-                        _removedIds.add(p.id);
-                      });
-                      try {
-                        await _viewModel.delete(p.id);
-                        if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(AppLocalizations.of(context)!.deleted)),
-                          );
-                        }
-                      } catch (_) {
-                        if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(AppLocalizations.of(context)!.deleteFailed)),
-                          );
-                        }
-                      }
-                    },
-                    background: Container(
-                      color: Colors.red,
-                      alignment: Alignment.centerLeft,
-                      padding: const EdgeInsets.only(left: 16),
-                      child: const Icon(Icons.delete, color: Colors.white),
-                    ),
-                    child: Card(
-                      margin: const EdgeInsets.symmetric(vertical: 8),
-                      child: InkWell(
-                        // カードタップでセール詳細画面へ遷移
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (_) => PriceDetailPage(info: p)),
-                          );
-                        },
-                        child: Padding(
-                          // 価格情報とメニューを右側に配置し、商品名の領域を拡大する
-                          padding: const EdgeInsets.all(16),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // 商品名と品種を左側にまとめて表示するエリア
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    ScrollingText(
-                                      '${p.itemName} / ${p.itemType}',
-                                      style: Theme.of(context).textTheme.titleMedium,
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      AppLocalizations.of(context)!.expiry(_formatDate(p.expiry)),
-                                      style: Theme.of(context).textTheme.bodyMedium,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              // 右側に価格情報を縦並びで表示する
-                              Column(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  Text(
-                                    '${AppLocalizations.of(context)!.regularPriceLabel(p.regularPrice.toStringAsFixed(0))} '
-                                    '${AppLocalizations.of(context)!.salePriceLabel(p.salePrice.toStringAsFixed(0))} '
-                                    '${AppLocalizations.of(context)!.priceDiffLabel(diffStr)}',
-                                  ),
-                                  Text(AppLocalizations.of(context)!.unitPrice(p.unitPrice.toStringAsFixed(2))),
-                                ],
-                              ),
-                              // メニューボタンを価格情報の右端に配置
-                              CardMenuButton(
-                                onPressed: () => _showActions(context, p),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  );
-                },
-                  );
-                },
+              Positioned.fill(
+                child: _buildListContent(context),
               ),
               Align(
                 alignment: Alignment.bottomCenter,
@@ -373,6 +224,148 @@ class _PriceCategoryListState extends State<PriceCategoryList> {
           ),
         ),
       ],
+    );
+  }
+
+  /// セール情報管理画面のリスト本体。
+  /// 取得状況に応じてローディングやエラー表示を切り替える
+  Widget _buildListContent(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
+    if (_viewModel.loading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (_viewModel.errorMessage != null) {
+      return Center(child: Text(loc.loadError(_viewModel.errorMessage!)));
+    }
+    final items = _viewModel.filteredItems;
+    // Firestore側で削除完了したIDは一覧から除外
+    _removedIds.removeWhere((id) => items.every((e) => e.id != id));
+    // スワイプ直後に除外したIDも非表示にする
+    final visible = items.where((e) => !_removedIds.contains(e.id)).toList();
+    if (visible.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 96),
+        child: Center(child: Text(loc.noItems)),
+      );
+    }
+    return ListView.builder(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
+      itemCount: visible.length,
+      itemBuilder: (context, index) {
+        final p = visible[index];
+        // セール価格と通常価格の差額（正負をそのまま表示）
+        final diff = p.salePrice - p.regularPrice;
+        final diffStr = diff > 0
+            ? '+${diff.toStringAsFixed(0)}'
+            : diff.toStringAsFixed(0);
+        return Dismissible(
+          key: ValueKey(p.id),
+          direction: DismissDirection.startToEnd,
+          // スワイプ時に削除確認ダイアログを表示
+          confirmDismiss: (_) async {
+            final loc = AppLocalizations.of(context)!;
+            final res = await showDialog<bool>(
+              context: context,
+              builder: (_) => AlertDialog(
+                content: Text(loc.deleteConfirm),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, false),
+                    child: Text(loc.cancel),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, true),
+                    child: Text(loc.delete),
+                  ),
+                ],
+              ),
+            );
+            return res ?? false;
+          },
+          // 削除処理本体
+          onDismissed: (_) async {
+            setState(() {
+              // Dismissible アニメーション完了後に残らないようIDを記録
+              _removedIds.add(p.id);
+            });
+            try {
+              await _viewModel.delete(p.id);
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(AppLocalizations.of(context)!.deleted)),
+                );
+              }
+            } catch (_) {
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(AppLocalizations.of(context)!.deleteFailed)),
+                );
+              }
+            }
+          },
+          background: Container(
+            color: Colors.red,
+            alignment: Alignment.centerLeft,
+            padding: const EdgeInsets.only(left: 16),
+            child: const Icon(Icons.delete, color: Colors.white),
+          ),
+          child: Card(
+            margin: const EdgeInsets.symmetric(vertical: 8),
+            child: InkWell(
+              // カードタップでセール詳細画面へ遷移
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => PriceDetailPage(info: p)),
+                );
+              },
+              child: Padding(
+                // 価格情報とメニューを右側に配置し、商品名の領域を拡大する
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // 商品名と品種を左側にまとめて表示するエリア
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ScrollingText(
+                            '${p.itemName} / ${p.itemType}',
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            AppLocalizations.of(context)!.expiry(_formatDate(p.expiry)),
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    // 右側に価格情報を縦並びで表示する
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          '${AppLocalizations.of(context)!.regularPriceLabel(p.regularPrice.toStringAsFixed(0))} '
+                          '${AppLocalizations.of(context)!.salePriceLabel(p.salePrice.toStringAsFixed(0))} '
+                          '${AppLocalizations.of(context)!.priceDiffLabel(diffStr)}',
+                        ),
+                        Text(AppLocalizations.of(context)!.unitPrice(p.unitPrice.toStringAsFixed(2))),
+                      ],
+                    ),
+                    // メニューボタンを価格情報の右端に配置
+                    CardMenuButton(
+                      onPressed: () => _showActions(context, p),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+      },
     );
   }
 

@@ -35,6 +35,7 @@ void main() {
       ),
     ));
     await tester.pump();
+    await tester.pump();
     expect(find.byType(Card), findsWidgets);
   });
 
@@ -51,6 +52,7 @@ void main() {
       ),
     ));
     await tester.pump();
+    await tester.pump();
     expect(find.byType(Card), findsNWidgets(2));
   });
 
@@ -65,6 +67,7 @@ void main() {
         ),
       ),
     ));
+    await tester.pump();
     await tester.pump();
     await tester.tap(find.byType(InkWell).first);
     await tester.pumpAndSettle();
@@ -82,6 +85,7 @@ void main() {
         ),
       ),
     ));
+    await tester.pump();
     await tester.pump();
     expect(find.byType(Dismissible), findsWidgets);
   });
@@ -120,6 +124,7 @@ void main() {
       ),
     ));
     await tester.pump();
+    await tester.pump();
     await tester.tap(find.byIcon(Icons.more_vert));
     await tester.pumpAndSettle();
     expect(find.text('買い物リストへ追加'), findsOneWidget);
@@ -140,6 +145,7 @@ void main() {
       ),
     ));
     await tester.pump();
+    await tester.pump();
     expect(find.text('通常価格: 200 セール価格: 150 差額: -50'), findsOneWidget);
     expect(find.text('単価: 150.00'), findsOneWidget);
   });
@@ -159,6 +165,7 @@ void main() {
       ),
     ));
     await tester.pump();
+    await tester.pump();
     expect(find.text('商品A'), findsOneWidget);
 
     await tester.pumpWidget(MaterialApp(
@@ -171,6 +178,7 @@ void main() {
         ),
       ),
     ));
+    await tester.pump();
     await tester.pump();
     expect(find.text('商品B'), findsOneWidget);
   });
@@ -186,6 +194,7 @@ void main() {
         ),
       ),
     ));
+    await tester.pump();
     await tester.pump();
     final listView = tester.widget<ListView>(find.byType(ListView));
     expect(listView.padding, const EdgeInsets.fromLTRB(16, 16, 16, 96));
