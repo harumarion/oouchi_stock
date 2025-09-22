@@ -184,6 +184,12 @@ class _InventoryListState extends State<InventoryList> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
+    // 在庫一覧画面で検索や削除操作後のリストを再構成する
+    final items = _viewModel.filteredItems;
+    _removedIds.removeWhere((id) => items.every((e) => e.id != id));
+    final visible = items.where((e) => !_removedIds.contains(e.id)).toList();
+
     return CustomScrollView(
       slivers: [
         // 他画面と同じ検索バーを SliverToBoxAdapter で表示
@@ -198,121 +204,106 @@ class _InventoryListState extends State<InventoryList> {
             ),
           ),
         ),
-        StreamBuilder<List<Inventory>>(
-          stream: _viewModel.stream,
-          builder: (context, snapshot) {
-            if (snapshot.hasError) {
-              final err = snapshot.error?.toString() ?? 'unknown';
-              return SliverFillRemaining(
-                hasScrollBody: false,
-                child: Center(
-                  child: Text(AppLocalizations.of(context)!.loadError(err)),
-                ),
-              );
-            }
-            if (!snapshot.hasData) {
-              return const SliverFillRemaining(
-                hasScrollBody: false,
-                child: Center(child: CircularProgressIndicator()),
-              );
-            }
-            var list = snapshot.data!
-                .where((inv) =>
-                    inv.itemName.contains(_viewModel.search) ||
-                    inv.category.contains(_viewModel.search) ||
-                    inv.itemType.contains(_viewModel.search))
-                .toList();
-            _removedIds.removeWhere((id) => list.every((e) => e.id != id));
-            list = list.where((e) => !_removedIds.contains(e.id)).toList();
-            // 並び替え機能は廃止したため、常に最終更新日時順で表示
-            list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-            return SliverPadding(
-              padding: const EdgeInsets.all(16),
-              sliver: SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final inv = list[index];
-                    return Dismissible(
-                      key: ValueKey(inv.id),
-                      direction: DismissDirection.startToEnd,
-                      confirmDismiss: (_) async {
-                        final loc = AppLocalizations.of(context)!;
-                        final res = await showDialog<bool>(
-                          context: context,
-                          builder: (_) => AlertDialog(
-                            content: Text(loc.deleteConfirm),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.pop(context, false),
-                                child: Text(loc.cancel),
-                              ),
-                              TextButton(
-                                onPressed: () => Navigator.pop(context, true),
-                                child: Text(loc.delete),
-                              ),
-                            ],
-                          ),
-                        );
-                        return res ?? false;
-                      },
-                      onDismissed: (_) async {
-                        setState(() {
-                          _removedIds.add(inv.id);
-                        });
-                        try {
-                          await _viewModel.delete(inv.id);
-                        } catch (e) {
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content:
-                                    Text(AppLocalizations.of(context)!.deleteFailed),
-                              ),
-                            );
-                          }
-                        }
-                      },
-                      background: Container(
-                        color: Colors.red,
-                        alignment: Alignment.centerLeft,
-                        padding: const EdgeInsets.only(left: 16),
-                        child: const Icon(Icons.delete, color: Colors.white),
-                      ),
-                      child: InventoryCard(
-                        inventory: inv,
-                        updateQuantity: _viewModel.updateQuantity,
-                        stocktake: _viewModel.stocktake,
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => InventoryDetailPage(
-                                inventoryId: inv.id,
-                                categories: widget.categories,
-                              ),
+        if (_viewModel.loading)
+          const SliverFillRemaining(
+            hasScrollBody: false,
+            child: Center(child: CircularProgressIndicator()),
+          )
+        else if (_viewModel.errorMessage != null)
+          SliverFillRemaining(
+            hasScrollBody: false,
+            child: Center(
+              child: Text(loc.loadError(_viewModel.errorMessage!)),
+            ),
+          )
+        else if (visible.isEmpty)
+          SliverFillRemaining(
+            hasScrollBody: false,
+            child: Center(child: Text(loc.noItems)),
+          )
+        else
+          SliverPadding(
+            padding: const EdgeInsets.all(16),
+            sliver: SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  final inv = visible[index];
+                  return Dismissible(
+                    key: ValueKey(inv.id),
+                    direction: DismissDirection.startToEnd,
+                    confirmDismiss: (_) async {
+                      final res = await showDialog<bool>(
+                        context: context,
+                        builder: (_) => AlertDialog(
+                          content: Text(loc.deleteConfirm),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, false),
+                              child: Text(loc.cancel),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, true),
+                              child: Text(loc.delete),
+                            ),
+                          ],
+                        ),
+                      );
+                      return res ?? false;
+                    },
+                    onDismissed: (_) async {
+                      setState(() {
+                        _removedIds.add(inv.id);
+                      });
+                      try {
+                        await _viewModel.delete(inv.id);
+                      } catch (e) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(loc.deleteFailed),
                             ),
                           );
-                        },
-                        onAddToList: () async {
-                          await _viewModel.addToBuyList(inv);
-                          if (mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                    AppLocalizations.of(context)!.addedBuyItem),
-                              ),
-                            );
-                          }
-                        },
-                      ),
-                    );
-                  },
-                  childCount: list.length,
-                ),
+                        }
+                      }
+                    },
+                    background: Container(
+                      color: Colors.red,
+                      alignment: Alignment.centerLeft,
+                      padding: const EdgeInsets.only(left: 16),
+                      child: const Icon(Icons.delete, color: Colors.white),
+                    ),
+                    child: InventoryCard(
+                      inventory: inv,
+                      updateQuantity: _viewModel.updateQuantity,
+                      stocktake: _viewModel.stocktake,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => InventoryDetailPage(
+                              inventoryId: inv.id,
+                              categories: widget.categories,
+                            ),
+                          ),
+                        );
+                      },
+                      onAddToList: () async {
+                        await _viewModel.addToBuyList(inv);
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(loc.addedBuyItem),
+                            ),
+                          );
+                        }
+                      },
+                    ),
+                  );
+                },
+                childCount: visible.length,
               ),
-            );
-          },
-        ),
+            ),
+          ),
       ],
     );
   }
