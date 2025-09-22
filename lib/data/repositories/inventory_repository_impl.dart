@@ -1,70 +1,49 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../util/firestore_refs.dart';
-import '../../util/date_time_parser.dart';
 
-import '../../domain/entities/inventory.dart';
 import '../../domain/entities/history_entry.dart';
+import '../../domain/entities/inventory.dart';
 import '../../domain/repositories/inventory_repository.dart';
+import '../datasources/inventory_remote_data_source.dart';
+import '../mappers/inventory_mapper.dart';
 
-/// Firestore を利用した在庫リポジトリ実装
+/// Firestore実装の在庫リポジトリ
+/// 在庫関連画面全体で利用されるデータ取得・更新処理の窓口
 class InventoryRepositoryImpl implements InventoryRepository {
-  /// デフォルトコンストラクタ
-  InventoryRepositoryImpl();
+  /// Firestoreのリモートデータソース
+  final InventoryRemoteDataSource _remoteDataSource;
+
+  /// Firestoreドキュメントとエンティティのマッパー
+  final InventoryMapper _mapper;
+
+  /// 依存関係を注入可能なコンストラクタ
+  InventoryRepositoryImpl({
+    InventoryRemoteDataSource? remoteDataSource,
+    InventoryMapper? mapper,
+  })  : _remoteDataSource = remoteDataSource ?? const InventoryRemoteDataSource(),
+        _mapper = mapper ?? const InventoryMapper();
 
   @override
   /// カテゴリごとの在庫を監視する
   Stream<List<Inventory>> watchByCategory(String category) {
-    return userCollection('inventory')
-        .where('category', isEqualTo: category)
-        .orderBy('createdAt', descending: true)
-        .snapshots()
-        .map((snapshot) => snapshot.docs.map((doc) {
-              final data = doc.data();
-              return Inventory(
-                id: doc.id,
-                itemName: data['itemName'] ?? '',
-                category: data['category'] ?? '',
-                itemType: data['itemType'] ?? '',
-                quantity: (data['quantity'] ?? 0).toDouble(),
-                volume: (data['volume'] ?? 0).toDouble(),
-                totalVolume: (data['totalVolume'] ?? 0).toDouble(),
-                unit: data['unit'] ?? '',
-                note: data['note'] ?? '',
-                monthlyConsumption:
-                    (data['monthlyConsumption'] ?? 0).toDouble(),
-                createdAt: parseDateTime(data['createdAt']),
-              );
-            }).toList());
+    return _remoteDataSource
+        .watchInventoriesByCategory(category)
+        .map((docs) => docs.map(_mapper.fromQueryDocument).toList());
   }
 
   @override
   /// 全在庫を取得する
   Future<List<Inventory>> fetchAll() async {
-    final snapshot = await userCollection('inventory')
-        .orderBy('createdAt')
-        .get();
-    return snapshot.docs.map((doc) {
-      final data = doc.data();
-      return Inventory(
-        id: doc.id,
-        itemName: data['itemName'] ?? '',
-        category: data['category'] ?? '',
-        itemType: data['itemType'] ?? '',
-        quantity: (data['quantity'] ?? 0).toDouble(),
-        volume: (data['volume'] ?? 0).toDouble(),
-        totalVolume: (data['totalVolume'] ?? 0).toDouble(),
-        unit: data['unit'] ?? '',
-        note: data['note'] ?? '',
-        monthlyConsumption: (data['monthlyConsumption'] ?? 0).toDouble(),
-        createdAt: parseDateTime(data['createdAt']),
-      );
-    }).toList();
+    final docs = await _remoteDataSource.fetchAllInventories();
+    if (docs.isEmpty) {
+      return [];
+    }
+    return docs.map(_mapper.fromQueryDocument).toList();
   }
 
   @override
   /// 在庫を追加してIDを返す
-  Future<String> addInventory(Inventory inventory) async {
-    final doc = await userCollection('inventory').add({
+  Future<String> addInventory(Inventory inventory) {
+    final data = {
       'itemName': inventory.itemName,
       'category': inventory.category,
       'itemType': inventory.itemType,
@@ -75,56 +54,22 @@ class InventoryRepositoryImpl implements InventoryRepository {
       'note': inventory.note,
       'monthlyConsumption': inventory.monthlyConsumption,
       'createdAt': Timestamp.fromDate(inventory.createdAt),
-    });
-    await doc.collection('history').add({
-      'type': 'add',
-      'quantity': inventory.quantity,
-      'timestamp': Timestamp.now(),
-    });
-    return doc.id;
+    };
+    return _remoteDataSource.addInventory(data, inventory.quantity);
   }
 
   @override
-  /// 数量変更履歴を保存し在庫数量を更新する
+  /// 数量を増減させる
   /// 在庫一覧画面のカードで+/-ボタンを押したときに実行される
-  Future<void> updateQuantity(String id, double amount, String type) async {
-    final doc = userCollection('inventory').doc(id);
-    try {
-      final snapshot = await doc.get();
-      // Firestore ドキュメントから取得したデータ。null の可能性があるため Map を nullable として扱う
-      final Map<String, dynamic>? data = snapshot.data();
-      final before = (data?['quantity'] ?? 0).toDouble();
-      final volume = (data?['volume'] ?? 0).toDouble();
-      final beforeVolume = (data?['totalVolume'] ?? before * volume).toDouble();
-      final after = before + amount;
-      final diffVolume = amount * volume;
-      final afterVolume = beforeVolume + diffVolume;
-
-      await doc.update({
-        'quantity': after,
-        'totalVolume': afterVolume,
-      });
-      await doc.collection('history').add({
-        'type': type,
-        // 増減量を総容量で記録
-        'quantity': diffVolume.abs(),
-        'before': beforeVolume,
-        'after': afterVolume,
-        'diff': diffVolume,
-        'timestamp': Timestamp.now(),
-      });
-      await _recalculateMonthlyConsumption(id);
-    } catch (e) {
-      // オフライン時や取得失敗時は例外を投げて上位でハンドリングする
-      rethrow;
-    }
+  Future<void> updateQuantity(String id, double amount, String type) {
+    return _remoteDataSource.updateQuantity(id, amount, type);
   }
 
   @override
   /// 在庫情報を更新する
-  /// 商品名やカテゴリだけでなく容量と単位も更新する
-  Future<void> updateInventory(Inventory inventory) async {
-    await userCollection('inventory').doc(inventory.id).update({
+  /// 在庫編集画面で保存ボタンを押したときに実行される
+  Future<void> updateInventory(Inventory inventory) {
+    final updateData = {
       'itemName': inventory.itemName,
       'category': inventory.category,
       'itemType': inventory.itemType,
@@ -132,135 +77,49 @@ class InventoryRepositoryImpl implements InventoryRepository {
       'totalVolume': inventory.totalVolume,
       'unit': inventory.unit,
       'note': inventory.note,
-    });
+    };
+    return _remoteDataSource.updateInventory(inventory.id, updateData);
   }
 
   @override
-  /// 指定IDの在庫情報を監視する
+  /// 指定IDの在庫情報をストリームで取得する
+  /// 在庫詳細画面で表示内容をリアルタイム更新するために利用する
   Stream<Inventory?> watchInventory(String inventoryId) {
-    return userCollection('inventory')
-        .doc(inventoryId)
-        .snapshots()
-        .map((doc) {
-      final data = doc.data();
-      if (data == null) return null;
-      return Inventory(
-        id: doc.id,
-        itemName: data['itemName'] ?? '',
-        category: data['category'] ?? '',
-        itemType: data['itemType'] ?? '',
-        quantity: (data['quantity'] ?? 0).toDouble(),
-        volume: (data['volume'] ?? 0).toDouble(),
-        totalVolume: (data['totalVolume'] ?? 0).toDouble(),
-        unit: data['unit'] ?? '',
-        note: data['note'] ?? '',
-        monthlyConsumption: (data['monthlyConsumption'] ?? 0).toDouble(),
-        createdAt: parseDateTime(data['createdAt']),
-      );
-    });
+    return _remoteDataSource
+        .watchInventory(inventoryId)
+        .map(_mapper.fromDocument);
   }
 
   @override
-  /// 指定在庫の履歴を監視する
+  /// 履歴を監視する
+  /// 在庫詳細画面の履歴タブで利用する
   Stream<List<HistoryEntry>> watchHistory(String inventoryId) {
-    return userCollection('inventory')
-        .doc(inventoryId)
-        .collection('history')
-        .orderBy('timestamp', descending: true)
-        .snapshots()
-        .map((snapshot) => snapshot.docs.map((d) {
-              final data = d.data();
-              final ts = data['timestamp'];
-              return HistoryEntry(
-                data['type'] ?? '',
-                (data['quantity'] ?? 0).toDouble(),
-                ts is Timestamp ? ts.toDate() : DateTime.now(),
-                before: (data['before'] ?? 0).toDouble(),
-                after: (data['after'] ?? 0).toDouble(),
-                diff: (data['diff'] ?? 0).toDouble(),
-              );
-            }).toList());
+    return _remoteDataSource
+        .watchHistory(inventoryId)
+        .map((docs) => docs.map(_mapper.fromHistoryDocument).toList());
   }
 
   @override
-  /// 棚卸し結果を記録する
+  /// 棚卸しを記録する
+  /// 在庫詳細画面で棚卸しボタンを押したときに利用する
   Future<void> stocktake(
-      String id, double before, double after, double diff) async {
-    final doc = userCollection('inventory').doc(id);
-    final snapshot = await doc.get();
-    final data = snapshot.data();
-    final volume = (data?['volume'] ?? 0).toDouble();
-    final beforeVolume = before * volume;
-    final afterVolume = after * volume;
-    final diffVolume = diff * volume;
-    await doc.update({
-      'quantity': after,
-      'totalVolume': afterVolume,
-    });
-    await doc.collection('history').add({
-      'type': 'stocktake',
-      'before': beforeVolume,
-      'after': afterVolume,
-      'diff': diffVolume,
-      'timestamp': Timestamp.now(),
-    });
-    await _recalculateMonthlyConsumption(id);
+      String id, double before, double after, double diff) {
+    return _remoteDataSource.stocktake(id, before, after, diff);
   }
 
   @override
   /// 在庫を削除する
-  Future<void> deleteInventory(String id) async {
-    final doc = userCollection('inventory').doc(id);
-    final history = await doc.collection('history').get();
-    for (final h in history.docs) {
-      await h.reference.delete();
-    }
-    await doc.delete();
+  /// 在庫詳細画面で削除操作をしたときに利用する
+  Future<void> deleteInventory(String id) {
+    return _remoteDataSource.deleteInventory(id);
   }
 
   @override
   /// 残量が一定以下の在庫を監視する
+  /// 買い物リスト画面で残量不足を検知するために利用する
   Stream<List<Inventory>> watchNeedsBuy(double threshold) {
-    return userCollection('inventory')
-        .where('totalVolume', isLessThanOrEqualTo: threshold)
-        .orderBy('totalVolume')
-        .snapshots()
-        .map((snapshot) => snapshot.docs.map((doc) {
-              final data = doc.data();
-              return Inventory(
-                id: doc.id,
-                itemName: data['itemName'] ?? '',
-                category: data['category'] ?? '',
-                itemType: data['itemType'] ?? '',
-                quantity: (data['quantity'] ?? 0).toDouble(),
-                volume: (data['volume'] ?? 0).toDouble(),
-                totalVolume: (data['totalVolume'] ?? 0).toDouble(),
-                unit: data['unit'] ?? '',
-                note: data['note'] ?? '',
-                monthlyConsumption:
-                    (data['monthlyConsumption'] ?? 0).toDouble(),
-                createdAt: parseDateTime(data['createdAt']),
-              );
-            }).toList());
-  }
-
-  /// 履歴から月あたりの消費量を再計算する
-  Future<void> _recalculateMonthlyConsumption(String id) async {
-    final monthAgo = DateTime.now().subtract(const Duration(days: 30));
-    final history = await userCollection('inventory')
-        .doc(id)
-        .collection('history')
-        .where('timestamp', isGreaterThanOrEqualTo: Timestamp.fromDate(monthAgo))
-        .get();
-    double used = 0;
-    for (final doc in history.docs) {
-      final data = doc.data();
-      if (data['type'] == 'used') {
-        used += (data['diff'] ?? 0).abs().toDouble();
-      }
-    }
-    await userCollection('inventory')
-        .doc(id)
-        .update({'monthlyConsumption': used});
+    return _remoteDataSource
+        .watchNeedsBuy(threshold)
+        .map((docs) => docs.map(_mapper.fromQueryDocument).toList());
   }
 }
