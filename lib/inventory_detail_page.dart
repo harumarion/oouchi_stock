@@ -6,10 +6,7 @@ import 'domain/entities/category.dart';
 import 'util/unit_localization.dart';
 import 'edit_inventory_page.dart';
 import 'domain/usecases/delete_inventory_with_relations.dart';
-import 'data/repositories/inventory_repository_impl.dart';
-import 'data/repositories/price_repository_impl.dart';
-import 'data/repositories/buy_list_repository_impl.dart';
-import 'data/repositories/buy_prediction_repository_impl.dart';
+import 'domain/factory/dependency_factory.dart';
 
 import "domain/entities/history_entry.dart";
 import "domain/entities/inventory.dart";
@@ -89,12 +86,11 @@ class InventoryDetailPage extends StatelessWidget {
                     );
                     if (res == true) {
                       try {
-                        await DeleteInventoryWithRelations(
-                          InventoryRepositoryImpl(),
-                          PriceRepositoryImpl(),
-                          BuyListRepositoryImpl(),
-                          BuyPredictionRepositoryImpl(),
-                        )(inv.id);
+                        // 商品詳細画面の削除メニュー選択時に依存をファクトリ経由で注入
+                        final deleter =
+                            DependencyFactory.instance
+                                .createDeleteInventoryWithRelations();
+                        await deleter(inv.id);
                         if (context.mounted) Navigator.pop(context);
                       } catch (e) {
                         if (context.mounted) {

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import '../../domain/entities/inventory.dart';
 import '../../domain/entities/category.dart';
 import '../../domain/usecases/update_inventory.dart';
-import '../../data/repositories/inventory_repository_impl.dart';
+import '../../domain/factory/dependency_factory.dart';
 import '../../util/firestore_refs.dart';
 import '../../util/date_time_parser.dart';
 import '../../default_item_types.dart';
@@ -16,8 +16,9 @@ import 'inventory_form_viewmodel.dart';
 // 商品編集フォームの状態を管理する ViewModel
 class EditInventoryViewModel extends ChangeNotifier
     implements InventoryFormViewModel {
-  /// 在庫更新ユースケース
-  final UpdateInventory _usecase = UpdateInventory(InventoryRepositoryImpl());
+  /// 在庫更新ユースケース（在庫編集画面で保存ボタンを押した際に実行）
+  final UpdateInventory _usecase =
+      DependencyFactory.instance.createUpdateInventory();
 
   /// フォームキー
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();

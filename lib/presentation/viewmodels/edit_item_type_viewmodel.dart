@@ -4,12 +4,14 @@ import 'package:flutter/material.dart';
 import '../../domain/entities/item_type.dart';
 import '../../domain/entities/category.dart';
 import '../../domain/usecases/update_item_type.dart';
-import '../../data/repositories/item_type_repository_impl.dart';
+import '../../domain/factory/dependency_factory.dart';
 
 /// 品種編集画面の状態を管理する ViewModel
 class EditItemTypeViewModel extends ChangeNotifier {
   /// 品種更新ユースケース
-  final UpdateItemType _usecase = UpdateItemType(ItemTypeRepositoryImpl());
+  /// アイテム種別設定画面で保存ボタンを押した際に呼ぶユースケース
+  final UpdateItemType _usecase =
+      DependencyFactory.instance.createUpdateItemType();
 
   /// フォームキー
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();

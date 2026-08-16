@@ -5,24 +5,18 @@ import '../../domain/entities/inventory.dart';
 import '../../domain/entities/price_info.dart';
 import '../../domain/usecases/add_price_info.dart';
 import '../../domain/usecases/fetch_all_inventory.dart';
-import '../../data/repositories/price_repository_impl.dart';
-import '../../data/repositories/inventory_repository_impl.dart';
-import '../../data/repositories/buy_prediction_repository_impl.dart';
-import '../../data/repositories/buy_list_repository_impl.dart';
-import '../../domain/usecases/add_prediction_item.dart';
-import '../../domain/usecases/auto_add_prediction_item.dart';
-import '../../domain/usecases/add_buy_item.dart';
-import '../../domain/usecases/auto_add_buy_item.dart';
-import '../../domain/usecases/purchase_decision.dart';
-import '../../domain/entities/purchase_decision_settings.dart';
+import '../../domain/factory/dependency_factory.dart';
 
 /// セール情報追加画面の状態を管理する ViewModel
 class AddPriceViewModel extends ChangeNotifier {
+  /// DI ファクトリ（セール登録画面で利用する依存を管理）
+  final DependencyFactory _factory;
+
   /// セール情報追加ユースケース
-  final AddPriceInfo _usecase = AddPriceInfo(PriceRepositoryImpl());
+  final AddPriceInfo _usecase;
+
   /// 在庫一覧取得ユースケース
-  final FetchAllInventory _fetchInventory =
-      FetchAllInventory(InventoryRepositoryImpl());
+  final FetchAllInventory _fetchInventory;
 
   /// フォームキー
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
@@ -51,7 +45,12 @@ class AddPriceViewModel extends ChangeNotifier {
   /// セール終了日
   DateTime expiry = DateTime.now();
 
-  AddPriceViewModel() {
+  AddPriceViewModel({DependencyFactory? factory})
+      : _factory = factory ?? DependencyFactory.instance,
+        _usecase =
+            (factory ?? DependencyFactory.instance).createAddPriceInfo(),
+        _fetchInventory =
+            (factory ?? DependencyFactory.instance).createFetchAllInventory() {
     _init();
   }
 
@@ -92,27 +91,16 @@ class AddPriceViewModel extends ChangeNotifier {
     );
     await _usecase(info);
     // セール情報登録後、買い物予報・買い物リストへの自動追加を評価
-    final settings = await loadPurchaseDecisionSettings();
-    final prediction = AutoAddPredictionItem(
-      AddPredictionItem(BuyPredictionRepositoryImpl()),
-      PurchaseDecision(
-        2,
-        cautiousDays: settings.cautiousDays,
-        bestTimeDays: settings.bestTimeDays,
-        discountPercent: settings.discountPercent,
-      ),
+    final settings = await _factory.loadPurchaseDecisionSettings();
+    final decision = _factory.createPurchaseDecision(
+      threshold: 2,
+      settings: settings,
     );
+    final prediction =
+        _factory.createAutoAddPredictionItem(decision);
     await prediction(inventory!, info);
     // セール登録後、買い物リストへの自動追加も評価
-    final buy = AutoAddBuyItem(
-      AddBuyItem(BuyListRepositoryImpl()),
-      PurchaseDecision(
-        2,
-        cautiousDays: settings.cautiousDays,
-        bestTimeDays: settings.bestTimeDays,
-        discountPercent: settings.discountPercent,
-      ),
-    );
+    final buy = _factory.createAutoAddBuyItem(decision);
     await buy(inventory!, info);
   }
 }

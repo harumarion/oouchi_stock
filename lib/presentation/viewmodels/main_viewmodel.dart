@@ -9,21 +9,19 @@ import '../../util/webview_checker.dart';
 import '../../firebase_options.dart';
 import '../../notification_service.dart';
 import '../../i18n/app_localizations.dart';
-import '../../data/repositories/inventory_repository_impl.dart';
-import '../../data/repositories/price_repository_impl.dart';
-import '../../data/repositories/buy_prediction_repository_impl.dart';
-import '../../data/repositories/buy_list_repository_impl.dart';
-import '../../domain/usecases/add_prediction_item.dart';
+import '../../domain/factory/dependency_factory.dart';
+import '../../domain/usecases/fetch_all_inventory.dart';
+import '../../domain/usecases/watch_price_by_type.dart';
 import '../../domain/usecases/auto_add_prediction_item.dart';
-import '../../domain/usecases/add_buy_item.dart';
 import '../../domain/usecases/auto_add_buy_item.dart';
-import '../../domain/usecases/purchase_decision.dart';
-import '../../domain/entities/purchase_decision_settings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// アプリ全体の状態を管理する ViewModel
 /// 初期化や言語設定、通信状況の監視を担当する
 class MainViewModel extends ChangeNotifier {
+  /// DI ファクトリ（アプリ全体の自動処理で利用する依存を集約）
+  final DependencyFactory _factory;
+
   /// 初期化完了フラグ
   bool initialized = false;
 
@@ -83,25 +81,26 @@ class MainViewModel extends ChangeNotifier {
     );
   }
 
+  MainViewModel({DependencyFactory? factory})
+      : _factory = factory ?? DependencyFactory.instance;
+
   /// 在庫と価格を評価し買い物予報を更新
   // アプリ起動時に在庫を評価して買い物予報を更新する
   Future<void> _runAutoPrediction() async {
-    final invRepo = InventoryRepositoryImpl();
-    final priceRepo = PriceRepositoryImpl();
-    // 保存された購入判定設定を読み込む
-    final decisionSettings = await loadPurchaseDecisionSettings();
-    final auto = AutoAddPredictionItem(
-      AddPredictionItem(BuyPredictionRepositoryImpl()),
-      PurchaseDecision(
-        2,
-        cautiousDays: decisionSettings.cautiousDays,
-        bestTimeDays: decisionSettings.bestTimeDays,
-        discountPercent: decisionSettings.discountPercent,
-      ),
+    final FetchAllInventory fetchAll =
+        _factory.createFetchAllInventory();
+    final WatchPriceByType watchPrice =
+        _factory.createWatchPriceByType();
+    final settings = await _factory.loadPurchaseDecisionSettings();
+    final decision = _factory.createPurchaseDecision(
+      threshold: 2,
+      settings: settings,
     );
-    final list = await invRepo.fetchAll();
+    final AutoAddPredictionItem auto =
+        _factory.createAutoAddPredictionItem(decision);
+    final list = await fetchAll();
     for (final inv in list) {
-      final prices = await priceRepo.watchByType(inv.category, inv.itemType).first;
+      final prices = await watchPrice(inv.category, inv.itemType).first;
       final price = prices.isNotEmpty ? prices.first : null;
       await auto(inv, price);
     }
@@ -110,21 +109,19 @@ class MainViewModel extends ChangeNotifier {
   /// 在庫と価格を評価し買い物リストを更新する
   /// アプリ起動時に在庫を評価して買い物リストへ自動追加を試みる
   Future<void> _runAutoBuyList() async {
-    final invRepo = InventoryRepositoryImpl();
-    final priceRepo = PriceRepositoryImpl();
-    final decisionSettings = await loadPurchaseDecisionSettings();
-    final auto = AutoAddBuyItem(
-      AddBuyItem(BuyListRepositoryImpl()),
-      PurchaseDecision(
-        2,
-        cautiousDays: decisionSettings.cautiousDays,
-        bestTimeDays: decisionSettings.bestTimeDays,
-        discountPercent: decisionSettings.discountPercent,
-      ),
+    final FetchAllInventory fetchAll =
+        _factory.createFetchAllInventory();
+    final WatchPriceByType watchPrice =
+        _factory.createWatchPriceByType();
+    final settings = await _factory.loadPurchaseDecisionSettings();
+    final decision = _factory.createPurchaseDecision(
+      threshold: 2,
+      settings: settings,
     );
-    final list = await invRepo.fetchAll();
+    final AutoAddBuyItem auto = _factory.createAutoAddBuyItem(decision);
+    final list = await fetchAll();
     for (final inv in list) {
-      final prices = await priceRepo.watchByType(inv.category, inv.itemType).first;
+      final prices = await watchPrice(inv.category, inv.itemType).first;
       final price = prices.isNotEmpty ? prices.first : null;
       await auto(inv, price);
     }

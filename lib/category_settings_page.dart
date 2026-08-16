@@ -10,7 +10,7 @@ import 'edit_category_page.dart';
 import 'domain/entities/category.dart';
 import 'domain/entities/category_order.dart';
 import 'domain/usecases/add_category.dart';
-import 'data/repositories/category_repository_impl.dart';
+import 'domain/factory/dependency_factory.dart';
 
 /// カテゴリを一覧表示し追加・削除・編集を行う画面。
 class CategorySettingsPage extends StatefulWidget {
@@ -30,8 +30,9 @@ class _CategorySettingsPageState extends State<CategorySettingsPage> {
   late final StreamSubscription<QuerySnapshot<Map<String, dynamic>>> _sub;
   List<Category> _list = [];
 
-  /// カテゴリ追加ユースケース
-  final AddCategory _addUsecase = AddCategory(CategoryRepositoryImpl());
+  /// カテゴリ追加ユースケース（カテゴリ設定画面で追加ボタンを押したときに利用）
+  final AddCategory _addUsecase =
+      DependencyFactory.instance.createAddCategory();
 
   @override
   void initState() {

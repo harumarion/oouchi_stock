@@ -1,7 +1,7 @@
 import '../../domain/repositories/inventory_repository.dart';
 import '../../domain/entities/inventory.dart';
 import '../../domain/entities/history_entry.dart';
-import '../../data/repositories/inventory_repository_impl.dart';
+import '../../domain/factory/dependency_factory.dart';
 
 /// 在庫詳細画面の状態を管理する ViewModel
 class InventoryDetailViewModel {
@@ -9,7 +9,8 @@ class InventoryDetailViewModel {
   final InventoryRepository repository;
 
   InventoryDetailViewModel({required this.inventoryId, InventoryRepository? repository})
-      : repository = repository ?? InventoryRepositoryImpl();
+      : repository =
+            repository ?? DependencyFactory.instance.inventoryRepository;
 
   /// 在庫を監視するストリーム
   Stream<Inventory?> inventoryStream() => repository.watchInventory(inventoryId);

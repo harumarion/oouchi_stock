@@ -4,9 +4,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../util/firestore_refs.dart';
-import '../../data/repositories/ad_config_repository_impl.dart';
 import '../../domain/usecases/load_ad_enabled.dart';
 import '../../domain/usecases/save_ad_enabled.dart';
+import '../../domain/factory/dependency_factory.dart';
 
 /// 設定画面の状態を管理する ViewModel
 class SettingsViewModel extends ChangeNotifier {
@@ -22,9 +22,11 @@ class SettingsViewModel extends ChangeNotifier {
   final LoadAdEnabled _loadAdEnabled;
   final SaveAdEnabled _saveAdEnabled;
 
-  SettingsViewModel()
-      : _loadAdEnabled = LoadAdEnabled(AdConfigRepositoryImpl()),
-        _saveAdEnabled = SaveAdEnabled(AdConfigRepositoryImpl()) {
+  SettingsViewModel({DependencyFactory? factory})
+      : _loadAdEnabled =
+            (factory ?? DependencyFactory.instance).createLoadAdEnabled(),
+        _saveAdEnabled =
+            (factory ?? DependencyFactory.instance).createSaveAdEnabled() {
     loadTimes();
     loadAds();
   }

@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 // google_mobile_ads 4.0.0 以上で動作する広告表示用ウィジェット
-import '../data/repositories/ad_config_repository_impl.dart';
 import '../domain/usecases/load_ad_enabled.dart';
+import '../domain/factory/dependency_factory.dart';
 
 /// 画面下部に表示するバナー広告ウィジェット
 class AdBanner extends StatefulWidget {
@@ -22,7 +22,7 @@ class _AdBannerState extends State<AdBanner> {
 
   // 広告設定を読み込むユースケース
   final LoadAdEnabled _loadUsecase =
-      LoadAdEnabled(AdConfigRepositoryImpl());
+      DependencyFactory.instance.createLoadAdEnabled();
 
   @override
   void initState() {

@@ -5,12 +5,13 @@ import 'package:flutter/material.dart';
 import '../../domain/entities/category.dart';
 import '../../domain/entities/item_type.dart';
 import '../../domain/usecases/add_item_type.dart';
-import '../../data/repositories/item_type_repository_impl.dart';
+import '../../domain/factory/dependency_factory.dart';
 
 /// 品種追加画面の状態を管理する ViewModel
 class AddItemTypeViewModel extends ChangeNotifier {
-  /// 品種追加ユースケース
-  final AddItemType _usecase = AddItemType(ItemTypeRepositoryImpl());
+  /// 品種追加ユースケース（品種追加画面の保存処理で利用）
+  final AddItemType _usecase =
+      DependencyFactory.instance.createAddItemType();
 
   /// フォームキー
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();

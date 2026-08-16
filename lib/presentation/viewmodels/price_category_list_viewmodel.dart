@@ -4,16 +4,17 @@ import 'dart:collection';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../data/repositories/buy_list_repository_impl.dart';
-import '../../data/repositories/price_repository_impl.dart';
 import '../../domain/entities/buy_item.dart';
 import '../../domain/entities/price_info.dart';
 import '../../domain/usecases/add_buy_item.dart';
 import '../../domain/usecases/delete_price_info.dart';
 import '../../domain/usecases/watch_price_by_category.dart';
+import '../../domain/factory/dependency_factory.dart';
 
 /// セール情報管理画面のカテゴリタブを管理する ViewModel
 class PriceCategoryListViewModel extends ChangeNotifier {
+  /// DI ファクトリ（セールカテゴリ画面で利用する依存を集約）
+  final DependencyFactory _factory;
   /// 対象カテゴリ名
   final String category;
 
@@ -62,9 +63,15 @@ class PriceCategoryListViewModel extends ChangeNotifier {
     DeletePriceInfo? delete,
     AddBuyItem? addBuy,
     Duration debounceDuration = const Duration(milliseconds: 160),
-  })  : _watch = watch ?? WatchPriceByCategory(PriceRepositoryImpl()),
-        _delete = delete ?? DeletePriceInfo(PriceRepositoryImpl()),
-        _addBuy = addBuy ?? AddBuyItem(BuyListRepositoryImpl()),
+    DependencyFactory? factory,
+  })  : _factory = factory ?? DependencyFactory.instance,
+        _watch = watch ??
+            (factory ?? DependencyFactory.instance)
+                .createWatchPriceByCategory(),
+        _delete = delete ??
+            (factory ?? DependencyFactory.instance).createDeletePriceInfo(),
+        _addBuy = addBuy ??
+            (factory ?? DependencyFactory.instance).createAddBuyItem(),
         _debounceDuration = debounceDuration {
     _startWatch();
   }
@@ -164,8 +171,12 @@ class PriceCategoryListViewModel extends ChangeNotifier {
 
   /// カードのボタンから呼ばれ、買い物リストに追加する
   Future<void> addToBuyList(PriceInfo info) async {
-    final item =
-        BuyItem(info.itemName, info.itemType, null, BuyItemReason.sale);
+    final item = _factory.createBuyItem(
+      info.itemName,
+      info.itemType,
+      null,
+      BuyItemReason.sale,
+    );
     await _addBuy(item);
   }
 
