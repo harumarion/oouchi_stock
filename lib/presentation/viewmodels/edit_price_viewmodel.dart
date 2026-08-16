@@ -4,16 +4,15 @@ import '../../domain/entities/inventory.dart';
 import '../../domain/entities/price_info.dart';
 import '../../domain/usecases/update_price_info.dart';
 import '../../domain/usecases/fetch_all_inventory.dart';
-import '../../data/repositories/price_repository_impl.dart';
-import '../../data/repositories/inventory_repository_impl.dart';
+import '../../domain/factory/dependency_factory.dart';
 
 /// セール情報編集画面の状態を管理する ViewModel
 class EditPriceViewModel extends ChangeNotifier {
   /// セール情報更新ユースケース
-  final UpdatePriceInfo _usecase = UpdatePriceInfo(PriceRepositoryImpl());
+  final UpdatePriceInfo _usecase;
+
   /// 在庫一覧取得ユースケース
-  final FetchAllInventory _fetchInventory =
-      FetchAllInventory(InventoryRepositoryImpl());
+  final FetchAllInventory _fetchInventory;
 
   /// フォームキー
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
@@ -45,7 +44,11 @@ class EditPriceViewModel extends ChangeNotifier {
   /// セール終了日
   DateTime expiry = DateTime.now();
 
-  EditPriceViewModel(PriceInfo info) {
+  EditPriceViewModel(PriceInfo info, {DependencyFactory? factory})
+      : _usecase =
+            (factory ?? DependencyFactory.instance).createUpdatePriceInfo(),
+        _fetchInventory =
+            (factory ?? DependencyFactory.instance).createFetchAllInventory() {
     original = info;
     _init();
   }

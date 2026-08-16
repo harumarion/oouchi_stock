@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../data/repositories/buy_list_repository_impl.dart';
 import '../../domain/entities/buy_item.dart';
 import '../../domain/usecases/add_buy_item.dart';
 import '../../models/sale_item.dart';
+import '../../domain/factory/dependency_factory.dart';
 
 /// 買い得リスト画面の状態を管理する ViewModel
 class SaleListViewModel extends ChangeNotifier {
@@ -21,7 +21,9 @@ class SaleListViewModel extends ChangeNotifier {
   /// 検索バーのコントローラ
   final SearchController controller = SearchController();
 
-  final AddBuyItem addBuyItem = AddBuyItem(BuyListRepositoryImpl());
+  /// 買い物リスト追加ユースケース（セール画面の追加ボタンで利用）
+  final AddBuyItem addBuyItem =
+      DependencyFactory.instance.createAddBuyItem();
 
   /// セール一覧画面で「買い物リストに追加」ボタンを押したときの処理
   /// [item] 追加する買い物リストアイテム

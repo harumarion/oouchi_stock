@@ -14,14 +14,15 @@ import '../../domain/usecases/watch_buy_items.dart';
 import '../../domain/usecases/update_quantity.dart';
 import '../../domain/usecases/watch_inventory.dart';
 import '../../domain/usecases/calculate_days_left.dart';
-import '../../data/repositories/inventory_repository_impl.dart';
-import '../../data/repositories/buy_list_repository_impl.dart';
+import '../../domain/factory/dependency_factory.dart';
 import '../../util/date_time_parser.dart';
 import '../../util/firestore_refs.dart';
 
 /// 買い物予報画面の状態を管理する ViewModel
 /// カテゴリ読み込みや条件設定、リスト操作を担当する
 class BuyListViewModel extends ChangeNotifier {
+  /// DI ファクトリ（買い物リスト画面で利用する依存を集約）
+  final DependencyFactory _factory;
   /// 在庫リポジトリ
   final InventoryRepository repository;
   /// 買い物リスト追加ユースケース
@@ -65,22 +66,32 @@ class BuyListViewModel extends ChangeNotifier {
     UpdateQuantity? updateQuantity,
     WatchInventory? watchInventory,
     CalculateDaysLeft? calcDaysLeft,
+    DependencyFactory? factory,
   }) {
-    final invRepo = repository ?? InventoryRepositoryImpl();
-    final buyRepo = buyRepository ?? BuyListRepositoryImpl();
+    final dep = factory ?? DependencyFactory.instance;
+    final invRepo = repository ?? dep.inventoryRepository;
+    final buyRepo = buyRepository ?? dep.buyListRepository;
     return BuyListViewModel._(
+      factory: dep,
       repository: invRepo,
       buyRepository: buyRepo,
-      addUsecase: addUsecase ?? AddBuyItem(buyRepo),
-      removeUsecase: removeUsecase ?? RemoveBuyItem(buyRepo),
-      watchUsecase: watchUsecase ?? WatchBuyItems(buyRepo),
-      updateQuantity: updateQuantity ?? UpdateQuantity(invRepo),
-      watchInventory: watchInventory ?? WatchInventory(invRepo),
-      calcDaysLeft: calcDaysLeft ?? CalculateDaysLeft(invRepo),
+      addUsecase:
+          addUsecase ?? dep.createAddBuyItem(repository: buyRepo),
+      removeUsecase:
+          removeUsecase ?? dep.createRemoveBuyItem(repository: buyRepo),
+      watchUsecase:
+          watchUsecase ?? dep.createWatchBuyItems(repository: buyRepo),
+      updateQuantity:
+          updateQuantity ?? dep.createUpdateQuantity(repository: invRepo),
+      watchInventory:
+          watchInventory ?? dep.createWatchInventory(repository: invRepo),
+      calcDaysLeft:
+          calcDaysLeft ?? dep.createCalculateDaysLeft(repository: invRepo),
     );
   }
 
   BuyListViewModel._({
+    required DependencyFactory factory,
     required this.repository,
     required BuyListRepository buyRepository,
     required this.addUsecase,
@@ -89,7 +100,8 @@ class BuyListViewModel extends ChangeNotifier {
     required UpdateQuantity updateQuantity,
     required WatchInventory watchInventory,
     required CalculateDaysLeft calcDaysLeft,
-  })  : _buyRepository = buyRepository,
+  })  : _factory = factory,
+        _buyRepository = buyRepository,
         _updateQuantity = updateQuantity,
         _watchInventory = watchInventory,
         _calcDaysLeft = calcDaysLeft;
@@ -133,8 +145,13 @@ class BuyListViewModel extends ChangeNotifier {
     _invSub = strategy.watch(repository).listen((list) async {
       for (final inv in list) {
         if (_ignoredIds.contains(inv.id)) continue;
-        await addUsecase(BuyItem(
-            inv.itemName, inv.category, inv.id, BuyItemReason.autoCautious));
+        final item = _factory.createBuyItem(
+          inv.itemName,
+          inv.category,
+          inv.id,
+          BuyItemReason.autoCautious,
+        );
+        await addUsecase(item);
       }
     });
   }
@@ -156,7 +173,13 @@ class BuyListViewModel extends ChangeNotifier {
   Future<void> addManualItem() async {
     final text = itemController.text.trim();
     if (text.isEmpty) return;
-    await addUsecase(BuyItem(text, '', null, BuyItemReason.manual));
+    final item = _factory.createBuyItem(
+      text,
+      '',
+      null,
+      BuyItemReason.manual,
+    );
+    await addUsecase(item);
     itemController.clear();
   }
 

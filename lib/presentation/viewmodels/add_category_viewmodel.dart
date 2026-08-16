@@ -4,12 +4,13 @@ import 'package:flutter/material.dart';
 
 import '../../domain/entities/category.dart';
 import '../../domain/usecases/add_category.dart';
-import '../../data/repositories/category_repository_impl.dart';
+import '../../domain/factory/dependency_factory.dart';
 
 /// カテゴリ追加画面の状態を管理する ViewModel
 class AddCategoryViewModel extends ChangeNotifier {
-  /// カテゴリ追加ユースケース
-  final AddCategory _usecase = AddCategory(CategoryRepositoryImpl());
+  /// カテゴリ追加ユースケース（カテゴリ追加画面の保存処理で利用）
+  final AddCategory _usecase =
+      DependencyFactory.instance.createAddCategory();
 
   /// フォームキー
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();

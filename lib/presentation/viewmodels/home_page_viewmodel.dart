@@ -8,14 +8,12 @@ import '../../domain/entities/inventory.dart';
 import '../../domain/entities/category.dart';
 import '../../domain/entities/category_order.dart';
 import '../../domain/entities/buy_list_condition_settings.dart';
-import '../../data/repositories/inventory_repository_impl.dart';
 import '../../domain/usecases/calculate_days_left.dart';
 import '../../domain/usecases/watch_inventory.dart';
-import '../../data/repositories/buy_list_repository_impl.dart';
 import '../../domain/usecases/add_buy_item.dart';
-import '../../data/repositories/buy_prediction_repository_impl.dart';
 import '../../domain/usecases/watch_prediction_items.dart';
 import '../../domain/usecases/remove_prediction_item.dart';
+import '../../domain/factory/dependency_factory.dart';
 
 /// ホーム画面の状態を管理する ViewModel
 class HomePageViewModel extends ChangeNotifier {
@@ -30,15 +28,36 @@ class HomePageViewModel extends ChangeNotifier {
   /// 買い物予報条件
   BuyListConditionSettings? conditionSettings;
 
-  final CalculateDaysLeft _calcUsecase =
-      CalculateDaysLeft(InventoryRepositoryImpl());
-  final WatchInventory _watchInventory = WatchInventory(InventoryRepositoryImpl());
-  final AddBuyItem _addBuyItem = AddBuyItem(BuyListRepositoryImpl());
-  final _predictionRepo = BuyPredictionRepositoryImpl();
-  late final WatchPredictionItems watchPrediction =
-      WatchPredictionItems(_predictionRepo);
-  late final RemovePredictionItem removePrediction =
-      RemovePredictionItem(_predictionRepo);
+  /// DI ファクトリ（ホーム画面全体で利用するユースケース生成用）
+  final DependencyFactory _factory;
+
+  /// 残り日数計算ユースケース
+  final CalculateDaysLeft _calcUsecase;
+
+  /// 在庫監視ユースケース
+  final WatchInventory _watchInventory;
+
+  /// 買い物リスト追加ユースケース
+  final AddBuyItem _addBuyItem;
+
+  /// 予報監視ユースケース
+  late final WatchPredictionItems watchPrediction;
+
+  /// 予報削除ユースケース
+  late final RemovePredictionItem removePrediction;
+
+  HomePageViewModel({DependencyFactory? factory})
+      : _factory = factory ?? DependencyFactory.instance,
+        _calcUsecase =
+            (factory ?? DependencyFactory.instance).createCalculateDaysLeft(),
+        _watchInventory =
+            (factory ?? DependencyFactory.instance).createWatchInventory(),
+        _addBuyItem =
+            (factory ?? DependencyFactory.instance).createAddBuyItem() {
+    // ホーム画面表示時に予報関連ユースケースをファクトリから取得
+    watchPrediction = _factory.createWatchPredictionItems();
+    removePrediction = _factory.createRemovePredictionItem();
+  }
 
   /// 検索文字列
   String search = '';
@@ -51,8 +70,12 @@ class HomePageViewModel extends ChangeNotifier {
 
   /// ホーム画面で予報カードの「買い物リストに追加」ボタンを押したときの処理
   Future<void> addPredictionToBuyList(BuyItem item) async {
-    final updated = BuyItem(
-        item.name, item.category, item.inventoryId, BuyItemReason.prediction);
+    final updated = _factory.createBuyItem(
+      item.name,
+      item.category,
+      item.inventoryId,
+      BuyItemReason.prediction,
+    );
     await _addBuyItem(updated);
   }
 

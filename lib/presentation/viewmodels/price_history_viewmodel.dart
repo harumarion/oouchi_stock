@@ -1,7 +1,7 @@
-import '../../data/repositories/price_repository_impl.dart';
 import '../../domain/entities/price_info.dart';
 import '../../domain/usecases/delete_price_info.dart';
 import '../../domain/usecases/watch_price_by_type.dart';
+import '../../domain/factory/dependency_factory.dart';
 
 /// セール情報履歴画面の状態を管理する ViewModel
 class PriceHistoryViewModel {
@@ -15,8 +15,11 @@ class PriceHistoryViewModel {
     required this.itemType,
     WatchPriceByType? watch,
     DeletePriceInfo? deleter,
-  })  : watch = watch ?? WatchPriceByType(PriceRepositoryImpl()),
-        deleter = deleter ?? DeletePriceInfo(PriceRepositoryImpl());
+    DependencyFactory? factory,
+  })  : watch = watch ??
+            (factory ?? DependencyFactory.instance).createWatchPriceByType(),
+        deleter = deleter ??
+            (factory ?? DependencyFactory.instance).createDeletePriceInfo();
 
   /// セール情報ストリーム
   Stream<List<PriceInfo>> stream() => watch(category, itemType);

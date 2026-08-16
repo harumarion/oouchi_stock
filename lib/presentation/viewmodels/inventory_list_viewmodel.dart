@@ -4,28 +4,22 @@ import 'dart:collection';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../data/repositories/buy_list_repository_impl.dart';
-import '../../data/repositories/buy_prediction_repository_impl.dart';
-import '../../data/repositories/inventory_repository_impl.dart';
-import '../../data/repositories/price_repository_impl.dart';
 import '../../domain/entities/buy_item.dart';
 import '../../domain/entities/inventory.dart';
-import '../../domain/entities/purchase_decision_settings.dart';
 import '../../domain/usecases/add_buy_item.dart';
-import '../../domain/usecases/add_prediction_item.dart';
-import '../../domain/usecases/auto_add_buy_item.dart';
-import '../../domain/usecases/auto_add_prediction_item.dart';
 import '../../domain/usecases/delete_inventory_with_relations.dart';
-import '../../domain/usecases/purchase_decision.dart';
 import '../../domain/usecases/stocktake.dart';
 import '../../domain/usecases/update_quantity.dart';
 import '../../domain/usecases/watch_inventories.dart';
 import '../../domain/usecases/watch_inventory.dart';
 import '../../domain/usecases/watch_price_by_type.dart';
+import '../../domain/factory/dependency_factory.dart';
 
 /// 在庫一覧の1タブ分の状態を管理する ViewModel
 /// 検索バーやスワイプ削除など、在庫一覧画面の操作を集約する
 class InventoryListViewModel extends ChangeNotifier {
+  /// DI ファクトリ（在庫一覧画面で利用する依存を集約）
+  final DependencyFactory _factory;
   /// 表示対象カテゴリ名
   final String category;
 
@@ -76,17 +70,19 @@ class InventoryListViewModel extends ChangeNotifier {
     UpdateQuantity? updateQuantity,
     Stocktake? stocktake,
     Duration debounceDuration = const Duration(milliseconds: 160),
-  })  : _watch = watch ?? WatchInventories(InventoryRepositoryImpl()),
+    DependencyFactory? factory,
+  })  : _factory = factory ?? DependencyFactory.instance,
+        _watch = watch ??
+            (factory ?? DependencyFactory.instance).createWatchInventories(),
         _delete = delete ??
-            DeleteInventoryWithRelations(
-              InventoryRepositoryImpl(),
-              PriceRepositoryImpl(),
-              BuyListRepositoryImpl(),
-              BuyPredictionRepositoryImpl(),
-            ),
-        _addBuy = addBuy ?? AddBuyItem(BuyListRepositoryImpl()),
-        _updateQuantity = updateQuantity ?? UpdateQuantity(InventoryRepositoryImpl()),
-        _stocktake = stocktake ?? Stocktake(InventoryRepositoryImpl()),
+            (factory ?? DependencyFactory.instance)
+                .createDeleteInventoryWithRelations(),
+        _addBuy = addBuy ??
+            (factory ?? DependencyFactory.instance).createAddBuyItem(),
+        _updateQuantity = updateQuantity ??
+            (factory ?? DependencyFactory.instance).createUpdateQuantity(),
+        _stocktake = stocktake ??
+            (factory ?? DependencyFactory.instance).createStocktake(),
         _debounceDuration = debounceDuration {
     _startWatch();
   }
@@ -153,43 +149,37 @@ class InventoryListViewModel extends ChangeNotifier {
 
   /// 在庫を買い物リストへ追加
   Future<void> addToBuyList(Inventory inv) async {
-    await _addBuy(
-      BuyItem(inv.itemName, inv.category, inv.id, BuyItemReason.inventory),
+    final item = _factory.createBuyItem(
+      inv.itemName,
+      inv.category,
+      inv.id,
+      BuyItemReason.inventory,
     );
+    await _addBuy(item);
   }
 
   /// 在庫数量を更新
   Future<void> updateQuantity(String id, double amount, String type) async {
     await _updateQuantity(id, amount, type);
     try {
-      final inv = await WatchInventory(InventoryRepositoryImpl())(id).first;
+      final watchInventory = _factory.createWatchInventory();
+      final watchPrice = _factory.createWatchPriceByType();
+      final inv = await watchInventory(id).first;
       if (inv == null) return;
-      final prices = await WatchPriceByType(PriceRepositoryImpl())(
+      final prices = await watchPrice(
         inv.category,
         inv.itemType,
       ).first;
       final price = prices.isNotEmpty ? prices.first : null;
-      final settings = await loadPurchaseDecisionSettings();
-      final prediction = AutoAddPredictionItem(
-        AddPredictionItem(BuyPredictionRepositoryImpl()),
-        PurchaseDecision(
-          2,
-          cautiousDays: settings.cautiousDays,
-          bestTimeDays: settings.bestTimeDays,
-          discountPercent: settings.discountPercent,
-        ),
+      final settings = await _factory.loadPurchaseDecisionSettings();
+      final decision = _factory.createPurchaseDecision(
+        threshold: 2,
+        settings: settings,
       );
+      final prediction = _factory.createAutoAddPredictionItem(decision);
       await prediction(inv, price);
       // 在庫一覧画面で数量を変更した後、買い物リストへの自動追加も評価
-      final buy = AutoAddBuyItem(
-        AddBuyItem(BuyListRepositoryImpl()),
-        PurchaseDecision(
-          2,
-          cautiousDays: settings.cautiousDays,
-          bestTimeDays: settings.bestTimeDays,
-          discountPercent: settings.discountPercent,
-        ),
-      );
+      final buy = _factory.createAutoAddBuyItem(decision);
       await buy(inv, price);
     } catch (e) {
       // 自動追加失敗時はログのみ
@@ -206,34 +196,24 @@ class InventoryListViewModel extends ChangeNotifier {
   ) async {
     await _stocktake(id, before, after, diff);
     try {
-      final inv = await WatchInventory(InventoryRepositoryImpl())(id).first;
+      final watchInventory = _factory.createWatchInventory();
+      final watchPrice = _factory.createWatchPriceByType();
+      final inv = await watchInventory(id).first;
       if (inv == null) return;
-      final prices = await WatchPriceByType(PriceRepositoryImpl())(
+      final prices = await watchPrice(
         inv.category,
         inv.itemType,
       ).first;
       final price = prices.isNotEmpty ? prices.first : null;
-      final settings = await loadPurchaseDecisionSettings();
-      final prediction = AutoAddPredictionItem(
-        AddPredictionItem(BuyPredictionRepositoryImpl()),
-        PurchaseDecision(
-          2,
-          cautiousDays: settings.cautiousDays,
-          bestTimeDays: settings.bestTimeDays,
-          discountPercent: settings.discountPercent,
-        ),
+      final settings = await _factory.loadPurchaseDecisionSettings();
+      final decision = _factory.createPurchaseDecision(
+        threshold: 2,
+        settings: settings,
       );
+      final prediction = _factory.createAutoAddPredictionItem(decision);
       await prediction(inv, price);
       // 棚卸し後も買い物リストへの自動追加を評価
-      final buy = AutoAddBuyItem(
-        AddBuyItem(BuyListRepositoryImpl()),
-        PurchaseDecision(
-          2,
-          cautiousDays: settings.cautiousDays,
-          bestTimeDays: settings.bestTimeDays,
-          discountPercent: settings.discountPercent,
-        ),
-      );
+      final buy = _factory.createAutoAddBuyItem(decision);
       await buy(inv, price);
     } catch (e) {
       debugPrint('auto add prediction failed: $e');

@@ -3,12 +3,13 @@ import 'package:flutter/material.dart';
 
 import '../../domain/entities/category.dart';
 import '../../domain/usecases/update_category.dart';
-import '../../data/repositories/category_repository_impl.dart';
+import '../../domain/factory/dependency_factory.dart';
 
 /// カテゴリ編集画面の状態を管理する ViewModel
 class EditCategoryViewModel extends ChangeNotifier {
-  /// カテゴリ更新ユースケース
-  final UpdateCategory _usecase = UpdateCategory(CategoryRepositoryImpl());
+  /// カテゴリ更新ユースケース（カテゴリ編集画面の保存処理で利用）
+  final UpdateCategory _usecase =
+      DependencyFactory.instance.createUpdateCategory();
 
   /// フォームキー
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
